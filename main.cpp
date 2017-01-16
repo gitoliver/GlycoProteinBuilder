@@ -235,25 +235,25 @@ int main(int argc, char *argv[])
     residue_NLN->SetName("NLN");
     CoordinateVector Coords_Vector;
 
-    //Atom *atomND2 = new Atom;
+    Atom *atomND2 = new Atom;
   //  double distance =  1.42;
    // double angle    =  1.910629385; // (109.147 degrees)
     double distance = 1.53;
     double angle = 1.90765; // 109.3 degrees
     double torsion = 3.141592653; // (~180 degrees)
     GeometryTopology::Coordinate new_Coords = get_cartesian_point_from_internal_coords(atomC5->GetCoordinates().at(0), atomO5->GetCoordinates().at(0), atomC1->GetCoordinates().at(0), angle, torsion, distance);
-    //atomND2->AddCoordinate(new GeometryTopology::Coordinate(new_Coords.GetX(), new_Coords.GetY(), new_Coords.GetZ()) );
-    //atomND2->SetName("ND2");
-    //atomND2->SetDescription("Atom;");
-    //atomND2->SetId("ND2_1_NLN_ _1_ _ _1");
-    //atomND2->SetResidue(residue_NLN);
+    atomND2->AddCoordinate(new GeometryTopology::Coordinate(new_Coords.GetX(), new_Coords.GetY(), new_Coords.GetZ()) );
+    atomND2->SetName("ND2");
+    atomND2->SetDescription("Atom;");
+    atomND2->SetId("ND2_1_NLN_ _1_ _ _1");
+    atomND2->SetResidue(residue_NLN);
 
-   // GeometryTopology::Coordinate *new_Coords_ptr = &new_Coords;
-   // Coords_Vector.push_back(new_Coords_ptr);
-   //  Atom *atomND2 = new Atom(residue_NLN, "ND2", Coords_Vector);
-    Atom *atomND2 = new Atom(residue_NLN, "ND2",new_Coords);
-    std::cout << "Id is " << atomND2->GetId() << std::endl;
-    //atomND2->SetId("ND2_1_NLN_ _1_ _ _1");
+    //GeometryTopology::Coordinate *new_Coords_ptr = &new_Coords;
+    //Coords_Vector.push_back(new_Coords_ptr);
+    //Atom *atomND2 = new Atom(residue_NLN, "ND2", Coords_Vector);
+    //Atom *atomND2 = new Atom(residue_NLN, "ND2",new_Coords);
+  //  std::cout << "Id is " << atomND2->GetId() << std::endl;
+    atomND2->SetId("ND2_1_NLN_ _1_ _ _1");
 
     Atom* atomCG = new Atom;
     distance = 1.325;
