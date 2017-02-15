@@ -27,6 +27,10 @@ typedef GeometryTopology::Coordinate Vector;
 
 //void FindConnectedAtoms(Atom *atom, Assembly::AtomVector &visitedAtoms);
 
+/*******************************************/
+/* Function Declarations                   */
+/*******************************************/
+
 void GetCenterOfGeometry(Assembly *assembly, GeometryTopology::Coordinate *center);
 double GetDistanceToAtom(Atom *A, Atom *otherAtom);
 double CalculateAtomicOverlaps(Assembly *assemblyA, Assembly *assemblyB);
@@ -36,15 +40,16 @@ Eigen::Affine3d Find3DAffineTransform(Eigen::Matrix3Xd in, Eigen::Matrix3Xd out)
 void GenerateMatrixFromAssembyCoordinates(Assembly *assembly, Eigen::Matrix3Xd *matrix);
 void GenerateMatrixFromAtomVectorCoordinates(AtomVector *atoms, Eigen::Matrix3Xd *matrix);
 void ReplaceAssemblyCoordinatesFromMatrix(Assembly *assembly, Eigen::Matrix3Xd *matrix);
-
 void Superimpose(AtomVector *moving, AtomVector *target);
 void Superimpose(Assembly *moving, Assembly *target);
 void Superimpose(Assembly *moving, Assembly *target, Assembly *alsoMoving);
 void Superimpose(Assembly *moving, Assembly *target, AssemblyVector *alsoMoving);
-
+void GetResidueRingCenter (Residue *residue, GeometryTopology::Coordinate *center);
 GeometryTopology::Coordinate subtract_coordinates(GeometryTopology::Coordinate minuaend, GeometryTopology::Coordinate subtrahend);
+GeometryTopology::Coordinate get_cartesian_point_from_internal_coords(GeometryTopology::Coordinate a, GeometryTopology::Coordinate b, GeometryTopology::Coordinate c, double theta_Degrees, double phi_Degrees, double distance_Angstrom);
+GeometryTopology::Coordinate get_cartesian_point_from_internal_coords(Atom *a, Atom *b, Atom *c, double theta_Degrees, double phi_Degrees, double distance_Angstrom);
+void prepare_Glycans_For_Superimposition_To_Any_Residue(std::string working_Directory, std::string amino_acid_name, Assembly *glycan);
 
-GeometryTopology::Coordinate get_cartesian_point_from_internal_coords(GeometryTopology::Coordinate a, GeometryTopology::Coordinate b, GeometryTopology::Coordinate c, double theta, double phi, double distance);
 
 int main(int argc, char *argv[])
 {
@@ -52,28 +57,31 @@ int main(int argc, char *argv[])
     glycoproteinBuilder w;
     w.show();
 
+    std::string working_Directory = "/home/oliver/work/zq.Sarah_Flowers_OLink_GlycoProteinBuilder/3.GMML_GlycoProteinBuilder/";
+    std::string installtionDirectory;
+
     //************************************************//
     // Details for loading in a PDB file              //
     //************************************************//
 
     std::vector<std::string> amino_libs, glycam_libs, other_libs, prep;
-    amino_libs.push_back("/home/oliver/Programs/gems-Nov2016/gmml/dat/CurrentParams/leaprc.ff12SB_2014-04-24/amino12.lib");
-    amino_libs.push_back("/home/oliver/Programs/gems-Nov2016/gmml/dat/CurrentParams/leaprc.ff12SB_2014-04-24/aminoct12.lib");
-    amino_libs.push_back("/home/oliver/Programs/gems-Nov2016/gmml/dat/CurrentParams/leaprc.ff12SB_2014-04-24/aminont12.lib");
+    amino_libs.push_back("/home/oliver/Programs/gems/gmml/dat/CurrentParams/leaprc.ff12SB_2014-04-24/amino12.lib");
+    amino_libs.push_back("/home/oliver/Programs/gems/gmml/dat/CurrentParams/leaprc.ff12SB_2014-04-24/aminoct12.lib");
+    amino_libs.push_back("/home/oliver/Programs/gems/gmml/dat/CurrentParams/leaprc.ff12SB_2014-04-24/aminont12.lib");
 
-    glycam_libs.push_back("/home/oliver/Programs/gems-Nov2016/gmml/dat/CurrentParams/leaprc_GLYCAM_06j-1_2014-03-14/GLYCAM_amino_06j_12SB.lib");
-    glycam_libs.push_back("/home/oliver/Programs/gems-Nov2016/gmml/dat/CurrentParams/leaprc_GLYCAM_06j-1_2014-03-14/GLYCAM_aminoct_06j_12SB.lib");
-    glycam_libs.push_back("/home/oliver/Programs/gems-Nov2016/gmml/dat/CurrentParams/leaprc_GLYCAM_06j-1_2014-03-14/GLYCAM_aminont_06j_12SB.lib");
+    glycam_libs.push_back("/home/oliver/Programs/gems/gmml/dat/CurrentParams/leaprc_GLYCAM_06j-1_2014-03-14/GLYCAM_amino_06j_12SB.lib");
+    glycam_libs.push_back("/home/oliver/Programs/gems/gmml/dat/CurrentParams/leaprc_GLYCAM_06j-1_2014-03-14/GLYCAM_aminoct_06j_12SB.lib");
+    glycam_libs.push_back("/home/oliver/Programs/gems/gmml/dat/CurrentParams/leaprc_GLYCAM_06j-1_2014-03-14/GLYCAM_aminont_06j_12SB.lib");
 
-    other_libs.push_back("/home/oliver/Programs/gems-Nov2016/gmml/dat/CurrentParams/leaprc.ff12SB_2014-04-24/nucleic12.lib");
-    other_libs.push_back("/home/oliver/Programs/gems-Nov2016/gmml/dat/CurrentParams/leaprc.ff12SB_2014-04-24/nucleic12.lib");
-    other_libs.push_back("/home/oliver/Programs/gems-Nov2016/gmml/dat/CurrentParams/other/solvents.lib");
+    other_libs.push_back("/home/oliver/Programs/gems/gmml/dat/CurrentParams/leaprc.ff12SB_2014-04-24/nucleic12.lib");
+    other_libs.push_back("/home/oliver/Programs/gems/gmml/dat/CurrentParams/leaprc.ff12SB_2014-04-24/nucleic12.lib");
+    other_libs.push_back("/home/oliver/Programs/gems/gmml/dat/CurrentParams/other/solvents.lib");
 
-    prep.push_back("/home/oliver/Programs/gems-Nov2016/gmml/dat/CurrentParams/leaprc_GLYCAM_06j-1_2014-03-14/GLYCAM_06j-1.prep");
+    prep.push_back("/home/oliver/Programs/gems/gmml/dat/CurrentParams/leaprc_GLYCAM_06j-1_2014-03-14/GLYCAM_06j-1.prep");
 
-    std::string pdb_file_path = "/home/oliver/Desktop/test.pdb";
-    std::string parameter_file_path = "/home/oliver/Programs/gems-Nov2016/gmml/dat/CurrentParams/leaprc_GLYCAM_06j-1_2014-03-14/GLYCAM_06j.dat";
-    std::string ion_parameter_file_path = "/home/oliver/Programs/gems-Nov2016/gmml/dat/CurrentParams/other/atomic_ions.lib";
+    std::string pdb_file_path = working_Directory + "test.pdb";
+    std::string parameter_file_path = "/home/oliver/Programs/gems/gmml/dat/CurrentParams/leaprc_GLYCAM_06j-1_2014-03-14/GLYCAM_06j.dat";
+    std::string ion_parameter_file_path = "/home/oliver/Programs/gems/gmml/dat/CurrentParams/other/atomic_ions.lib";
 
     //************************************************//
     // Build PDB file from condensed sequence         //
@@ -83,10 +91,14 @@ int main(int argc, char *argv[])
     assemblyC.BuildAssemblyFromCondensedSequence("DGlcpb1-4DNeup5Aca2-4DGlcpb1-OME", prep.at(0) ,parameter_file_path, true);
     assemblyC.BuildStructureByDistance();
     PdbFileSpace::PdbFile *outputPdbFile1 = assemblyC.BuildPdbFileStructureFromAssembly();
-    outputPdbFile1->Write("/home/oliver/Desktop/test-BuildFromSequence.pdb");
+    outputPdbFile1->Write(working_Directory + "test-buildFromStructure.pdb");
 
+/*
     TopologyFileSpace::TopologyFile *outputTopologyFile1 = assemblyC.BuildTopologyFileStructureFromAssembly(parameter_file_path, ion_parameter_file_path);
-    outputTopologyFile1->Write("/home/oliver/Desktop/test-BuildFromSequence.parm7");
+    outputTopologyFile1->Write(working_Directory + "test-BuildFromSequence.parm7");
+
+    CoordinateFileSpace::CoordinateFile *outputCoordinateFile = assemblyC.BuildCoordinateFileStructureFromAssembly();
+    outputCoordinateFile->Write(working_Directory + "test-BuildFromSequence.rst7");
 */
 
     //Assembly assemblyD;
@@ -100,7 +112,7 @@ int main(int argc, char *argv[])
     std::string proteinPDB, glycanDirectory, buffer;
     std::vector<std::string> glycositeList, listOfGlycans;
 
-    std::ifstream inf ("/home/oliver/Desktop/input.txt");
+    std::ifstream inf ("/home/oliver/work/zq.Sarah_Flowers_OLink_GlycoProteinBuilder/3.GMML_GlycoProteinBuilder/input.txt");
     if (!inf)
     {
         std::cerr << "Uh oh, input file could not be opened for reading!" << std::endl;
@@ -116,26 +128,30 @@ int main(int argc, char *argv[])
             getline(inf, glycanDirectory);
         if(strInput == "Protein Residue list:")
         {
+            getline(inf, buffer);
             while(buffer != "END")
             {
-                getline(inf, buffer);
                 glycositeList.push_back(buffer);
                 std::cout << "residue: " << buffer << std::endl;
+                getline(inf, buffer);
             }
         }
         buffer = "Flushed";
         if(strInput == "Glycan id list:")
         {
+            getline(inf, buffer);
             while(buffer != "END")
             {
-                getline(inf, buffer);
                 listOfGlycans.push_back(buffer);
                 std::cout << "glycan: " << buffer << std::endl;
+                getline(inf, buffer);
             }
         }
         //std::cout << strInput << std::endl;
     }
     //std::cout << proteinPDB << ", " << glycanDirectory << std::endl;
+
+
 
     //************************************************//
     // Create list containing pairs:                  //
@@ -151,10 +167,8 @@ int main(int argc, char *argv[])
     // Load Files From a Directory                    //
     //************************************************//
 
-    Assembly assembly;
-    /*
     std::ifstream fin;
-    std::string directory = "/home/oliver/Desktop/" + glycanDirectory ;
+    std::string directory = "/home/oliver/work/zq.Sarah_Flowers_OLink_GlycoProteinBuilder/3.GMML_GlycoProteinBuilder/" + glycanDirectory ;
     std::cout << "directory: " << directory << std::endl;
     std::string filepath;
     DIR *dp; // A directory stream
@@ -181,8 +195,8 @@ int main(int argc, char *argv[])
         if ( temp.compare(0, temp.size(), dirp->d_name, 0, temp.size()) == 0 )
         {   // Does glycan filename start with appropriate code?
             std::cout << "BOOM " << temp << " " << dirp->d_name << std::endl;
-            assembly.BuildAssemblyFromPdbFile(filepath, amino_libs, glycam_libs, other_libs, prep, parameter_file_path);
-            assembly.BuildStructureByDistance();
+           // assembly.BuildAssemblyFromPdbFile(filepath, amino_libs, glycam_libs, other_libs, prep, parameter_file_path);
+           // assembly.BuildStructureByDistance();
         }
        // Endeavor to read a single number from the file and display it
        // fin.open( filepath.c_str() );
@@ -192,190 +206,50 @@ int main(int argc, char *argv[])
 
     }
     closedir( dp );
-    */
+
     //************************************************//
     // Building the necessary N-link Torsions         //
     //************************************************//
 
-    pdb_file_path = "/home/oliver/Desktop/GAL-omega-gt.pdb";
-    assembly.BuildAssemblyFromPdbFile(pdb_file_path, amino_libs, glycam_libs, other_libs, prep, parameter_file_path);
-    assembly.BuildStructureByDistance();
 
-    Residue* residue4YB = assembly.GetAllResiduesOfAssembly().at(1);
-    std::cout << "residue4YB = " << residue4YB->GetName() << std::endl;
-
-    AtomVector atoms4YB = residue4YB->GetAtoms();
-
-    Atom* atomC5; // = residue4YB.FindAtom("C5");
-    Atom* atomO5;
-    Atom* atomC1;
-
-    // Want: residue.FindAtom(string Name);
-    for(AtomVector::iterator it = atoms4YB.begin(); it != atoms4YB.end(); it++)
-    {
-       Atom* atom = *it;
-       if(atom->GetName().compare("C5")==0)
-           atomC5 = atom;
-       if(atom->GetName().compare("O5")==0)
-           atomO5 = atom;
-       if(atom->GetName().compare("C1")==0)
-           atomC1 = atom;
-    }
-
-    // Want: atom.Coordinate (the first fucking coordinate).
-    // Want: Constructor Atom atom(residue, name, coordinate).
-    // Want: residue.DeleteAtom(int index);
-    // Want: assembly.AddAtom(int index);
-    std::cout << "Atoms are: " << atomC5->GetName() << ", " << atomO5->GetName() << ", " << atomC1->GetName() << std::endl;
-    std::cout << std::endl;
-
-    Assembly* assembly_NLN = new Assembly();
-    Assembly* superimposition_atoms = new Assembly();
-    Residue* residue_NLN = new Residue();
-    residue_NLN->SetName("NLN");
-    CoordinateVector Coords_Vector;
-
-    Atom *atomND2 = new Atom;
-  //  double distance =  1.42;
-   // double angle    =  1.910629385; // (109.147 degrees)
-    double distance = 1.53;
-    double angle = 1.90765; // 109.3 degrees
-    double torsion = 3.141592653; // (~180 degrees)
-    GeometryTopology::Coordinate new_Coords = get_cartesian_point_from_internal_coords(atomC5->GetCoordinates().at(0), atomO5->GetCoordinates().at(0), atomC1->GetCoordinates().at(0), angle, torsion, distance);
-    atomND2->AddCoordinate(new GeometryTopology::Coordinate(new_Coords.GetX(), new_Coords.GetY(), new_Coords.GetZ()) );
-    atomND2->SetName("ND2");
-    atomND2->SetDescription("Atom;");
-    atomND2->SetId("ND2_1_NLN_ _1_ _ _1");
-    atomND2->SetResidue(residue_NLN);
-
-    //GeometryTopology::Coordinate *new_Coords_ptr = &new_Coords;
-    //Coords_Vector.push_back(new_Coords_ptr);
-    //Atom *atomND2 = new Atom(residue_NLN, "ND2", Coords_Vector);
-    //Atom *atomND2 = new Atom(residue_NLN, "ND2",new_Coords);
-  //  std::cout << "Id is " << atomND2->GetId() << std::endl;
-    atomND2->SetId("ND2_1_NLN_ _1_ _ _1");
-
-    Atom* atomCG = new Atom;
-    distance = 1.325;
-    angle = 1.90765; // 109.3 degrees
-    torsion = 4.55531; // 261 degrees
-    new_Coords = get_cartesian_point_from_internal_coords(atomO5->GetCoordinates().at(0), atomC1->GetCoordinates().at(0), atomND2->GetCoordinates().at(0), angle, torsion, distance);
-    atomCG->AddCoordinate(new GeometryTopology::Coordinate(new_Coords.GetX(), new_Coords.GetY(), new_Coords.GetZ()) );
-    atomCG->SetName("CG");
-    atomCG->SetDescription("Atom;");
-    atomCG->SetId("CG_2_NLN_ _1_ _ _1");
-    atomCG->SetResidue(residue_NLN);
-
-    Atom* atomOD1 = new Atom;
-    distance = 1.22;
-    angle = 2.19911; // 126 degrees
-    torsion = 0; // 0 degrees
-    new_Coords = get_cartesian_point_from_internal_coords(atomC1->GetCoordinates().at(0), atomND2->GetCoordinates().at(0), atomCG->GetCoordinates().at(0), angle, torsion, distance);
-    atomOD1->AddCoordinate(new GeometryTopology::Coordinate(new_Coords.GetX(), new_Coords.GetY(), new_Coords.GetZ()) );
-    atomOD1->SetName("OD1");
-    atomOD1->SetDescription("Atom;");
-    atomOD1->SetId("OD1_3_NLN_ _1_ _ _1");
-    atomOD1->SetResidue(residue_NLN);
-
-    Atom* atomCB = new Atom;
-    distance = 1.53;
-    angle = 1.98968; // 114 degrees
-    torsion = 3.0945; // 177.3 degrees
-    new_Coords = get_cartesian_point_from_internal_coords(atomC1->GetCoordinates().at(0), atomND2->GetCoordinates().at(0), atomCG->GetCoordinates().at(0), angle, torsion, distance);
-    atomCB->AddCoordinate(new GeometryTopology::Coordinate(new_Coords.GetX(), new_Coords.GetY(), new_Coords.GetZ()) );
-    atomCB->SetName("CB");
-    atomCB->SetDescription("Atom;");
-    atomCB->SetId("CB_4_NLN_ _1_ _ _1");
-    atomCB->SetResidue(residue_NLN);
-
-    Atom* atomCA = new Atom;
-    distance = 1.53;
-    angle = 1.93732; // 111 degrees
-    torsion = 3.0997; // 177.6 degrees
-    new_Coords = get_cartesian_point_from_internal_coords(atomND2->GetCoordinates().at(0), atomCG->GetCoordinates().at(0), atomCB->GetCoordinates().at(0), angle, torsion, distance);
-    atomCA->AddCoordinate(new GeometryTopology::Coordinate(new_Coords.GetX(), new_Coords.GetY(), new_Coords.GetZ()) );
-    atomCA->SetName("CA");
-    atomCA->SetDescription("Atom;");
-    atomCA->SetId("CA_5_NLN_ _1_ _ _1");
-    atomCA->SetResidue(residue_NLN);
-
-    Atom* atomN = new Atom;
-    distance = 1.453;
-    angle = 1.93732; // 111 degrees
-    torsion = 3.3441; // 191.6 degrees
-    new_Coords = get_cartesian_point_from_internal_coords(atomCG->GetCoordinates().at(0), atomCB->GetCoordinates().at(0), atomCA->GetCoordinates().at(0), angle, torsion, distance);
-    atomN->AddCoordinate(new GeometryTopology::Coordinate(new_Coords.GetX(), new_Coords.GetY(), new_Coords.GetZ()) );
-    atomN->SetName("N");
-    atomN->SetDescription("Atom;");
-    atomN->SetId("N_6_NLN_ _1_ _ _1");
-    atomN->SetResidue(residue_NLN);
-
-
-    residue_NLN->SetName("NLN");
-    residue_NLN->AddAtom(atomN);
-    residue_NLN->AddAtom(atomCA);
-    residue_NLN->AddAtom(atomCB);
-
-    residue_NLN->SetId("NLN_ _1_ _ _1");
-
-    residue_NLN->SetAssembly(superimposition_atoms);
-    superimposition_atoms->AddResidue(residue_NLN);
-    superimposition_atoms->BuildStructureByDistance();
-    PdbFileSpace::PdbFile *outputPdbFileSuperAtoms = superimposition_atoms->BuildPdbFileStructureFromAssembly(-1,0);
-    outputPdbFileSuperAtoms->Write("/home/oliver/Desktop/superimposition_atoms.pdb");
-
-    residue_NLN->AddAtom(atomCG);
-    residue_NLN->AddAtom(atomOD1);
-    residue_NLN->AddAtom(atomND2);
-
-    residue_NLN->SetAssembly(assembly_NLN);
-    assembly_NLN->AddResidue(residue_NLN);
-    assembly_NLN->BuildStructureByDistance();
-    //assembly_NLN->Print();
-    PdbFileSpace::PdbFile *outputPdbFileNLN = assembly_NLN->BuildPdbFileStructureFromAssembly(-1,0);
-    outputPdbFileNLN->Write("/home/oliver/Desktop/NLN_AlignedToGlycan.pdb");
-
+    //Yohanna example
 /*
-    torsion = 3.0944688; // 177.3
-    new_Coords = get_cartesian_point_from_internal_coords(atomC1->GetCoordinates().at(0), atomND2.GetCoordinates().at(0), atomCG.GetCoordinates().at(0), angle, torsion, distance);
-    Atom atomCB(&residue_NLN, "CB", Coords_Vector);
+    Assembly yohAssembly;
+    pdb_file_path = "/home/oliver/Downloads/1hzh.pdb";
+    yohAssembly.BuildAssemblyFromPdbFile(pdb_file_path, amino_libs, glycam_libs, other_libs, prep, parameter_file_path);
+    yohAssembly.BuildStructureByDistance();
 
-    torsion = 3.0997048; // 177.6
-    new_Coords = get_cartesian_point_from_internal_coords(atomND2.GetCoordinates().at(0), atomCG.GetCoordinates().at(0), atomCB.GetCoordinates().at(0), angle, torsion, distance);
-    Atom atomCA(&residue_NLN, "CA", Coords_Vector);
+    ResidueVector yohResidues = yohAssembly.GetAllResiduesOfAssembly();
 
-    torsion = 3.3440508; // 191.6
-    new_Coords = get_cartesian_point_from_internal_coords(atomCG.GetCoordinates().at(0), atomCB.GetCoordinates().at(0), atomCA.GetCoordinates().at(0), angle, torsion, distance);
-    Atom atomN(&residue_NLN, "N", Coords_Vector);
+    GeometryTopology::Coordinate *centerOfRing = new GeometryTopology::Coordinate();
+    for(ResidueVector::iterator it = yohResidues.begin(); it != yohResidues.end(); ++it)
+    {
+        Residue* current_residue = *it;
+        if(current_residue->GetName().compare("TYR")==0 || current_residue->GetName().compare("PHE")==0 ||
+           current_residue->GetName().compare("TRP")==0 || current_residue->GetName().compare("HIS")==0)
 
-    torsion = 3.141592653; // (~180 degrees)
-    new_Coords = get_cartesian_point_from_internal_coords(atomND2.GetCoordinates().at(0), atomCB.GetCoordinates().at(0), atomCG.GetCoordinates().at(0), angle, torsion, distance);
-    Atom atomOD1(&residue_NLN, "OD1", Coords_Vector);
-*/
-   // assembly.AddAssembly(assembly_NLN);
- //   assembly_NLN->BuildStructureByDistance();
-//    assembly.AddAssembly(assembly_NLN);
-   // PdbFileSpace::PdbFile *outputPdbFileNLN = assembly_NLN->BuildPdbFileStructureFromAssembly();
-    // outputPdbFileNLN->Write("/home/oliver/Desktop/test-NLN.pdb");
+        {
+            // Want it to look like this:
+           //centerOfRing = current_residue->GetResidueRingCenter;
 
-  /*
-    GeometryTopology::Coordinate aO1(-0.847,   0.445,  -2.872);
-    GeometryTopology::Coordinate aC1(0.535,   0.914,  -3.092);
-    GeometryTopology::Coordinate aO5(1.398,   0.495,  -1.964);
+           GetResidueRingCenter(current_residue, centerOfRing);
+           std::cout << "Residue is " << current_residue->GetId() << std::endl;
+           centerOfRing->Print();
+           std::cout << std::endl;
+        }
+    }
+    */
 
-    GeometryTopology::Coordinate expected_aN1(-1.251, -0.827, -3.599);
+    Assembly glycan;
+    //pdb_file_path = working_Directory + listOfGlycans.at(0);
+    pdb_file_path = working_Directory + "/glycans/SiaCore1_-g.pdb";
+    glycan.BuildAssemblyFromPdbFile(pdb_file_path, amino_libs, glycam_libs, other_libs, prep, parameter_file_path);
+    glycan.BuildStructureByDistance();
 
-    double distance = 1.52, torsion = -1.415, angle = 2.03;
 
-  //  distance = 1.52, torsion = -1.727, angle = 2.03;
 
-    GeometryTopology::Coordinate actual_aN1 =  get_cartesian_point_from_internal_coords( aO5, aC1, aO1, angle, torsion, distance);
-
-    expected_aN1.Print();
-    std::cout << std::endl;
-    actual_aN1.Print();
-    std::cout << std::endl;
-*/
+    //prepare_Glycans_For_Superimposition_To_Any_Residue(working_Directory, "THR", &glycan);
+   // prepare_Glycans_For_Superimposition_To_Any_Residue(working_Directory, "ASN", &glycan);
 
     //************************************************//
     // COM translating                                //
@@ -393,7 +267,7 @@ int main(int argc, char *argv[])
     }
 
     PdbFileSpace::PdbFile *outputPdbFile = assembly.BuildPdbFileStructureFromAssembly();
-    outputPdbFile->Write("/home/oliver/Desktop/test-Translate.pdb");
+    outputPdbFile->Write(working_Directory + "test-Translate.pdb");
     */
     //************************************************//
     // Adjusting a torsion                            //
@@ -428,7 +302,7 @@ int main(int argc, char *argv[])
     double torsion1 = 80.0;
     assembly.SetDihedral(atom1, atom2, atom3, atom4, torsion1);
 
-    outputPdbFile->Write("/home/oliver/Desktop/test-Dihedral.pdb");
+    outputPdbFile->Write(working_Directory + "test-Dihedral.pdb");
     */
     //************************************************//
     // Atomic Overlaps                                //
@@ -439,20 +313,21 @@ int main(int argc, char *argv[])
 
     // Write a PDB file containing the moved co-ordinates
    // PdbFileSpace::PdbFile *outputPdbFileA = assemblyMoving.BuildPdbFileStructureFromAssembly();
-  //  outputPdbFileA->Write("/home/oliver/Desktop/Superimposed-moved.pdb");
+  //  outputPdbFileA->Write(working_Directory + "Superimposed-moved.pdb");
 
 
   //  std::cout << "Overlap is " << CalculateAtomicOverlaps(&assemblyA, &assemblyB) << std::endl;
 
     //assemblyA.AddAssembly(&assemblyB);
-   // outputPdbFile->Write("/home/oliver/Desktop/test-MergeAssemblies.pdb");
+   // outputPdbFile->Write(working_Directory + "test-MergeAssemblies.pdb");
 
     //************************************************//
     // Superimposition                                //
     //************************************************//
+    std::cout << "Superimposition" << std::endl;
 
     Assembly protein;
-    protein.BuildAssemblyFromPdbFile(proteinPDB, amino_libs, glycam_libs, other_libs, prep, parameter_file_path );
+    protein.BuildAssemblyFromPdbFile( (working_Directory + proteinPDB), amino_libs, glycam_libs, other_libs, prep, parameter_file_path );
     protein.BuildStructureByDistance();
 
     ResidueVector *glycosites = new ResidueVector();
@@ -471,10 +346,18 @@ int main(int argc, char *argv[])
             // If the residue number set in the input file is equal to the current residue number
             if( id.compare(5,formatted_glycosite.size(),formatted_glycosite) == 0)
             {
-               // std::cout << "glycosite: " << glycosite << std::endl;
+                std::cout << "glycosite: " << glycosite << std::endl;
                 std::cout << "glycosite id:" << id << std::endl;
                 glycosites->push_back(residue);
-                residue->SetName("NLN");
+                prepare_Glycans_For_Superimposition_To_Any_Residue(working_Directory, residue->GetName(), &glycan); //OG NOT HAVING glycan SET WILL BREAK IT LATER!!!!!!!!!!!!!!!!!!!!!!!!!
+                if (residue->GetName().compare("SER")==0)
+                    residue->SetName("OLS");
+                if (residue->GetName().compare("THR")==0)
+                    residue->SetName("OLT");
+                if (residue->GetName().compare("ASN")==0)
+                    residue->SetName("NLN");
+                if (residue->GetName().compare("TYR")==0)
+                    residue->SetName("OLY");
             }
         }
     }
@@ -507,20 +390,23 @@ int main(int argc, char *argv[])
         assemblyTarget->AddResidue(residueTarget);
         assemblyTarget->BuildStructureByDistance();
 
-        pdb_file_path = "/home/oliver/Desktop/GAL-omega-gt.pdb";
+        pdb_file_path = working_Directory + "/glycans/SiaCore1_-g.pdb";
         addedGlycans[i].BuildAssemblyFromPdbFile(pdb_file_path, amino_libs, glycam_libs, other_libs, prep, parameter_file_path);
         addedGlycans[i].BuildStructureByDistance();
 
-        pdb_file_path = "/home/oliver/Desktop/NLN_AlignedToGlycan.pdb";
-        Assembly *residueNLN = new Assembly();
-        residueNLN->BuildAssemblyFromPdbFile(pdb_file_path, amino_libs, glycam_libs, other_libs, prep, parameter_file_path);
-        residueNLN->BuildStructureByDistance();
+        pdb_file_path = working_Directory + glycosite->GetName() + "_AlignedToGlycan.pdb";
+        std::cout << "Attempting to open " << pdb_file_path << std::endl;
+        Assembly *residueAminoAcid = new Assembly();
+        residueAminoAcid->BuildAssemblyFromPdbFile(pdb_file_path, amino_libs, glycam_libs, other_libs, prep, parameter_file_path);
+        residueAminoAcid->BuildStructureByDistance();
 
         AssemblyVector *atomsToAlsoMove = new AssemblyVector; // using AddAssembly for the NLN part crashes the PDB writer.
         atomsToAlsoMove->push_back((&addedGlycans[i]));
-        atomsToAlsoMove->push_back(residueNLN);
+        atomsToAlsoMove->push_back(residueAminoAcid);
 
-        pdb_file_path = "/home/oliver/Desktop/superimposition_atoms.pdb";
+        pdb_file_path = working_Directory + glycosite->GetName() + "_superimposition_atoms.pdb";
+        std::cout << "Attempting to open " << pdb_file_path << std::endl;
+
         Assembly *assemblyMoving = new Assembly();
         assemblyMoving->BuildAssemblyFromPdbFile(pdb_file_path, amino_libs, glycam_libs, other_libs, prep, parameter_file_path );
 
@@ -531,12 +417,12 @@ int main(int argc, char *argv[])
         // Want: atom.ReplaceCoords()
         // Replace Co-ords of sidechain
         // Want: assembly.Select(:residue@atom)
-        AtomVector newSideChainAtoms = residueNLN->GetAllAtomsOfAssembly();
+        AtomVector newSideChainAtoms = residueAminoAcid->GetAllAtomsOfAssembly();
         for(AtomVector::iterator itt = atoms.begin(); itt != atoms.end(); ++itt)
         {
             Atom *atom = (*itt);
             std::cout << "Checking: " << atom->GetName() << std::endl;
-            if ( (atom->GetName() == "ND2") || (atom->GetName() == "OD1") || (atom->GetName() == "CG") )
+            if ( (atom->GetName() != "N") && (atom->GetName() != "CA") && (atom->GetName() != "CB") )
             {
                 std::cout << "Replacing co-ords of protein " << atom->GetName() << std::endl;
                 for(AtomVector::iterator ittt = newSideChainAtoms.begin(); ittt != newSideChainAtoms.end(); ++ittt)
@@ -546,11 +432,11 @@ int main(int argc, char *argv[])
                     if (atom->GetName() == atom1->GetName() )
                     {
 
-                            std::cout << "Before X=" << atom->GetCoordinates().at(0)->GetX() << std::endl;
+                        //    std::cout << "Before X=" << atom->GetCoordinates().at(0)->GetX() << std::endl;
                             atom->GetCoordinates().at(0)->SetX( atom1->GetCoordinates().at(0)->GetX() );
                             atom->GetCoordinates().at(0)->SetY( atom1->GetCoordinates().at(0)->GetY() );
                             atom->GetCoordinates().at(0)->SetZ( atom1->GetCoordinates().at(0)->GetZ() );
-                            std::cout << "After X=" << atom->GetCoordinates().at(0)->GetX() << std::endl;
+                         //   std::cout << "After X=" << atom->GetCoordinates().at(0)->GetX() << std::endl;
                     }
                 }
             }
@@ -558,7 +444,7 @@ int main(int argc, char *argv[])
 
         // Write out each glycan to check superimposition
         std::stringstream ss;
-        ss << "/home/oliver/Desktop/GlycoProtein" << i << ".pdb";
+        ss << working_Directory + "GlycoProtein" << i << ".pdb";
         PdbFileSpace::PdbFile *outputPdbFileGlycoProtein = addedGlycans[i].BuildPdbFileStructureFromAssembly(-1,0);
         outputPdbFileGlycoProtein->Write(ss.str());
         protein.AddAssembly(&addedGlycans[i]);
@@ -567,11 +453,12 @@ int main(int argc, char *argv[])
     std::cout << "Got this far" << std::endl;
     // Add superimposed glycan (assemblyAlsoMoving) to protein assembly
     i = 1;
+
     /*
     for(std::vector<Assembly>::iterator addedGlycan = addedGlycans->begin(); addedGlycan != addedGlycans->end(); addedGlycan++)
     {
         std::stringstream ss;
-        ss << "/home/oliver/Desktop/GlycoProtein" << i << ".pdb";
+        ss << working_Directory + "GlycoProtein" << i << ".pdb";
         i++;
         PdbFileSpace::PdbFile *outputPdbFileGlycoProtein = (*addedGlycan).BuildPdbFileStructureFromAssembly(-1,0);
         outputPdbFileGlycoProtein->Write(ss.str());
@@ -579,10 +466,12 @@ int main(int argc, char *argv[])
     }
     */
     //protein.Print();
+
     std::cout << "Got this far" << std::endl;
     PdbFileSpace::PdbFile *outputPdbFileGlycoProteinAll = protein.BuildPdbFileStructureFromAssembly(-1,0);
-    outputPdbFileGlycoProteinAll->Write("/home/oliver/Desktop/GlycoProtein.pdb");
+    outputPdbFileGlycoProteinAll->Write(working_Directory + "GlycoProtein.pdb");
     delete[] addedGlycans;
+
       //************************************************//
       // Selections                                     //
       //************************************************//
@@ -615,7 +504,7 @@ int main(int argc, char *argv[])
    //            std::cout << "Boo found again" << std::endl;
    //        }
  //     }
- //      outputPdbFileA->Write("/home/oliver/Desktop/test-Delete-Function.pdb");
+ //      outputPdbFileA->Write(working_Directory + "test-Delete-Function.pdb");
 
     std::cout << "Program got to end ok" << std::endl;
     return abss.exec();
@@ -693,8 +582,6 @@ void Superimpose(AtomVector *moving, AtomVector *target)
     ReplaceAtomVectorCoordinatesFromMatrix(moving, &movedMatrix);
 }
 
-
-
 void Superimpose(Assembly *moving, Assembly *target)
 {
     // Was thinking to do everything via AtomVector, but probably won't
@@ -718,8 +605,8 @@ void Superimpose(Assembly *moving, Assembly *target)
     ReplaceAssemblyCoordinatesFromMatrix(moving, &movedMatrix);
 
     // Write a PDB file containing the moved co-ordinates
-    PdbFileSpace::PdbFile *outputPdbFile = moving->BuildPdbFileStructureFromAssembly();
-    outputPdbFile->Write("/home/oliver/Desktop/test-Superimposed-Function.pdb");
+   // PdbFileSpace::PdbFile *outputPdbFile = moving->BuildPdbFileStructureFromAssembly();
+   // outputPdbFile->Write("/home/oliver/Desktop/test-Superimposed-Function.pdb");
 }
 
 void Superimpose(Assembly *moving, Assembly *target, Assembly *alsoMoving)
@@ -990,55 +877,225 @@ GeometryTopology::Coordinate subtract_coordinates(GeometryTopology::Coordinate m
     return new_coordinate;
 }
 
-GeometryTopology::Coordinate get_cartesian_point_from_internal_coords(GeometryTopology::Coordinate a, GeometryTopology::Coordinate b, GeometryTopology::Coordinate c, double theta, double phi, double distance)
+GeometryTopology::Coordinate get_cartesian_point_from_internal_coords(GeometryTopology::Coordinate a, GeometryTopology::Coordinate b, GeometryTopology::Coordinate c, double theta_Degrees, double phi_Degrees, double distance_Angstrom)
 {
-// theta is the angle between 3 atoms. Phi is the torsion between 4 atoms.
-Vector lmn_x, lmn_y, lmn_z;
-double x_p, y_p, z_p;
+    //Convert from Degrees to Radians
+    theta_Degrees = ( (theta_Degrees * PI) / 180 );
+    phi_Degrees = ( (phi_Degrees * PI) / 180 );
 
-Vector cb = subtract_coordinates(b, c);
-Vector ba = subtract_coordinates(a, b);
+    // theta is the angle between 3 atoms. Phi is the torsion between 4 atoms.
+    Vector lmn_x, lmn_y, lmn_z;
+    double x_p, y_p, z_p;
 
-cb.Print(); std::cout << "^cb" << std::endl;
-ba.Print(); std::cout << "^ba" << std::endl;
-std::cout << std::endl;
+    Vector cb = subtract_coordinates(b, c);
+    Vector ba = subtract_coordinates(a, b);
 
-lmn_y = ba;
-lmn_y.CrossProduct(cb);
-lmn_y.Normalize();
+    //cb.Print(); std::cout << "^cb" << std::endl;
+    //ba.Print(); std::cout << "^ba" << std::endl;
+    //std::cout << std::endl;
 
-lmn_z = cb;
-lmn_z.Normalize();
+    lmn_y = ba;
+    lmn_y.CrossProduct(cb);
+    lmn_y.Normalize();
 
-lmn_x = lmn_z;
-lmn_x.CrossProduct(lmn_y);
+    lmn_z = cb;
+    lmn_z.Normalize();
 
-/*
-lmn_x.Print();
-std::cout << "^lmn_x" << std::endl;
-lmn_y.Print();
-std::cout << "^lmn_y" << std::endl;
-lmn_z.Print();
-std::cout << "^lmn_z" << std::endl;
-*/
+    lmn_x = lmn_z;
+    lmn_x.CrossProduct(lmn_y);
 
-/*
-lmn_y = normalize_vec(get_crossprod(ba, cb));
-lmn_z = normalize_vec(cb);
-lmn_x = get_crossprod(lmn_y, lmn_z);
-*/
+    /*
+    lmn_x.Print();
+    std::cout << "^lmn_x" << std::endl;
+    lmn_y.Print();
+    std::cout << "^lmn_y" << std::endl;
+    lmn_z.Print();
+    std::cout << "^lmn_z" << std::endl;
+    */
 
-x_p = distance *  sin(theta) * cos(phi);
-y_p = distance * sin(theta) * sin(phi);
-z_p = distance * cos(theta);
+    /*
+    lmn_y = normalize_vec(get_crossprod(ba, cb));
+    lmn_z = normalize_vec(cb);
+    lmn_x = get_crossprod(lmn_y, lmn_z);
+    */
 
-//std::cout << "x_p=" << x_p << "y_p=" << y_p << "z_p=" << z_p << std::endl;
+    x_p = distance_Angstrom *  sin(theta_Degrees) * cos(phi_Degrees);
+    y_p = distance_Angstrom * sin(theta_Degrees) * sin(phi_Degrees);
+    z_p = distance_Angstrom * cos(theta_Degrees);
 
-return (GeometryTopology::Coordinate)
+    //std::cout << "x_p=" << x_p << "y_p=" << y_p << "z_p=" << z_p << std::endl;
+
+    return (GeometryTopology::Coordinate)
     {
-                lmn_x.GetX()*x_p + lmn_y.GetX()*y_p + lmn_z.GetX()*z_p + c.GetX(),
-                lmn_x.GetY()*x_p + lmn_y.GetY()*y_p + lmn_z.GetY()*z_p + c.GetY(),
-                lmn_x.GetZ()*x_p + lmn_y.GetZ()*y_p + lmn_z.GetZ()*z_p + c.GetZ()
+        lmn_x.GetX()*x_p + lmn_y.GetX()*y_p + lmn_z.GetX()*z_p + c.GetX(),
+        lmn_x.GetY()*x_p + lmn_y.GetY()*y_p + lmn_z.GetY()*z_p + c.GetY(),
+        lmn_x.GetZ()*x_p + lmn_y.GetZ()*y_p + lmn_z.GetZ()*z_p + c.GetZ()
     };
 
+}
+
+GeometryTopology::Coordinate get_cartesian_point_from_internal_coords(Atom *a, Atom *b, Atom *c, double theta_Degrees, double phi_Degrees, double distance_Angstrom)
+{
+    GeometryTopology::Coordinate new_Coord = get_cartesian_point_from_internal_coords(a->GetCoordinates().at(0), b->GetCoordinates().at(0), c->GetCoordinates().at(0), theta_Degrees, phi_Degrees, distance_Angstrom);
+    return {new_Coord.GetX(), new_Coord.GetY(), new_Coord.GetZ()};
+}
+
+void GetResidueRingCenter (Residue *residue, GeometryTopology::Coordinate *center)
+{
+    double sumX = 0.0, sumY = 0.0, sumZ = 0.0;
+    int numberOfRingAtoms = 0;
+    AtomVector atoms = residue->GetAtoms();
+
+    for(Assembly::AtomVector::iterator atom = atoms.begin(); atom != atoms.end(); atom++)
+    {
+
+        if ( (*atom)->GetIsRing() )
+        {
+            numberOfRingAtoms++;
+            std::cout << "Atom is ring: " << (*atom)->GetName() << std::endl;
+            sumX += (*atom)->GetCoordinates().at(0)->GetX();
+            sumY += (*atom)->GetCoordinates().at(0)->GetY();
+            sumZ += (*atom)->GetCoordinates().at(0)->GetZ();
+        }
+    }
+    center->SetX( sumX / numberOfRingAtoms  );
+    center->SetY( sumY / numberOfRingAtoms  );
+    center->SetZ( sumZ / numberOfRingAtoms  );
+    return;
+}
+
+void prepare_Glycans_For_Superimposition_To_Any_Residue(std::string working_Directory, std::string amino_acid_name, Assembly *glycan)
+{
+
+    //Dear future self, the order that you add the atoms to the residue matters for superimposition ie N, CA, CB , not CB, CA, N.
+
+    Residue* reducing_Residue = glycan->GetAllResiduesOfAssembly().at(1);
+    std::cout << "Reducing residue is " << reducing_Residue->GetName() << std::endl;
+    AtomVector reducing_Atoms = reducing_Residue->GetAtoms();
+
+    Atom* atomC5; // = reducing_Residue.FindAtom("C5");
+    Atom* atomO5;
+    Atom* atomC1;
+
+    // Want: residue.FindAtom(string Name);
+    for(AtomVector::iterator it = reducing_Atoms.begin(); it != reducing_Atoms.end(); it++)
+    {
+       Atom* atom = *it;
+       if(atom->GetName().compare("C5")==0)
+           atomC5 = atom;
+       if(atom->GetName().compare("O5")==0)
+           atomO5 = atom;
+       if(atom->GetName().compare("C1")==0)
+           atomC1 = atom;
+    }
+
+    // Want: atom.Coordinate (the first fucking coordinate).
+    // Want: residue.DeleteAtom(int index);
+    // Want: assembly.AddAtom(int index);
+   // std::cout << "Atoms are: " << atomC5->GetName() << ", " << atomO5->GetName() << ", " << atomC1->GetName() << std::endl;
+   // std::cout << std::endl;
+
+    Assembly* assembly = new Assembly();
+    Residue* residue = new Residue();
+    residue->SetAssembly(assembly);
+    assembly->AddResidue(residue);
+    PdbFileSpace::PdbFile *outputPdbFile = new PdbFileSpace::PdbFile();
+
+    if (amino_acid_name.compare("ASN")==0)
+    {
+        residue->SetName("NLN");
+        residue->SetId("NLN_ _1_ _ _1");
+
+        Atom *atomND2 = new Atom(residue, "ND2", (get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 109.3, 180, 1.53)));
+        Atom *atomCG = new Atom(residue, "CG", (get_cartesian_point_from_internal_coords(atomO5, atomC1, atomND2, 109.3, 261, 1.325)));
+        Atom *atomOD1 = new Atom(residue, "OD1", (get_cartesian_point_from_internal_coords(atomC1, atomND2, atomCG, 126, 0, 1.22)));
+        Atom *atomCB = new Atom(residue, "CB", (get_cartesian_point_from_internal_coords(atomC1, atomND2, atomCG, 114, 177.3, 1.53)));
+        Atom *atomCA = new Atom(residue, "CA", (get_cartesian_point_from_internal_coords(atomND2, atomCG, atomCB, 111, 177.6, 1.53)));
+        Atom *atomN = new Atom(residue, "N", (get_cartesian_point_from_internal_coords(atomCG, atomCB, atomCA, 111, 191.6, 1.453)));
+
+        residue->AddAtom(atomN);
+        residue->AddAtom(atomCA);
+        residue->AddAtom(atomCB);
+        assembly->BuildStructureByDistance();
+        outputPdbFile = assembly->BuildPdbFileStructureFromAssembly();
+        outputPdbFile->Write(working_Directory + "NLN_superimposition_atoms.pdb");
+
+        residue->AddAtom(atomCG);
+        residue->AddAtom(atomOD1);
+        residue->AddAtom(atomND2);
+        assembly->BuildStructureByDistance();
+        outputPdbFile = assembly->BuildPdbFileStructureFromAssembly();
+        outputPdbFile->Write(working_Directory + "NLN_AlignedToGlycan.pdb");
+
+    }
+
+    else if (amino_acid_name.compare("THR")==0 || amino_acid_name.compare("SER")==0)
+    {
+        residue->SetName("OLS");
+        residue->SetId("OLS_ _1_ _ _1");
+
+        Atom *atomOG1 = new Atom(residue, "OG", (get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
+        Atom *atomCB = new Atom(residue, "CB", (get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOG1, 109.3, 75, 1.53)));
+        Atom *atomCA = new Atom(residue, "CA", (get_cartesian_point_from_internal_coords(atomC1, atomOG1, atomCB, 109.3, 125, 1.53)));
+        Atom *atomN = new Atom(residue, "N", (get_cartesian_point_from_internal_coords(atomOG1, atomCB, atomCA, 109.3, 180, 1.53)));
+        Atom *atomCG2 = new Atom(residue, "CG2", (get_cartesian_point_from_internal_coords(atomC1, atomOG1, atomCB, 109.3, -60, 1.53)));
+
+        residue->AddAtom(atomN);
+        residue->AddAtom(atomCA);
+        residue->AddAtom(atomCB);
+        assembly->BuildStructureByDistance();
+        outputPdbFile = assembly->BuildPdbFileStructureFromAssembly();
+        outputPdbFile->Write(working_Directory + "OLT_superimposition_atoms.pdb");
+        outputPdbFile->Write(working_Directory + "OLS_superimposition_atoms.pdb");
+
+        residue->AddAtom(atomOG1);
+        assembly->BuildStructureByDistance();
+        outputPdbFile = assembly->BuildPdbFileStructureFromAssembly();
+        outputPdbFile->Write(working_Directory + "OLS_AlignedToGlycan.pdb");
+
+        residue->SetName("OLT"); //Thr = Ser + CG2
+        residue->SetId("OLT_ _1_ _ _1");
+        residue->AddAtom(atomCG2);
+        atomOG1->SetName("OG1"); // It's OG in Ser.
+        assembly->BuildStructureByDistance();
+        outputPdbFile = assembly->BuildPdbFileStructureFromAssembly();
+        outputPdbFile->Write(working_Directory + "OLT_AlignedToGlycan.pdb");
+    }
+
+    else if (amino_acid_name.compare("TYR")==0)
+    {
+        residue->SetName("OLY");
+        residue->SetId("OLY_ _1_ _ _1");
+
+        Atom *atomOH = new Atom(residue, "OH", (get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
+        Atom *atomCZ = new Atom(residue, "CZ", (get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOH, 117, 60, 1.35)));
+        Atom *atomCE1 = new Atom(residue, "CE1", (get_cartesian_point_from_internal_coords(atomC1, atomOH, atomCZ, 120, 180, 1.37)));
+        Atom *atomCD1 = new Atom(residue, "CD1", (get_cartesian_point_from_internal_coords(atomOH, atomCZ, atomCE1, 120, 180, 1.37)));
+        Atom *atomCE2 = new Atom(residue, "CE2", (get_cartesian_point_from_internal_coords(atomC1, atomOH, atomCZ, 120, 0, 1.37)));
+        Atom *atomCD2 = new Atom(residue, "CD2", (get_cartesian_point_from_internal_coords(atomOH, atomCZ, atomCE2, 120, 180, 1.37)));
+        Atom *atomCG = new Atom(residue, "CG", (get_cartesian_point_from_internal_coords(atomCZ, atomCE2, atomCD2, 120, 0, 1.37)));
+        Atom *atomCB = new Atom(residue, "CB", (get_cartesian_point_from_internal_coords(atomCE2, atomCD2, atomCG, 122, 180, 1.51)));
+        Atom *atomCA = new Atom(residue, "CA", (get_cartesian_point_from_internal_coords(atomCD2, atomCG, atomCB, 111, -107, 1.55)));
+        Atom *atomN = new Atom(residue, "N", (get_cartesian_point_from_internal_coords(atomCG, atomCB, atomCA, 114, -170, 1.44)));
+
+        residue->AddAtom(atomN);
+        residue->AddAtom(atomCA);
+        residue->AddAtom(atomCB);
+        assembly->BuildStructureByDistance();
+        outputPdbFile = assembly->BuildPdbFileStructureFromAssembly();
+        outputPdbFile->Write(working_Directory + "OLY_superimposition_atoms.pdb");
+
+        residue->AddAtom(atomOH);
+        residue->AddAtom(atomCZ);
+        residue->AddAtom(atomCE1);
+        residue->AddAtom(atomCD1);
+        residue->AddAtom(atomCE2);
+        residue->AddAtom(atomCD2);
+        residue->AddAtom(atomCG);
+        assembly->BuildStructureByDistance();
+        outputPdbFile = assembly->BuildPdbFileStructureFromAssembly();
+        outputPdbFile->Write(working_Directory + "OLY_AlignedToGlycan.pdb");
+
+    }
+    return;
 }
