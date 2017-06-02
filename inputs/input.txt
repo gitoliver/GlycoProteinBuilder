@@ -1,0 +1,26 @@
+Parameters:
+/home/oliver/Programs/Cplusplus/GlycoproteinBuilder/glycoproteinBuilder/CurrentParams
+
+Protein:
+2L7BM1.pdb
+
+Glycans:
+glycans/
+
+Protein Residue list:
+36
+194
+289
+290
+296
+298
+END
+
+Glycan id list:
+DiSiaCore1_-g
+DiSiaCore1_-g
+DiSiaCore1_-g
+DiSiaCore1_-g
+DiSiaCore1_-g
+119
+END

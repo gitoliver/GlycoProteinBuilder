@@ -1,7 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <cstdlib> // for exit()
-#include "glycoproteinbuilder.h"
+
 #include <QApplication>
 // Includes for directory reading
 #include <string>
@@ -9,12 +9,11 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <stdlib.h>     /* getenv */
+#include <fstream>      // std::ifstream
 
-#include "/home/oliver/Programs/gems/gmml/includes/gmml.hpp"
-
-#include <Eigen/Geometry>
-
-
+#include "glycosylationsite.h"
+#include <io.h>
 
 constexpr auto PI = 3.14159265358979323846;
 
@@ -24,6 +23,7 @@ typedef std::vector<GeometryTopology::Coordinate*> CoordinateVector;
 typedef std::vector<Residue*> ResidueVector;
 typedef std::vector<Assembly*> AssemblyVector;
 typedef GeometryTopology::Coordinate Vector;
+typedef std::vector<GlycosylationSite*> GlycoSiteVector;
 
 //void FindConnectedAtoms(Atom *atom, Assembly::AtomVector &visitedAtoms);
 
@@ -35,6 +35,7 @@ void GetCenterOfGeometry(Assembly *assembly, GeometryTopology::Coordinate *cente
 double GetDistanceToAtom(Atom *A, Atom *otherAtom);
 double CalculateAtomicOverlaps(Assembly *assemblyA, Assembly *assemblyB);
 // Superimposition Functions
+/*  // Have added these to GMML
 void TestFind3DAffineTransform();
 Eigen::Affine3d Find3DAffineTransform(Eigen::Matrix3Xd in, Eigen::Matrix3Xd out);
 void GenerateMatrixFromAssembyCoordinates(Assembly *assembly, Eigen::Matrix3Xd *matrix);
@@ -44,75 +45,62 @@ void Superimpose(AtomVector *moving, AtomVector *target);
 void Superimpose(Assembly *moving, Assembly *target);
 void Superimpose(Assembly *moving, Assembly *target, Assembly *alsoMoving);
 void Superimpose(Assembly *moving, Assembly *target, AssemblyVector *alsoMoving);
+*/
 void GetResidueRingCenter (Residue *residue, GeometryTopology::Coordinate *center);
 GeometryTopology::Coordinate subtract_coordinates(GeometryTopology::Coordinate minuaend, GeometryTopology::Coordinate subtrahend);
 GeometryTopology::Coordinate get_cartesian_point_from_internal_coords(GeometryTopology::Coordinate a, GeometryTopology::Coordinate b, GeometryTopology::Coordinate c, double theta_Degrees, double phi_Degrees, double distance_Angstrom);
 GeometryTopology::Coordinate get_cartesian_point_from_internal_coords(Atom *a, Atom *b, Atom *c, double theta_Degrees, double phi_Degrees, double distance_Angstrom);
-void prepare_Glycans_For_Superimposition_To_Any_Residue(std::string working_Directory, std::string amino_acid_name, Assembly *glycan);
-
+void prepare_Glycans_For_Superimposition_To_Particular_Residue(std::string working_Directory, std::string amino_acid_name, Assembly *glycan);
+void Find_and_Prepare_Protein_Residues_for_Glycosylation(ResidueVector *glycosites, ResidueVector *protein_residues, const std::vector<std::__cxx11::string> *glycositeList);
+void Superimpose_Glycans_To_Glycosites(AssemblyVector *addedGlycans, ResidueVector *glycosites, std::string parameterDirectory);
 
 int main(int argc, char *argv[])
 {
-    QApplication abss(argc, argv);
-    glycoproteinBuilder w;
-    w.show();
+   // QApplication abss(argc, argv);
+   // glycoproteinBuilder w;
+   // w.show();
 
-    std::string working_Directory = "/home/oliver/work/zq.Sarah_Flowers_OLink_GlycoProteinBuilder/3.GMML_GlycoProteinBuilder/";
-    std::string installtionDirectory;
 
-    //************************************************//
-    // Details for loading in a PDB file              //
-    //************************************************//
+    /*
+    if (fileExists("testing.txt"))
+        std::cout << "Existing" << std::endl;
+    else
+        std::cout << "Not Existing" << std::endl;
+    */
 
-    std::vector<std::string> amino_libs, glycam_libs, other_libs, prep;
-    amino_libs.push_back("/home/oliver/Programs/gems/gmml/dat/CurrentParams/leaprc.ff12SB_2014-04-24/amino12.lib");
-    amino_libs.push_back("/home/oliver/Programs/gems/gmml/dat/CurrentParams/leaprc.ff12SB_2014-04-24/aminoct12.lib");
-    amino_libs.push_back("/home/oliver/Programs/gems/gmml/dat/CurrentParams/leaprc.ff12SB_2014-04-24/aminont12.lib");
 
-    glycam_libs.push_back("/home/oliver/Programs/gems/gmml/dat/CurrentParams/leaprc_GLYCAM_06j-1_2014-03-14/GLYCAM_amino_06j_12SB.lib");
-    glycam_libs.push_back("/home/oliver/Programs/gems/gmml/dat/CurrentParams/leaprc_GLYCAM_06j-1_2014-03-14/GLYCAM_aminoct_06j_12SB.lib");
-    glycam_libs.push_back("/home/oliver/Programs/gems/gmml/dat/CurrentParams/leaprc_GLYCAM_06j-1_2014-03-14/GLYCAM_aminont_06j_12SB.lib");
+   std::string working_Directory = Find_Program_Working_Directory();
+   std::string installation_Directory = Find_Program_Installation_Directory();
+   //std::cout << working_Directory << std::endl;
+   // std::string working_Directory = "/home/oliver/Programs/Cplusplus/GlycoproteinBuilder/glycoproteinBuilder/";
 
-    other_libs.push_back("/home/oliver/Programs/gems/gmml/dat/CurrentParams/leaprc.ff12SB_2014-04-24/nucleic12.lib");
-    other_libs.push_back("/home/oliver/Programs/gems/gmml/dat/CurrentParams/leaprc.ff12SB_2014-04-24/nucleic12.lib");
-    other_libs.push_back("/home/oliver/Programs/gems/gmml/dat/CurrentParams/other/solvents.lib");
+    /*
+    char* csGEMSHOME;
+    std::string sGEMSHOME;
+    csGEMSHOME = getenv ("GEMSHOME");
+    if (csGEMSHOME!=NULL)
+    {
+        printf ("GEMSHOME: %s",csGEMSHOME);
+        sGEMSHOME=csGEMSHOME; //convert to std::string now, as is nicer to work with.
+    }
+    else
+    {
+        std::cout << "Error(" << errno << ") GEMSHOME not set." << std::endl;
+        //return errno;
+        csGEMSHOME="/home/oliver/Programs/gems"; // Do this for now as can't import Sys variables into Qt.
+        sGEMSHOME=csGEMSHOME; //convert to std::string now, as is nicer to work with.
+    }
+    */
+    // std::string installtionDirectory;
 
-    prep.push_back("/home/oliver/Programs/gems/gmml/dat/CurrentParams/leaprc_GLYCAM_06j-1_2014-03-14/GLYCAM_06j-1.prep");
-
-    std::string pdb_file_path = working_Directory + "test.pdb";
-    std::string parameter_file_path = "/home/oliver/Programs/gems/gmml/dat/CurrentParams/leaprc_GLYCAM_06j-1_2014-03-14/GLYCAM_06j.dat";
-    std::string ion_parameter_file_path = "/home/oliver/Programs/gems/gmml/dat/CurrentParams/other/atomic_ions.lib";
-
-    //************************************************//
-    // Build PDB file from condensed sequence         //
-    //************************************************//
-/*
-    Assembly assemblyC;
-    assemblyC.BuildAssemblyFromCondensedSequence("DGlcpb1-4DNeup5Aca2-4DGlcpb1-OME", prep.at(0) ,parameter_file_path, true);
-    assemblyC.BuildStructureByDistance();
-    PdbFileSpace::PdbFile *outputPdbFile1 = assemblyC.BuildPdbFileStructureFromAssembly();
-    outputPdbFile1->Write(working_Directory + "test-buildFromStructure.pdb");
-
-/*
-    TopologyFileSpace::TopologyFile *outputTopologyFile1 = assemblyC.BuildTopologyFileStructureFromAssembly(parameter_file_path, ion_parameter_file_path);
-    outputTopologyFile1->Write(working_Directory + "test-BuildFromSequence.parm7");
-
-    CoordinateFileSpace::CoordinateFile *outputCoordinateFile = assemblyC.BuildCoordinateFileStructureFromAssembly();
-    outputCoordinateFile->Write(working_Directory + "test-BuildFromSequence.rst7");
-*/
-
-    //Assembly assemblyD;
-    //assemblyD.BuildAssemblyFromPdbFile(pdb_file_path, amino_libs, glycam_libs, other_libs, prep, parameter_file_path );
-    //assemblyD.BuildStructureByDistance();
 
     //************************************************//
-    // Reading an input file                          //
+    // Reading input file                             //
     //************************************************//
 
-    std::string proteinPDB, glycanDirectory, buffer;
+    std::string proteinPDB, glycanDirectory, buffer, parameterDirectory;
     std::vector<std::string> glycositeList, listOfGlycans;
-
-    std::ifstream inf ("/home/oliver/work/zq.Sarah_Flowers_OLink_GlycoProteinBuilder/3.GMML_GlycoProteinBuilder/input.txt");
+    std::ifstream inf (working_Directory + "/inputs/" + "input.txt");
     if (!inf)
     {
         std::cerr << "Uh oh, input file could not be opened for reading!" << std::endl;
@@ -122,6 +110,8 @@ int main(int argc, char *argv[])
     {
         std::string strInput;
         getline(inf, strInput);
+        if(strInput == "Parameters:")
+            getline(inf, parameterDirectory);
         if(strInput == "Protein:")
             getline(inf, proteinPDB);
         if(strInput == "Glycans:")
@@ -151,6 +141,37 @@ int main(int argc, char *argv[])
     }
     //std::cout << proteinPDB << ", " << glycanDirectory << std::endl;
 
+    if (fileExists(parameterDirectory + "/amino12.lib"))
+        std::cout << "Using user provided parameters" << std::endl;
+    else
+        std::cout << "Using default parameters from installation folder" << std::endl;
+        parameterDirectory = installation_Directory + "/CurrentParams";
+
+    //************************************************//
+    // Details for loading in a PDB file              //
+    //************************************************//
+
+    std::vector<std::string> amino_libs, glycam_libs, other_libs, prep;
+    amino_libs.push_back(parameterDirectory + "/amino12.lib");
+    amino_libs.push_back(parameterDirectory + "/aminoct12.lib");
+    amino_libs.push_back(parameterDirectory + "/aminont12.lib");
+
+    std::cout << "Check out: " << amino_libs.at(0) << std::endl;
+
+
+    glycam_libs.push_back(parameterDirectory + "/GLYCAM_amino_06j_12SB.lib");
+    glycam_libs.push_back(parameterDirectory + "/GLYCAM_aminoct_06j_12SB.lib");
+    glycam_libs.push_back(parameterDirectory + "/GLYCAM_aminont_06j_12SB.lib");
+
+    other_libs.push_back(parameterDirectory + "/nucleic12.lib");
+    other_libs.push_back(parameterDirectory + "/nucleic12.lib");
+    other_libs.push_back(parameterDirectory + "/solvents.lib");
+
+    prep.push_back(parameterDirectory + "/GLYCAM_06j-1.prep");
+
+    std::string pdb_file_path = working_Directory + "/outputs/" + "test.pdb";
+    std::string parameter_file_path = parameterDirectory + "/GLYCAM_06j.dat";
+    std::string ion_parameter_file_path = parameterDirectory + "/atomic_ions.lib";
 
 
     //************************************************//
@@ -158,23 +179,21 @@ int main(int argc, char *argv[])
     // protein residue - Glycan                       //
     //************************************************//
 
-    /*
-     std::list < std::pair<std::string, std::string> > protein_glycanList;
-     protein_glycanList.push_back( std::pair<std::string, std::string>(glycositeList.at(i), listOfGlycans.at(i)) );
-     */
+    //    std::list < std::pair<std::string, std::string> > protein_glycanList;
+    //    protein_glycanList.push_back( std::pair<std::string, std::string>(glycositeList.at(i), listOfGlycans.at(i)) );
 
     //************************************************//
-    // Load Files From a Directory                    //
+    // Load glycan files from directory               //
     //************************************************//
 
-    std::ifstream fin;
-    std::string directory = "/home/oliver/work/zq.Sarah_Flowers_OLink_GlycoProteinBuilder/3.GMML_GlycoProteinBuilder/" + glycanDirectory ;
+    GlycoSiteVector glycoSites();
+
+    std::string directory = working_Directory + "/inputs/" + glycanDirectory ;
     std::cout << "directory: " << directory << std::endl;
     std::string filepath;
     DIR *dp; // A directory stream
     struct dirent *dirp; // Contains file serial number and name (char d_name[])
     struct stat filestat; // Contains info about file, such as device ID, user ID, access time etc
-    int num;
 
     dp = opendir( directory.c_str() ); //.c_str adds a null character to the end.
     if (dp == NULL)
@@ -184,9 +203,7 @@ int main(int argc, char *argv[])
     }
     while ((dirp = readdir ( dp )))
     {
-        // std::cout << "Here" << std::endl;
         filepath = directory + "/" + dirp->d_name;
-
         // If the file is a directory (or is in some way invalid) we'll skip it
         if (stat( filepath.c_str(), &filestat )) continue; // Is it a valid file?
         if (S_ISDIR( filestat.st_mode ))         continue; // Is it a directory?
@@ -195,61 +212,95 @@ int main(int argc, char *argv[])
         if ( temp.compare(0, temp.size(), dirp->d_name, 0, temp.size()) == 0 )
         {   // Does glycan filename start with appropriate code?
             std::cout << "BOOM " << temp << " " << dirp->d_name << std::endl;
+
            // assembly.BuildAssemblyFromPdbFile(filepath, amino_libs, glycam_libs, other_libs, prep, parameter_file_path);
            // assembly.BuildStructureByDistance();
         }
-       // Endeavor to read a single number from the file and display it
+       // Testing: endeavor to read a single number from the file and display it
+       // std::ifstream fin;
        // fin.open( filepath.c_str() );
+       // int num;
        // if (fin >> num)
        //     std::cout << filepath << ": " << num << std::endl;
        // fin.close();
-
     }
     closedir( dp );
 
     //************************************************//
-    // Building the necessary N-link Torsions         //
+    // Building the necessary amino acid torsions     //
     //************************************************//
-
-
-    //Yohanna example
-/*
-    Assembly yohAssembly;
-    pdb_file_path = "/home/oliver/Downloads/1hzh.pdb";
-    yohAssembly.BuildAssemblyFromPdbFile(pdb_file_path, amino_libs, glycam_libs, other_libs, prep, parameter_file_path);
-    yohAssembly.BuildStructureByDistance();
-
-    ResidueVector yohResidues = yohAssembly.GetAllResiduesOfAssembly();
-
-    GeometryTopology::Coordinate *centerOfRing = new GeometryTopology::Coordinate();
-    for(ResidueVector::iterator it = yohResidues.begin(); it != yohResidues.end(); ++it)
-    {
-        Residue* current_residue = *it;
-        if(current_residue->GetName().compare("TYR")==0 || current_residue->GetName().compare("PHE")==0 ||
-           current_residue->GetName().compare("TRP")==0 || current_residue->GetName().compare("HIS")==0)
-
-        {
-            // Want it to look like this:
-           //centerOfRing = current_residue->GetResidueRingCenter;
-
-           GetResidueRingCenter(current_residue, centerOfRing);
-           std::cout << "Residue is " << current_residue->GetId() << std::endl;
-           centerOfRing->Print();
-           std::cout << std::endl;
-        }
-    }
-    */
 
     Assembly glycan;
     //pdb_file_path = working_Directory + listOfGlycans.at(0);
-    pdb_file_path = working_Directory + "/glycans/SiaCore1_-g.pdb";
+    pdb_file_path = working_Directory + "/inputs/glycans/DiSiaCore1_-g-gt-t.pdb";
     glycan.BuildAssemblyFromPdbFile(pdb_file_path, amino_libs, glycam_libs, other_libs, prep, parameter_file_path);
     glycan.BuildStructureByDistance();
 
+    prepare_Glycans_For_Superimposition_To_Particular_Residue(working_Directory, "THR", &glycan);
+    prepare_Glycans_For_Superimposition_To_Particular_Residue(working_Directory, "TYR", &glycan);
+    prepare_Glycans_For_Superimposition_To_Particular_Residue(working_Directory, "ASN", &glycan);
+
+    //************************************************//
+    // Superimposition                                //
+    //************************************************//
+    std::cout << "Superimposition" << std::endl;
+
+    Assembly protein;
+    protein.BuildAssemblyFromPdbFile( (working_Directory + "/inputs/" + proteinPDB), amino_libs, glycam_libs, other_libs, prep, parameter_file_path );
+    protein.BuildStructureByDistance();
+
+    ResidueVector glycosites;
+    ResidueVector protein_residues = protein.GetResidues();
+    Find_and_Prepare_Protein_Residues_for_Glycosylation(&glycosites, &protein_residues, &glycositeList);
+
+    // Load in a glycan for each glycosite. For now it is the same glycan for each site.
+    Assembly *addedGlycans = new Assembly[glycosites.size()];
+    AssemblyVector addedGlycansVector;
+
+    // This crashes out without a good error, so I'm sticking with having both addedGlycansVector and addedGlycans until I get smarter.
+    /*
+    AssemblyVector addedGlycansVector;
+    addedGlycansVector.reserve(glycosites.size());
+    pdb_file_path = working_Directory + "/inputs/glycans/DiSiaCore1_-g-gt-t.pdb";
+    for(AssemblyVector::iterator it = addedGlycansVector.begin(); it != addedGlycansVector.end(); ++it)
+    {
+        addedGlycansVector.push_back(new Assembly);
+        (*it)->BuildAssemblyFromPdbFile(pdb_file_path, amino_libs, glycam_libs, other_libs, prep, parameter_file_path);
+        (*it)->BuildStructureByDistance();
+    }
+    */
+
+    unsigned int i = 0;
+    for (i = 0; i != glycosites.size(); ++i)
+    {
+        pdb_file_path = working_Directory + "/inputs/glycans/DiSiaCore1_-g-gt-t.pdb";
+        addedGlycans[i].BuildAssemblyFromPdbFile(pdb_file_path, amino_libs, glycam_libs, other_libs, prep, parameter_file_path);
+        addedGlycans[i].BuildStructureByDistance();
+        addedGlycansVector.push_back(&addedGlycans[i]);
+    }
+
+    Superimpose_Glycans_To_Glycosites(&addedGlycansVector, &glycosites, parameterDirectory);
+
+    int j = 0;
+    Assembly glycoProtein;
+    glycoProtein.AddAssembly(&protein); //Could have combined everything into protein, but added assemblies get written first into PDB file.
+    for(AssemblyVector::iterator it = addedGlycansVector.begin(); it != addedGlycansVector.end(); ++it)
+    {
+        Assembly *addedglycan = (*it);
+        std::stringstream ss;
+        ss << working_Directory + "/outputs/addedGlycan" << j << ".pdb";
+        PdbFileSpace::PdbFile *outputPdbFileGlycoProtein = addedglycan->BuildPdbFileStructureFromAssembly(-1,0);
+        outputPdbFileGlycoProtein->Write(ss.str());
+        glycoProtein.AddAssembly(addedglycan);
+        ++j;
+    }
 
 
-    //prepare_Glycans_For_Superimposition_To_Any_Residue(working_Directory, "THR", &glycan);
-   // prepare_Glycans_For_Superimposition_To_Any_Residue(working_Directory, "ASN", &glycan);
+    PdbFileSpace::PdbFile *outputPdbFileGlycoProteinAll = glycoProtein.BuildPdbFileStructureFromAssembly(-1,0);
+    outputPdbFileGlycoProteinAll->Write(working_Directory + "/outputs/GlycoProtein.pdb");
+    delete[] addedGlycans;
+
+
 
     //************************************************//
     // COM translating                                //
@@ -267,7 +318,7 @@ int main(int argc, char *argv[])
     }
 
     PdbFileSpace::PdbFile *outputPdbFile = assembly.BuildPdbFileStructureFromAssembly();
-    outputPdbFile->Write(working_Directory + "test-Translate.pdb");
+    outputPdbFile->Write(working_Directory + "/test-Translate.pdb");
     */
     //************************************************//
     // Adjusting a torsion                            //
@@ -302,7 +353,7 @@ int main(int argc, char *argv[])
     double torsion1 = 80.0;
     assembly.SetDihedral(atom1, atom2, atom3, atom4, torsion1);
 
-    outputPdbFile->Write(working_Directory + "test-Dihedral.pdb");
+    outputPdbFile->Write(working_Directory + "/test-Dihedral.pdb");
     */
     //************************************************//
     // Atomic Overlaps                                //
@@ -313,164 +364,14 @@ int main(int argc, char *argv[])
 
     // Write a PDB file containing the moved co-ordinates
    // PdbFileSpace::PdbFile *outputPdbFileA = assemblyMoving.BuildPdbFileStructureFromAssembly();
-  //  outputPdbFileA->Write(working_Directory + "Superimposed-moved.pdb");
+  //  outputPdbFileA->Write(working_Directory + "/Superimposed-moved.pdb");
 
 
   //  std::cout << "Overlap is " << CalculateAtomicOverlaps(&assemblyA, &assemblyB) << std::endl;
 
     //assemblyA.AddAssembly(&assemblyB);
-   // outputPdbFile->Write(working_Directory + "test-MergeAssemblies.pdb");
+   // outputPdbFile->Write(working_Directory + "/test-MergeAssemblies.pdb");
 
-    //************************************************//
-    // Superimposition                                //
-    //************************************************//
-    std::cout << "Superimposition" << std::endl;
-
-    Assembly protein;
-    protein.BuildAssemblyFromPdbFile( (working_Directory + proteinPDB), amino_libs, glycam_libs, other_libs, prep, parameter_file_path );
-    protein.BuildStructureByDistance();
-
-    ResidueVector *glycosites = new ResidueVector();
-
-    // Get list of Residues that we will superimpose the glycans onto
-    for(std::vector<std::string>::iterator it = glycositeList.begin(); it < glycositeList.end(); ++it)
-    {
-        std::string glycosite=(*it);
-        ResidueVector residues = protein.GetResidues();
-        for(ResidueVector::iterator itt = residues.begin(); itt != residues.end(); ++itt)
-        {
-            // Comparing strings is easier:
-            Residue *residue = (*itt);
-            std::string id = residue->GetId();
-            std::string formatted_glycosite = "_" + glycosite + "_";
-            // If the residue number set in the input file is equal to the current residue number
-            if( id.compare(5,formatted_glycosite.size(),formatted_glycosite) == 0)
-            {
-                std::cout << "glycosite: " << glycosite << std::endl;
-                std::cout << "glycosite id:" << id << std::endl;
-                glycosites->push_back(residue);
-                prepare_Glycans_For_Superimposition_To_Any_Residue(working_Directory, residue->GetName(), &glycan); //OG NOT HAVING glycan SET WILL BREAK IT LATER!!!!!!!!!!!!!!!!!!!!!!!!!
-                if (residue->GetName().compare("SER")==0)
-                    residue->SetName("OLS");
-                if (residue->GetName().compare("THR")==0)
-                    residue->SetName("OLT");
-                if (residue->GetName().compare("ASN")==0)
-                    residue->SetName("NLN");
-                if (residue->GetName().compare("TYR")==0)
-                    residue->SetName("OLY");
-            }
-        }
-    }
-    // Want: AtomVector = assembly.Selection(@CA,N,ND2,CG,CB)
-    // Superimpose onto each glycosite
-   // std::vector<Assembly> *addedGlycans;
-    Assembly *addedGlycans = new Assembly[glycosites->size()];
-    int i=0;
-
-    for(ResidueVector::iterator it = glycosites->begin(); it != glycosites->end(); ++it)
-    {
-        Residue *glycosite=(*it);
-        std::cout << "Glycosite is " << glycosite->GetId() << std::endl;
-        AtomVector atoms = glycosite->GetAtoms();
-        Assembly* assemblyTarget = new Assembly();
-
-        Residue* residueTarget = new Residue();
-        for(AtomVector::iterator itt = atoms.begin(); itt != atoms.end(); ++itt)
-        {
-            Atom *atom = (*itt);
-            std::cout << "Checking: " << atom->GetName() << std::endl;
-            if (atom->GetName() == "CB")
-                residueTarget->AddAtom(atom);
-            if (atom->GetName() == "CA")
-                residueTarget->AddAtom(atom);
-            if (atom->GetName() == "N")
-                residueTarget->AddAtom(atom);
-        }
-        residueTarget->SetAssembly(assemblyTarget);
-        assemblyTarget->AddResidue(residueTarget);
-        assemblyTarget->BuildStructureByDistance();
-
-        pdb_file_path = working_Directory + "/glycans/SiaCore1_-g.pdb";
-        addedGlycans[i].BuildAssemblyFromPdbFile(pdb_file_path, amino_libs, glycam_libs, other_libs, prep, parameter_file_path);
-        addedGlycans[i].BuildStructureByDistance();
-
-        pdb_file_path = working_Directory + glycosite->GetName() + "_AlignedToGlycan.pdb";
-        std::cout << "Attempting to open " << pdb_file_path << std::endl;
-        Assembly *residueAminoAcid = new Assembly();
-        residueAminoAcid->BuildAssemblyFromPdbFile(pdb_file_path, amino_libs, glycam_libs, other_libs, prep, parameter_file_path);
-        residueAminoAcid->BuildStructureByDistance();
-
-        AssemblyVector *atomsToAlsoMove = new AssemblyVector; // using AddAssembly for the NLN part crashes the PDB writer.
-        atomsToAlsoMove->push_back((&addedGlycans[i]));
-        atomsToAlsoMove->push_back(residueAminoAcid);
-
-        pdb_file_path = working_Directory + glycosite->GetName() + "_superimposition_atoms.pdb";
-        std::cout << "Attempting to open " << pdb_file_path << std::endl;
-
-        Assembly *assemblyMoving = new Assembly();
-        assemblyMoving->BuildAssemblyFromPdbFile(pdb_file_path, amino_libs, glycam_libs, other_libs, prep, parameter_file_path );
-
-        //Superimpose(assemblyMoving, assemblyTarget, &addedGlycans[i]);
-        Superimpose(assemblyMoving, assemblyTarget, atomsToAlsoMove);
-
-        // Want: atom.SetX()
-        // Want: atom.ReplaceCoords()
-        // Replace Co-ords of sidechain
-        // Want: assembly.Select(:residue@atom)
-        AtomVector newSideChainAtoms = residueAminoAcid->GetAllAtomsOfAssembly();
-        for(AtomVector::iterator itt = atoms.begin(); itt != atoms.end(); ++itt)
-        {
-            Atom *atom = (*itt);
-            std::cout << "Checking: " << atom->GetName() << std::endl;
-            if ( (atom->GetName() != "N") && (atom->GetName() != "CA") && (atom->GetName() != "CB") )
-            {
-                std::cout << "Replacing co-ords of protein " << atom->GetName() << std::endl;
-                for(AtomVector::iterator ittt = newSideChainAtoms.begin(); ittt != newSideChainAtoms.end(); ++ittt)
-                {
-                    Atom *atom1 = (*ittt);
-                    std::cout << "Comparing with " << atom1->GetName() << std::endl;
-                    if (atom->GetName() == atom1->GetName() )
-                    {
-
-                        //    std::cout << "Before X=" << atom->GetCoordinates().at(0)->GetX() << std::endl;
-                            atom->GetCoordinates().at(0)->SetX( atom1->GetCoordinates().at(0)->GetX() );
-                            atom->GetCoordinates().at(0)->SetY( atom1->GetCoordinates().at(0)->GetY() );
-                            atom->GetCoordinates().at(0)->SetZ( atom1->GetCoordinates().at(0)->GetZ() );
-                         //   std::cout << "After X=" << atom->GetCoordinates().at(0)->GetX() << std::endl;
-                    }
-                }
-            }
-        }
-
-        // Write out each glycan to check superimposition
-        std::stringstream ss;
-        ss << working_Directory + "GlycoProtein" << i << ".pdb";
-        PdbFileSpace::PdbFile *outputPdbFileGlycoProtein = addedGlycans[i].BuildPdbFileStructureFromAssembly(-1,0);
-        outputPdbFileGlycoProtein->Write(ss.str());
-        protein.AddAssembly(&addedGlycans[i]);
-        ++i;
-    }
-    std::cout << "Got this far" << std::endl;
-    // Add superimposed glycan (assemblyAlsoMoving) to protein assembly
-    i = 1;
-
-    /*
-    for(std::vector<Assembly>::iterator addedGlycan = addedGlycans->begin(); addedGlycan != addedGlycans->end(); addedGlycan++)
-    {
-        std::stringstream ss;
-        ss << working_Directory + "GlycoProtein" << i << ".pdb";
-        i++;
-        PdbFileSpace::PdbFile *outputPdbFileGlycoProtein = (*addedGlycan).BuildPdbFileStructureFromAssembly(-1,0);
-        outputPdbFileGlycoProtein->Write(ss.str());
-        protein.AddAssembly(&(*addedGlycan));
-    }
-    */
-    //protein.Print();
-
-    std::cout << "Got this far" << std::endl;
-    PdbFileSpace::PdbFile *outputPdbFileGlycoProteinAll = protein.BuildPdbFileStructureFromAssembly(-1,0);
-    outputPdbFileGlycoProteinAll->Write(working_Directory + "GlycoProtein.pdb");
-    delete[] addedGlycans;
 
       //************************************************//
       // Selections                                     //
@@ -504,14 +405,144 @@ int main(int argc, char *argv[])
    //            std::cout << "Boo found again" << std::endl;
    //        }
  //     }
- //      outputPdbFileA->Write(working_Directory + "test-Delete-Function.pdb");
+ //      outputPdbFileA->Write(working_Directory + "/test-Delete-Function.pdb");
+
+
+    //************************************************//
+    // Build PDB file from condensed sequence         //
+    //************************************************//
+/*
+    Assembly assemblyC;
+    assemblyC.BuildAssemblyFromCondensedSequence("DGlcpb1-4[DManpa1-2]DNeup5Aca2-4DGlcpb1-OME", prep.at(0) ,parameter_file_path, true);
+    assemblyC.BuildStructureByDistance();
+    PdbFileSpace::PdbFile *outputPdbFile1 = assemblyC.BuildPdbFileStructureFromAssembly();
+    outputPdbFile1->Write(working_Directory + "/test-buildFromStructure.pdb");
+
+    TopologyFileSpace::TopologyFile *outputTopologyFile1 = assemblyC.BuildTopologyFileStructureFromAssembly(parameter_file_path, ion_parameter_file_path);
+    outputTopologyFile1->Write(working_Directory + "/test-BuildFromSequence.parm7");
+
+    CoordinateFileSpace::CoordinateFile *outputCoordinateFile = assemblyC.BuildCoordinateFileStructureFromAssembly();
+    outputCoordinateFile->Write(working_Directory + "/test-BuildFromSequence.rst7");
+
+*/
+    //Assembly assemblyD;
+    //assemblyD.BuildAssemblyFromPdbFile(pdb_file_path, amino_libs, glycam_libs, other_libs, prep, parameter_file_path );
+    //assemblyD.BuildStructureByDistance();
+
 
     std::cout << "Program got to end ok" << std::endl;
-    return abss.exec();
+   // return abss.exec();
+    return 0;
+}
+
+void Superimpose_Glycans_To_Glycosites(AssemblyVector *addedGlycans, ResidueVector *glycosites, std::string parameterDirectory)
+{
+    //************************************************//
+    // Details for loading in a PDB file              //
+    //************************************************//
+
+    std::vector<std::string> amino_libs, glycam_libs, other_libs, prep;
+    amino_libs.push_back(parameterDirectory + "/amino12.lib");
+    amino_libs.push_back(parameterDirectory + "/aminoct12.lib");
+    amino_libs.push_back(parameterDirectory + "/aminont12.lib");
+
+    glycam_libs.push_back(parameterDirectory + "/GLYCAM_amino_06j_12SB.lib");
+    glycam_libs.push_back(parameterDirectory + "/GLYCAM_aminoct_06j_12SB.lib");
+    glycam_libs.push_back(parameterDirectory + "/GLYCAM_aminont_06j_12SB.lib");
+
+    other_libs.push_back(parameterDirectory + "/nucleic12.lib");
+    other_libs.push_back(parameterDirectory + "/nucleic12.lib");
+    other_libs.push_back(parameterDirectory + "/solvents.lib");
+
+    prep.push_back(parameterDirectory + "/GLYCAM_06j-1.prep");
+
+    std::string parameter_file_path = parameterDirectory + "/GLYCAM_06j.dat";
+    std::string ion_parameter_file_path = parameterDirectory + "/atomic_ions.lib";
+
+    // Superimpose onto each glycosite
+    int i=0;
+    for(ResidueVector::iterator it = glycosites->begin(); it != glycosites->end(); ++it)
+    {
+        Residue *glycosite=(*it);
+        std::cout << "Glycosite is " << glycosite->GetId() << std::endl;
+        AtomVector atoms = glycosite->GetAtoms();
+        Assembly* assemblyTarget = new Assembly();
+        Residue* residueTarget = new Residue();
+        for(AtomVector::iterator itt = atoms.begin(); itt != atoms.end(); ++itt)
+        {
+            Atom *atom = (*itt);
+            //std::cout << "Checking: " << atom->GetName() << std::endl;
+            if (atom->GetName() == "CB")
+                residueTarget->AddAtom(atom);
+            if (atom->GetName() == "CA")
+                residueTarget->AddAtom(atom);
+            if (atom->GetName() == "N")
+                residueTarget->AddAtom(atom);
+        }
+        residueTarget->SetAssembly(assemblyTarget);
+        assemblyTarget->AddResidue(residueTarget);
+        assemblyTarget->BuildStructureByDistance();
+
+        std::string pdb_file_path = "/home/oliver/Programs/Cplusplus/GlycoproteinBuilder/glycoproteinBuilder/outputs/" + glycosite->GetName() + "_AlignedToGlycan.pdb";
+        std::cout << "Attempting to open " << pdb_file_path << std::endl;
+        Assembly *residueAminoAcid = new Assembly();
+        residueAminoAcid->BuildAssemblyFromPdbFile(pdb_file_path, amino_libs, glycam_libs, other_libs, prep, parameter_file_path);
+        residueAminoAcid->BuildStructureByDistance();
+
+        AssemblyVector *atomsToAlsoMove = new AssemblyVector; // using AddAssembly for the NLN part crashes the PDB writer.
+        atomsToAlsoMove->push_back(addedGlycans->at(i));
+        atomsToAlsoMove->push_back(residueAminoAcid);
+
+        pdb_file_path = "/home/oliver/Programs/Cplusplus/GlycoproteinBuilder/glycoproteinBuilder/outputs/" + glycosite->GetName() + "_superimposition_atoms.pdb";
+        std::cout << "Attempting to open " << pdb_file_path << std::endl;
+
+        Assembly *assemblyMoving = new Assembly();
+        assemblyMoving->BuildAssemblyFromPdbFile(pdb_file_path, amino_libs, glycam_libs, other_libs, prep, parameter_file_path );
+
+        //Superimpose(assemblyMoving, assemblyTarget, &addedGlycans[i]);
+        gmml::Superimpose(assemblyMoving, assemblyTarget, atomsToAlsoMove);
+
+        AtomVector newSideChainAtoms = residueAminoAcid->GetAllAtomsOfAssembly();
+
+        glycosite->ReplaceAtomCoordinates(&newSideChainAtoms);
+        ++i;
+    }
+}
+
+void Find_and_Prepare_Protein_Residues_for_Glycosylation(ResidueVector *glycosites, ResidueVector *protein_residues, const std::vector<std::__cxx11::string> *glycositeList)
+{
+    for(std::vector<std::string>::const_iterator it = glycositeList->begin(); it != glycositeList->end(); ++it)
+    {
+        std::string glycosite = (*it);
+        for(ResidueVector::iterator itt = protein_residues->begin(); itt != protein_residues->end(); ++itt)
+        {
+            // Comparing strings is easier:
+            Residue *residue = (*itt);
+            std::string id = residue->GetId();
+            std::string formatted_glycosite = "_" + glycosite + "_";
+            // If the residue number in the input file is equal to the current residue number
+            if( id.compare(5, formatted_glycosite.size(), formatted_glycosite) == 0)
+            {
+                std::cout << "glycosite: " << glycosite << std::endl;
+                std::cout << "glycosite id:" << id << std::endl;
+                glycosites->push_back(residue);
+                //prepare_Glycans_For_Superimposition_To_Particular_Residue(working_Directory, residue->GetName(), &glycan); //OG NOT HAVING glycan SET WILL BREAK IT LATER!!!!!!!!!!!!!!!!!!!!!!!!!
+                if (residue->GetName().compare("SER")==0)
+                    residue->SetName("OLS");
+                if (residue->GetName().compare("THR")==0)
+                    residue->SetName("OLT");
+                if (residue->GetName().compare("ASN")==0)
+                    residue->SetName("NLN");
+                if (residue->GetName().compare("TYR")==0)
+                    residue->SetName("OLY");
+            }
+        }
+    }
 }
 
 
-void GenerateMatrixFromAssembyCoordinates(Assembly *assembly, Eigen::Matrix3Xd *matrix)
+/*
+  void GenerateMatrixFromAssembyCoordinates(Assembly *assembly, Eigen::Matrix3Xd *matrix)
 {
     int col = 0; // Column index for matrix
     CoordinateVector assemblyCoordinates = assembly->GetAllCoordinates();
@@ -523,6 +554,7 @@ void GenerateMatrixFromAssembyCoordinates(Assembly *assembly, Eigen::Matrix3Xd *
         col++;
     }
 }
+
 
 void ReplaceAssemblyCoordinatesFromMatrix(Assembly *assembly, Eigen::Matrix3Xd *matrix)
 {
@@ -561,8 +593,6 @@ void ReplaceAtomVectorCoordinatesFromMatrix(AtomVector *atoms, Eigen::Matrix3Xd 
         col++;
     }
 }
-//End atom vector version
-
 
 void Superimpose(AtomVector *moving, AtomVector *target)
 {
@@ -611,11 +641,6 @@ void Superimpose(Assembly *moving, Assembly *target)
 
 void Superimpose(Assembly *moving, Assembly *target, Assembly *alsoMoving)
 {
-    // Was thinking to do everything via AtomVector, but probably won't
-    //AtomVector movingAtoms = moving->GetAllAtomsOfAssembly();
-    //AtomVector targetAtoms = target->GetAllAtomsOfAssembly();
-    //Superimpose(&movingAtoms, &targetAtoms);
-
     Eigen::Matrix3Xd movingMatrix(3, moving->GetAllCoordinates().size()), targetMatrix(3, target->GetAllCoordinates().size());
     Eigen::Matrix3Xd alsoMovingMatrix(3, alsoMoving->GetAllCoordinates().size()); // separate from above line for clarity
 
@@ -638,10 +663,10 @@ void Superimpose(Assembly *moving, Assembly *target, Assembly *alsoMoving)
 
 
     // Write a PDB file containing the moved co-ordinates
-    PdbFileSpace::PdbFile *outputPdbFile = moving->BuildPdbFileStructureFromAssembly();
-    outputPdbFile->Write("/home/oliver/Desktop/test-Superimposed-Function-moved.pdb");
-    PdbFileSpace::PdbFile *outputPdbFile1 = alsoMoving->BuildPdbFileStructureFromAssembly();
-    outputPdbFile1->Write("/home/oliver/Desktop/test-Superimposed-Function-AlsoMoved.pdb");
+    //PdbFileSpace::PdbFile *outputPdbFile = moving->BuildPdbFileStructureFromAssembly();
+   // outputPdbFile->Write("/home/oliver/Desktop/test-Superimposed-Function-moved.pdb");
+   // PdbFileSpace::PdbFile *outputPdbFile1 = alsoMoving->BuildPdbFileStructureFromAssembly();
+   // outputPdbFile1->Write("/home/oliver/Desktop/test-Superimposed-Function-AlsoMoved.pdb");
 }
 
 void Superimpose(Assembly *moving, Assembly *target, AssemblyVector *alsoMoving)
@@ -668,26 +693,26 @@ void Superimpose(Assembly *moving, Assembly *target, AssemblyVector *alsoMoving)
     ReplaceAssemblyCoordinatesFromMatrix(moving, &movedMatrix);
 
     // Write a PDB file containing the moved co-ordinates
-    PdbFileSpace::PdbFile *outputPdbFile = moving->BuildPdbFileStructureFromAssembly();
-    outputPdbFile->Write("/home/oliver/Desktop/output-Superimposed-Function-moved.pdb");
+    //PdbFileSpace::PdbFile *outputPdbFile = moving->BuildPdbFileStructureFromAssembly();
+    //outputPdbFile->Write("/home/oliver/Desktop/output-Superimposed-Function-moved.pdb");
 
     // Also move every assembly in also moving
-    int i=1; // To create unique output PDB file names
+    //int i=1; // To create unique output PDB file names
     for(AssemblyVector::iterator it = alsoMoving->begin(); it != alsoMoving->end(); it++)
     {
-        Assembly *assembly = (*it); // I hate (*it)
+        Assembly *assembly = (*it); // I hate (*it)->
         Eigen::Matrix3Xd alsoMovingMatrix(3, assembly->GetAllCoordinates().size());
         GenerateMatrixFromAssembyCoordinates(assembly, &alsoMovingMatrix);
         Eigen::Matrix3Xd alsoMovedMatrix = (Affine * alsoMovingMatrix);
         ReplaceAssemblyCoordinatesFromMatrix(assembly, &alsoMovedMatrix);
-        PdbFileSpace::PdbFile *outputPdbFile1 = assembly->BuildPdbFileStructureFromAssembly();
-        std::stringstream ss;
-        ss << "/home/oliver/Desktop/output-Superimposed-Function-AlsoMoved" << i << ".pdb";
-        outputPdbFile1->Write(ss.str());
-        ++i;
+        //PdbFileSpace::PdbFile *outputPdbFile1 = assembly->BuildPdbFileStructureFromAssembly();
+       // std::stringstream ss;
+       // ss << "/home/oliver/Desktop/output-Superimposed-Function-AlsoMoved" << i << ".pdb";
+        //outputPdbFile1->Write(ss.str());
+        //++i;
     }
 }
-
+*/
 
 double GetDistanceToAtom(Atom *A, Atom *otherAtom)
 {
@@ -785,6 +810,7 @@ void GetCenterOfGeometry(Assembly *assembly, GeometryTopology::Coordinate *cente
 }
 */
 
+/* Have moved this to GMML. Can delete if all is ok.
 Eigen::Affine3d Find3DAffineTransform(Eigen::Matrix3Xd in, Eigen::Matrix3Xd out) {
 
   // Default output
@@ -844,7 +870,8 @@ Eigen::Affine3d Find3DAffineTransform(Eigen::Matrix3Xd in, Eigen::Matrix3Xd out)
 
 // A function to test Find3DAffineTransform()
 
-void TestFind3DAffineTransform(){
+void TestFind3DAffineTransform()
+{
 
   // Create datasets with known transform
   Eigen::Matrix3Xd in(3, 100), out(3, 100);
@@ -869,6 +896,7 @@ void TestFind3DAffineTransform(){
        (S-A.translation()).cwiseAbs().maxCoeff() > 1e-13)
     throw "Could not determine the affine transform accurately enough";
 }
+*/
 
 // Change Coordinate so I can do coordinate.subtract(coordinate);
 GeometryTopology::Coordinate subtract_coordinates(GeometryTopology::Coordinate minuaend, GeometryTopology::Coordinate subtrahend)
@@ -964,16 +992,15 @@ void GetResidueRingCenter (Residue *residue, GeometryTopology::Coordinate *cente
     return;
 }
 
-void prepare_Glycans_For_Superimposition_To_Any_Residue(std::string working_Directory, std::string amino_acid_name, Assembly *glycan)
+void prepare_Glycans_For_Superimposition_To_Particular_Residue(std::string working_Directory, std::string amino_acid_name, Assembly *glycan)
 {
-
     //Dear future self, the order that you add the atoms to the residue matters for superimposition ie N, CA, CB , not CB, CA, N.
 
     Residue* reducing_Residue = glycan->GetAllResiduesOfAssembly().at(1);
     std::cout << "Reducing residue is " << reducing_Residue->GetName() << std::endl;
     AtomVector reducing_Atoms = reducing_Residue->GetAtoms();
 
-    Atom* atomC5; // = reducing_Residue.FindAtom("C5");
+    Atom* atomC5;
     Atom* atomO5;
     Atom* atomC1;
 
@@ -1004,7 +1031,7 @@ void prepare_Glycans_For_Superimposition_To_Any_Residue(std::string working_Dire
     if (amino_acid_name.compare("ASN")==0)
     {
         residue->SetName("NLN");
-        residue->SetId("NLN_ _1_ _ _1");
+        residue->SetId("NLN_?_1_?_?_1");
 
         Atom *atomND2 = new Atom(residue, "ND2", (get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 109.3, 180, 1.53)));
         Atom *atomCG = new Atom(residue, "CG", (get_cartesian_point_from_internal_coords(atomO5, atomC1, atomND2, 109.3, 261, 1.325)));
@@ -1018,21 +1045,20 @@ void prepare_Glycans_For_Superimposition_To_Any_Residue(std::string working_Dire
         residue->AddAtom(atomCB);
         assembly->BuildStructureByDistance();
         outputPdbFile = assembly->BuildPdbFileStructureFromAssembly();
-        outputPdbFile->Write(working_Directory + "NLN_superimposition_atoms.pdb");
+        outputPdbFile->Write(working_Directory + "/outputs/NLN_superimposition_atoms.pdb");
 
         residue->AddAtom(atomCG);
         residue->AddAtom(atomOD1);
         residue->AddAtom(atomND2);
         assembly->BuildStructureByDistance();
         outputPdbFile = assembly->BuildPdbFileStructureFromAssembly();
-        outputPdbFile->Write(working_Directory + "NLN_AlignedToGlycan.pdb");
-
+        outputPdbFile->Write(working_Directory + "/outputs/NLN_AlignedToGlycan.pdb");
     }
 
     else if (amino_acid_name.compare("THR")==0 || amino_acid_name.compare("SER")==0)
     {
         residue->SetName("OLS");
-        residue->SetId("OLS_ _1_ _ _1");
+        residue->SetId("OLS_?_1_?_?_1");
 
         Atom *atomOG1 = new Atom(residue, "OG", (get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
         Atom *atomCB = new Atom(residue, "CB", (get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOG1, 109.3, 75, 1.53)));
@@ -1045,27 +1071,27 @@ void prepare_Glycans_For_Superimposition_To_Any_Residue(std::string working_Dire
         residue->AddAtom(atomCB);
         assembly->BuildStructureByDistance();
         outputPdbFile = assembly->BuildPdbFileStructureFromAssembly();
-        outputPdbFile->Write(working_Directory + "OLT_superimposition_atoms.pdb");
-        outputPdbFile->Write(working_Directory + "OLS_superimposition_atoms.pdb");
+        outputPdbFile->Write(working_Directory + "/outputs/OLT_superimposition_atoms.pdb");
+        outputPdbFile->Write(working_Directory + "/outputs/OLS_superimposition_atoms.pdb");
 
         residue->AddAtom(atomOG1);
         assembly->BuildStructureByDistance();
         outputPdbFile = assembly->BuildPdbFileStructureFromAssembly();
-        outputPdbFile->Write(working_Directory + "OLS_AlignedToGlycan.pdb");
+        outputPdbFile->Write(working_Directory + "/outputs/OLS_AlignedToGlycan.pdb");
 
         residue->SetName("OLT"); //Thr = Ser + CG2
-        residue->SetId("OLT_ _1_ _ _1");
+        residue->SetId("OLT_?_1_?_?_1");
         residue->AddAtom(atomCG2);
         atomOG1->SetName("OG1"); // It's OG in Ser.
         assembly->BuildStructureByDistance();
         outputPdbFile = assembly->BuildPdbFileStructureFromAssembly();
-        outputPdbFile->Write(working_Directory + "OLT_AlignedToGlycan.pdb");
+        outputPdbFile->Write(working_Directory + "/outputs/OLT_AlignedToGlycan.pdb");
     }
 
     else if (amino_acid_name.compare("TYR")==0)
     {
         residue->SetName("OLY");
-        residue->SetId("OLY_ _1_ _ _1");
+        residue->SetId("OLY_?_1_?_?_1");
 
         Atom *atomOH = new Atom(residue, "OH", (get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
         Atom *atomCZ = new Atom(residue, "CZ", (get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOH, 117, 60, 1.35)));
@@ -1083,7 +1109,7 @@ void prepare_Glycans_For_Superimposition_To_Any_Residue(std::string working_Dire
         residue->AddAtom(atomCB);
         assembly->BuildStructureByDistance();
         outputPdbFile = assembly->BuildPdbFileStructureFromAssembly();
-        outputPdbFile->Write(working_Directory + "OLY_superimposition_atoms.pdb");
+        outputPdbFile->Write(working_Directory + "/outputs/OLY_superimposition_atoms.pdb");
 
         residue->AddAtom(atomOH);
         residue->AddAtom(atomCZ);
@@ -1094,7 +1120,7 @@ void prepare_Glycans_For_Superimposition_To_Any_Residue(std::string working_Dire
         residue->AddAtom(atomCG);
         assembly->BuildStructureByDistance();
         outputPdbFile = assembly->BuildPdbFileStructureFromAssembly();
-        outputPdbFile->Write(working_Directory + "OLY_AlignedToGlycan.pdb");
+        outputPdbFile->Write(working_Directory + "/outputs/OLY_AlignedToGlycan.pdb");
 
     }
     return;

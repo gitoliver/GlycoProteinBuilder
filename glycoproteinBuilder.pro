@@ -19,21 +19,24 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        glycoproteinbuilder.cpp \
-    gpb_inputs.cpp
+    glycosylationsite.cpp \
+    overlap.cpp \
+    io.cpp \
+    attachedrotamer.cpp
 
-HEADERS  += glycoproteinbuilder.h \
-    gpb_inputs.h
+HEADERS  += \
+    glycosylationsite.h \
+    overlap.h \
+    io.h \
+    attachedrotamer.h
 
 FORMS    += glycoproteinbuilder.ui
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../gems/gmml/bin/release/ -lgmml
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../gems/gmml/bin/debug/ -lgmml
-else:unix: LIBS += -L$$PWD/../../../gems/gmml/bin/ -lgmml
+
 
 
 LIBS += -L/home/oliver/Programs/gems/gmml/bin/ -lgmml
 
-INCLUDEPATH += /home/oliver/Programs/gems-Nov2016/gmml/includes/Eigen_Algebra_Templates
+INCLUDEPATH += $$PWD/../../../gems/gmml/includes/
 INCLUDEPATH += $$PWD/../../../gems/gmml/bin
 DEPENDPATH += $$PWD/../../../gems/gmml/bin
