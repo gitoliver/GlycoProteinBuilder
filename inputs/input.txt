@@ -17,7 +17,7 @@ Protein Residue list:
 END
 
 Glycan id list:
-DiSiaCore1_-g
+DiSiaCore1_
 DiSiaCore1_-g
 DiSiaCore1_-g
 DiSiaCore1_-g

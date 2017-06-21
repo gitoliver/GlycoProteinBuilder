@@ -10,7 +10,7 @@
 
 Overlap::Overlap()
 {
-    overlap_=0.0;
+    overlap_ = 0.0;
 }
 
 Overlap::Overlap(Residue *residue1, Residue *residue2, double overlap)

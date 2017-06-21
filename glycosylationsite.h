@@ -19,12 +19,14 @@ public:
     //////////////////////////////////////////////////////////
 
     GlycosylationSite();
-    GlycosylationSite(Residue* residue, AttachedRotamerVector attached_rotamers);
+    GlycosylationSite(std::string glycan_name);
+    GlycosylationSite(std::string glycan_name, Residue* residue, AttachedRotamerVector attached_rotamers);
     ~GlycosylationSite();
     //////////////////////////////////////////////////////////
     //                       ACCESSOR                       //
     //////////////////////////////////////////////////////////
 
+    std::string GetGlycanName();
     Residue* GetResidue();
     AttachedRotamerVector GetAttachedRotamers();
 
@@ -36,8 +38,10 @@ public:
     //                       MUTATOR                        //
     //////////////////////////////////////////////////////////
 
+    void SetGlycanName(std::string glycan_name);
     void SetResidue(Residue* residue);
     void SetAttachedRotamers(AttachedRotamerVector attached_rotamers);
+    void AddRotamer(AttachedRotamer *rotamer);
 
     //////////////////////////////////////////////////////////
     //                       DISPLAY FUNCTION               //
@@ -50,6 +54,7 @@ private:
     //                       ATTRIBUTES                     //
     //////////////////////////////////////////////////////////
 
+    std::string glycan_name_;
     Residue* residue_;                                  /*!< A pointer back to the residue for this glycosite >*/
     AttachedRotamerVector attached_rotamers_;
 

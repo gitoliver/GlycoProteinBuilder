@@ -20,7 +20,7 @@ public:
     //////////////////////////////////////////////////////////
 
     AttachedRotamer();
-    AttachedRotamer(Assembly *glycan_rotamer);
+    AttachedRotamer(Assembly glycan_rotamer);
     ~AttachedRotamer(); // destructor
 
     //////////////////////////////////////////////////////////
@@ -28,7 +28,8 @@ public:
     //////////////////////////////////////////////////////////
 
     Assembly *GetAttachedRotamer();
-    std::string GetGlycanPDBPath();
+    Assembly* GetSuperimpositionAtoms();
+    Assembly* GetAlternateSidechain();
     double GetTotalOverlap(); // Recalculate and return double each time, do not store.
 
     //////////////////////////////////////////////////////////
@@ -38,6 +39,8 @@ public:
     AttachedRotamer(const AttachedRotamer &L);             // copy constructor
     AttachedRotamer & operator=(const AttachedRotamer &L); // assignment
 
+    void Prepare_Glycans_For_Superimposition_To_Particular_Residue(std::string amino_acid_name);
+    void Superimpose_Glycan_To_Glycosite(Residue *glycosite_residue);
     //////////////////////////////////////////////////////////
     //                       MUTATOR                        //
     //////////////////////////////////////////////////////////
@@ -59,9 +62,9 @@ private:
     //                       ATTRIBUTES                     //
     //////////////////////////////////////////////////////////
 
-    Assembly* glycan_rotamer_;                                        /*!< A pointer to the assembly for this shape >*/
-    // double total_overlap_;                                            /*!< Total vdW overlap with other molecules >*
-    std::string glycan_pdb_path_;
+    Assembly glycan_rotamer_;                                            /*!< An assembly for this shape >*/
+    Assembly superimposition_atoms_;
+    Assembly alternate_sidechain_;
     OverlapVector overlaps_;
 };
 
