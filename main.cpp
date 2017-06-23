@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cstdlib> // for exit()
 
-#include <QApplication>
+//#include <QApplication>
 // Includes for directory reading
 #include <string>
 #include <dirent.h>
@@ -13,7 +13,7 @@
 #include <fstream>      // std::ifstream
 
 #include "glycosylationsite.h"
-#include <io.h>
+#include "io.h"
 
 constexpr auto PI = 3.14159265358979323846;
 
@@ -57,43 +57,8 @@ void Superimpose_Glycans_To_Glycosites(AssemblyVector *addedGlycans, GlycoSiteVe
 
 int main(int argc, char *argv[])
 {
-   // QApplication abss(argc, argv);
-   // glycoproteinBuilder w;
-   // w.show();
-
-
-    /*
-    if (fileExists("testing.txt"))
-        std::cout << "Existing" << std::endl;
-    else
-        std::cout << "Not Existing" << std::endl;
-    */
-
-
-   std::string working_Directory = Find_Program_Working_Directory();
-   std::string installation_Directory = Find_Program_Installation_Directory();
-   //std::cout << working_Directory << std::endl;
-   // std::string working_Directory = "/home/oliver/Programs/Cplusplus/GlycoproteinBuilder/glycoproteinBuilder/";
-
-    /*
-    char* csGEMSHOME;
-    std::string sGEMSHOME;
-    csGEMSHOME = getenv ("GEMSHOME");
-    if (csGEMSHOME!=NULL)
-    {
-        printf ("GEMSHOME: %s",csGEMSHOME);
-        sGEMSHOME=csGEMSHOME; //convert to std::string now, as is nicer to work with.
-    }
-    else
-    {
-        std::cout << "Error(" << errno << ") GEMSHOME not set." << std::endl;
-        //return errno;
-        csGEMSHOME="/home/oliver/Programs/gems"; // Do this for now as can't import Sys variables into Qt.
-        sGEMSHOME=csGEMSHOME; //convert to std::string now, as is nicer to work with.
-    }
-    */
-    // std::string installtionDirectory;
-
+    std::string working_Directory = Find_Program_Working_Directory();
+    std::string installation_Directory = Find_Program_Installation_Directory();
 
     //************************************************//
     // Reading input file                             //
@@ -140,9 +105,7 @@ int main(int argc, char *argv[])
                 getline(inf, buffer);          
             }
         }
-        //std::cout << strInput << std::endl;
     }
-    //std::cout << proteinPDB << ", " << glycanDirectory << std::endl;
 
     if (fileExists(parameterDirectory + "/amino12.lib"))
         std::cout << "Using user provided parameters" << std::endl;
@@ -158,8 +121,6 @@ int main(int argc, char *argv[])
     amino_libs.push_back(parameterDirectory + "/amino12.lib");
     amino_libs.push_back(parameterDirectory + "/aminoct12.lib");
     amino_libs.push_back(parameterDirectory + "/aminont12.lib");
-
-    std::cout << "Check out: " << amino_libs.at(0) << std::endl;
 
     glycam_libs.push_back(parameterDirectory + "/GLYCAM_amino_06j_12SB.lib");
     glycam_libs.push_back(parameterDirectory + "/GLYCAM_aminoct_06j_12SB.lib");
@@ -183,8 +144,6 @@ int main(int argc, char *argv[])
     protein.BuildAssemblyFromPdbFile( (working_Directory + "/inputs/" + proteinPDB), amino_libs, glycam_libs, other_libs, prep, parameter_file_path );
     protein.BuildStructureByDistance();
 
-   // GlycoSiteVector glycoSites;
-    //ResidueVector glycosites;
     ResidueVector protein_residues = protein.GetResidues();
     Find_and_Prepare_Protein_Residues_for_Glycosylation(&glycoSites, &protein_residues, &glycositeList);
 
@@ -217,7 +176,7 @@ int main(int argc, char *argv[])
             GlycosylationSite* glycosite = *it;
             if (glycosite->GetGlycanName().compare(0, glycosite->GetGlycanName().size(), dirp->d_name, 0, glycosite->GetGlycanName().size()) == 0 )
             {
-                std::cout << "BOAM " << (*it) << " " << dirp->d_name << std::endl;
+              //  std::cout << "BOOM " << (*it) << " " << dirp->d_name << std::endl;
                 temp_assembly.BuildAssemblyFromPdbFile(filepath, amino_libs, glycam_libs, other_libs, prep, parameter_file_path);
                 temp_assembly.BuildStructureByDistance();
                 glycosite->AddRotamer(new AttachedRotamer(temp_assembly)); // a deep copy of the assembly occurs?
@@ -225,77 +184,13 @@ int main(int argc, char *argv[])
         }
     }
     closedir( dp );
-    /*while ((dirp = readdir ( dp )))
-    {
-        filepath = directory + "/" + dirp->d_name;
-        // If the file is a directory (or is in some way invalid) we'll skip it
-        if (stat( filepath.c_str(), &filestat )) continue; // Is it a valid file?
-        if (S_ISDIR( filestat.st_mode ))         continue; // Is it a directory?
-
-        for (std::vector<std::string>::iterator it = listOfGlycans.begin(); it != listOfGlycans.end(); ++it)
-        {
-            if ( it->compare(0, it->size(), dirp->d_name, 0, it->size()) == 0 )
-            {
-                std::cout << "BOOM " << (*it) << " " << dirp->d_name << std::endl;
-
-                // assembly.BuildAssemblyFromPdbFile(filepath, amino_libs, glycam_libs, other_libs, prep, parameter_file_path);
-                // assembly.BuildStructureByDistance();
-            }
-        }
-
-       // Testing: endeavor to read a single number from the file and display it
-       // std::ifstream fin;
-       // fin.open( filepath.c_str() );
-       // int num;
-       // if (fin >> num)
-       //     std::cout << filepath << ": " << num << std::endl;
-       // fin.close();
-    }
-    closedir( dp );
-    */
-
-    //************************************************//
-    // Building the necessary amino acid torsions     //
-    //************************************************//
-
-    /*
-    Assembly glycan;
-    //pdb_file_path = working_Directory + listOfGlycans.at(0);
-    pdb_file_path = working_Directory + "/inputs/glycans/DiSiaCore1_-g-gt-t.pdb";
-    glycan.BuildAssemblyFromPdbFile(pdb_file_path, amino_libs, glycam_libs, other_libs, prep, parameter_file_path);
-    glycan.BuildStructureByDistance();
-
-    prepare_Glycans_For_Superimposition_To_Particular_Residue(working_Directory, "THR", &glycan);
-    prepare_Glycans_For_Superimposition_To_Particular_Residue(working_Directory, "TYR", &glycan);
-    prepare_Glycans_For_Superimposition_To_Particular_Residue(working_Directory, "ASN", &glycan);
-    */
 
     //************************************************//
     // Superimposition                                //
     //************************************************//
     std::cout << "Superimposition" << std::endl;
 
-   // Assembly protein;
-    //protein.BuildAssemblyFromPdbFile( (working_Directory + "/inputs/" + proteinPDB), amino_libs, glycam_libs, other_libs, prep, parameter_file_path );
-   // protein.BuildStructureByDistance();
-
-
-/*
-    // Load in a glycan for each glycosite. For now it is the same glycan for each site.
-    Assembly *addedGlycans = new Assembly[glycoSites.size()];
-    AssemblyVector addedGlycansVector;
-
-
-    unsigned int i = 0;
-    for (i = 0; i != glycoSites.size(); ++i)
-    {
-        pdb_file_path = working_Directory + "/inputs/glycans/DiSiaCore1_-g-gt-t.pdb";
-        addedGlycans[i].BuildAssemblyFromPdbFile(pdb_file_path, amino_libs, glycam_libs, other_libs, prep, parameter_file_path);
-        addedGlycans[i].BuildStructureByDistance();
-        addedGlycansVector.push_back(&addedGlycans[i]);
-    }
-*/
-    int j = 0;
+    int j = 0, i = 0;
     Assembly glycoProtein;
     glycoProtein.AddAssembly(&protein); //Could have combined everything into protein, but added assemblies get written first into PDB file.
 
@@ -307,44 +202,28 @@ int main(int argc, char *argv[])
         for (AttachedRotamerVector::iterator itt = rotamers.begin(); itt != rotamers.end(); ++itt)
         {
             AttachedRotamer *rotamer = *itt;
-            std::cout << "Calling prepare glycans with " << glycosite->GetResidue()->GetName() << std::endl;
+          //  std::cout << "Calling prepare glycans with " << glycosite->GetResidue()->GetName() << std::endl;
             rotamer->Prepare_Glycans_For_Superimposition_To_Particular_Residue(glycosite->GetResidue()->GetName());
-            //rotamer->GetAttachedRotamer()->Print();
-           // std::cout << "superimposition atoms are: " << std::endl;
-            //rotamer->GetSuperimpositionAtoms()->Print();
             rotamer->Superimpose_Glycan_To_Glycosite(glycosite->GetResidue());
             //Write out a pdb file:
             std::stringstream ss;
-            ss << working_Directory + "/outputs/addedGlycan_" << j << ".pdb";
+            ss << working_Directory + "/outputs/addedGlycan_" << i << "_" << j << ".pdb";
             PdbFileSpace::PdbFile *outputPdbFileGlycoProtein = rotamer->GetAttachedRotamer()->BuildPdbFileStructureFromAssembly(-1,0);
             outputPdbFileGlycoProtein->Write(ss.str());
 
             // This is just temporary, I need to decide which rotamer to add
-            glycoProtein.AddAssembly(rotamer->GetAttachedRotamer());
+            if (j == 0)
+                glycoProtein.AddAssembly(rotamer->GetAttachedRotamer());
             ++j;
         }
+        j = 0; // reset rotamer counter. Used only for output file names.
+        ++i; // increment residue counter. Used only for output file names.
+
     }
 
     PdbFileSpace::PdbFile *outputPdbFileGlycoProteinAll = glycoProtein.BuildPdbFileStructureFromAssembly(-1,0);
     outputPdbFileGlycoProteinAll->Write(working_Directory + "/outputs/GlycoProtein.pdb");
 
-    /*for(AssemblyVector::iterator it = addedGlycansVector.begin(); it != addedGlycansVector.end(); ++it)
-    {
-        Assembly *addedglycan = (*it);
-        std::stringstream ss;
-        ss << working_Directory + "/outputs/addedGlycan" << j << ".pdb";
-        PdbFileSpace::PdbFile *outputPdbFileGlycoProtein = addedglycan->BuildPdbFileStructureFromAssembly(-1,0);
-        outputPdbFileGlycoProtein->Write(ss.str());
-        glycoProtein.AddAssembly(addedglycan);
-        ++j;
-    }*/
-
-
-    /*
-    PdbFileSpace::PdbFile *outputPdbFileGlycoProteinAll = glycoProtein.BuildPdbFileStructureFromAssembly(-1,0);
-    outputPdbFileGlycoProteinAll->Write(working_Directory + "/outputs/GlycoProtein.pdb");
-    delete[] addedGlycans;
-    */
     //************************************************//
     // COM translating                                //
     //************************************************//
@@ -474,7 +353,6 @@ int main(int argc, char *argv[])
 
 
     std::cout << "Program got to end ok" << std::endl;
-   // return abss.exec();
     return 0;
 }
 

@@ -4,8 +4,6 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
-
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 greaterThan(QT_MAJOR_VERSION, 4){    
@@ -14,9 +12,7 @@ CONFIG += c++11
 QMAKE_CXXFLAGS += -std=c++0x
 }
 
-TARGET = glycoproteinBuilder
-TEMPLATE = app
-
+TARGET = gp_builder
 
 SOURCES += main.cpp\
     glycosylationsite.cpp \
@@ -30,13 +26,8 @@ HEADERS  += \
     io.h \
     attachedrotamer.h
 
-FORMS    += glycoproteinbuilder.ui
+LIBS += -L$(GEMSHOME)/gmml/bin/ -lgmml
 
-
-
-
-LIBS += -L/home/oliver/Programs/gems/gmml/bin/ -lgmml
-
-INCLUDEPATH += $$PWD/../../../gems/gmml/includes/
-INCLUDEPATH += $$PWD/../../../gems/gmml/bin
-DEPENDPATH += $$PWD/../../../gems/gmml/bin
+INCLUDEPATH += $(GEMSHOME)/gmml/includes/
+INCLUDEPATH += $(GEMSHOME)/gmml/bin
+DEPENDPATH += $(GEMSHOME)/gmml/bin

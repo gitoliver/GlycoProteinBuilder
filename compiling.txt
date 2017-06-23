@@ -1,0 +1,3 @@
+export GEMSHOME=/home/oliver/Programs/gems
+qmake
+make
