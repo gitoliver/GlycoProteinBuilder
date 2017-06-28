@@ -4,8 +4,11 @@ Uses GEMS/GMML to add and adapt 3D structures of N-glycans and O-glycans onto gl
 ## Prerequisites
 
 You'll need GEMS and GMML. See here for installation instructions: http://glycam.org/docs/gems/download-and-install/.
+
 2017-06-28 you'll need the gmml-dev branch:
+
 git clone -b gmml-dev https://github.com/GLYCAM-Web/gmml.git gmml
+
 If it's a few months later, then ignore this.
 
 ### Installation of GlycoProteinBuilder
