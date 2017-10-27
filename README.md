@@ -2,7 +2,7 @@
 Uses GEMS/GMML to add and adapt 3D structures of N-glycans and O-glycans onto glycoproteins. It can do this for Asn, Ser, Thr and Tyr.
 
 ##Schematic
-[schematic](schematic/schematic.png)
+![schematic](schematic/schematic.png)
 
 ## Notes
 2017-10-27 
