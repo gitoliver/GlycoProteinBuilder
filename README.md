@@ -1,15 +1,18 @@
 # GlycoProteinBuilder
 Uses GEMS/GMML to add and adapt 3D structures of N-glycans and O-glycans onto glycoproteins. It can do this for Asn, Ser, Thr and Tyr.
 
+##Schematic
+[schematic](schematic/schematic.png)
+
+## Notes
+2017-10-27 
+Project is under development, contact olivercgrant@gmail.com with queries. 
+This code will replace the glycoprotein builder currently available on glycam.org/gp.
+Has been tested on linux, but should install on both Mac and Windows with appropriate C++ complilers.
+
 ## Prerequisites
 
 You'll need GEMS and GMML. See here for installation instructions: http://glycam.org/docs/gems/download-and-install/.
-
-2017-06-28 you'll need the gmml-dev branch:
-
-git clone -b gmml-dev https://github.com/GLYCAM-Web/gmml.git gmml
-
-If it's a few months later, then ignore this.
 
 ### Installation of GlycoProteinBuilder
 export GEMSHOME=<Your Path To Gems > # eg: export GEMSHOME=/home/oliver/Programs/gems
@@ -31,7 +34,7 @@ You must provide:
 
     input.txt, which contains:
 
-        parameter files (optional)
+        parameter files (optional, defaults available)
 
         protein file name
 

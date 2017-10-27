@@ -289,7 +289,7 @@ int main(int argc, char *argv[])
   //  outputPdbFileA->Write(working_Directory + "/Superimposed-moved.pdb");
 
 
-  //  std::cout << "Overlap is " << CalculateAtomicOverlaps(&assemblyA, &assemblyB) << std::endl;
+    std::cout << "Overlap is " << CalculateAtomicOverlaps(&assemblyA, &assemblyB) << std::endl;
 
     //assemblyA.AddAssembly(&assemblyB);
    // outputPdbFile->Write(working_Directory + "/test-MergeAssemblies.pdb");
