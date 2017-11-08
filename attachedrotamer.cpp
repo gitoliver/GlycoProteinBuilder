@@ -58,8 +58,8 @@ void AttachedRotamer::Prepare_Glycans_For_Superimposition_To_Particular_Residue(
 {
     //Dear future self, the order that you add the atoms to the residue matters for superimposition ie N, CA, CB , not CB, CA, N.
 
-    Residue* reducing_Residue = glycan_rotamer_.GetAllResiduesOfAssembly().at(1);
-    std::cout << "Reducing residue is " << reducing_Residue->GetName() << std::endl;
+    Residue* reducing_Residue = glycan_rotamer_.GetAllResiduesOfAssembly().at(1); // I assume I assumed something stupid here.
+    //std::cout << "Reducing residue is " << reducing_Residue->GetName() << std::endl;
     AtomVector reducing_Atoms = reducing_Residue->GetAtoms();
 
     Atom* atomC5;
@@ -84,17 +84,17 @@ void AttachedRotamer::Prepare_Glycans_For_Superimposition_To_Particular_Residue(
     for(AtomVector::iterator it = aglycon_Atoms.begin(); it != aglycon_Atoms.end(); it++)
     {
        Atom* atom = *it;
-       std::cout << "Removing " << atom->GetName() << std::endl;
+//       std::cout << "Removing " << atom->GetName() << std::endl;
        aglycon->RemoveAtom(atom);
     }
 
-    Assembly* assembly = new Assembly();
+   // Assembly* assembly = new Assembly();
     Residue* super_residue = new Residue();
     Residue* alt_residue = new Residue();
     super_residue->SetAssembly(&superimposition_atoms_);
     superimposition_atoms_.AddResidue(super_residue);
 
-    PdbFileSpace::PdbFile *outputPdbFile = new PdbFileSpace::PdbFile();
+   // PdbFileSpace::PdbFile *outputPdbFile = new PdbFileSpace::PdbFile();
 
     if (amino_acid_name.compare("ASN")==0)
     {
@@ -210,6 +210,7 @@ void AttachedRotamer::Prepare_Glycans_For_Superimposition_To_Particular_Residue(
 void AttachedRotamer::Superimpose_Glycan_To_Glycosite(Residue *glycosite_residue)
 {
     // Get the 3 target atoms from protein residue.
+    //std::cout << "Superimposing to " << glycosite_residue->GetName() << std::endl;
     AtomVector target_atoms = glycosite_residue->GetAtoms();
     AtomVector super_atoms = superimposition_atoms_.GetAllAtomsOfAssembly();
     Assembly* assemblyTarget = new Assembly();
@@ -229,12 +230,14 @@ void AttachedRotamer::Superimpose_Glycan_To_Glycosite(Residue *glycosite_residue
     assemblyTarget->AddResidue(residueTarget);
     assemblyTarget->BuildStructureByDistance();
 
-   // std::cout << "Here now" << std::endl;
-   // superimposition_atoms_.Print();
+    //std::cout << "Here now" << std::endl;
+   //superimposition_atoms_.Print();
    // std::cout << "How now" << std::endl;
-  //  glycan_rotamer_.Print();
+   // glycan_rotamer_.Print();
 
     gmml::Superimpose(&superimposition_atoms_, assemblyTarget, &glycan_rotamer_);
+   // std::cout << "Brown cow" << std::endl;
+
 
     //AtomVector newSideChainAtoms = alternate_sidechain_.GetAllAtomsOfAssembly();
     //glycosite_residue->ReplaceAtomCoordinates(&newSideChainAtoms);
