@@ -14,6 +14,7 @@
 
 #include "glycosylationsite.h"
 #include "io.h"
+#include "resolve_overlaps.h"
 
 constexpr auto PI = 3.14159265358979323846;
 
@@ -98,10 +99,10 @@ int main()
     // Load Protein PDB file                          //
     //************************************************//
 
-    Assembly protein ((working_Directory + "/inputs/" + proteinPDB), gmml::InputFileType::PDB);
-    protein.BuildStructureByDistance();
+    Assembly glycoprotein ((working_Directory + "/inputs/" + proteinPDB), gmml::InputFileType::PDB);
+    glycoprotein.BuildStructureByDistance();
 
-    ResidueVector protein_residues = protein.GetResidues();
+    ResidueVector protein_residues = glycoprotein.GetResidues();
     Find_and_Prepare_Protein_Residues_for_Glycosylation(&glycoSites, &protein_residues, &glycositeList);
 
     //************************************************//
@@ -143,11 +144,12 @@ int main()
     //************************************************//
     // Superimposition                                //
     //************************************************//
-   // std::cout << "Superimposition" << std::endl;
+    std::cout << "Superimposition" << std::endl;
 
     int j = 0, i = 0;
-    Assembly glycoProtein;
-    glycoProtein.AddAssembly(&protein); //Added assemblies get written into top of output PDB file.
+
+    //Assembly glycoprotein = &protein; // I think this copies protein into glycoprotein, doing it to get an appropriate name.
+    //glycoprotein.AddAssembly(&protein); //Added assemblies get written into top of output PDB file.
 
     for (GlycoSiteVector::iterator it = glycoSites.begin(); it != glycoSites.end(); ++it)
     {
@@ -169,7 +171,8 @@ int main()
             // This is just temporary, I need to decide which rotamer to add
             if (j == 0)
             {
-                glycoProtein.AddAssembly(rotamer->GetAttachedRotamer());
+                glycoprotein.MergeAssembly(rotamer->GetAttachedRotamer());
+                //glycoprotein.AddAssembly(rotamer->GetAttachedRotamer());
             }
             ++j;
         }
@@ -177,8 +180,16 @@ int main()
         ++i; // increment residue counter. Used only for output file names.
     }
 
-    PdbFileSpace::PdbFile *outputPdbFileGlycoProteinAll = glycoProtein.BuildPdbFileStructureFromAssembly(-1,0);
+    PdbFileSpace::PdbFile *outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
     outputPdbFileGlycoProteinAll->Write(working_Directory + "/outputs/GlycoProtein.pdb");
+
+    //************************************************//
+    // Overlaps                                       //
+    //************************************************//
+
+
+    resolve_overlaps::monte_carlo(glycoprotein, glycoSites);
+
 
     //************************************************//
     // COM translating                                //

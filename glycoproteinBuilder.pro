@@ -18,13 +18,15 @@ SOURCES += main.cpp\
     glycosylationsite.cpp \
     overlap.cpp \
     io.cpp \
-    attachedrotamer.cpp
+    attachedrotamer.cpp \
+    resolve_overlaps.cpp
 
 HEADERS  += \
     glycosylationsite.h \
     overlap.h \
     io.h \
-    attachedrotamer.h
+    attachedrotamer.h \
+    resolve_overlaps.h
 
 LIBS += -L$(GEMSHOME)/gmml/bin/ -lgmml
 
