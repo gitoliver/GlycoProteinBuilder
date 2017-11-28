@@ -12,14 +12,12 @@ Has been tested on linux, but should install on both Mac and Windows with approp
 
 ### Prerequisites
 
-You'll need GEMS and GMML. See here for installation instructions: http://glycam.org/docs/gems/download-and-install/.
+You'll need GMML. See here for installation instructions: http://glycam.org/docs/gems/download-and-install/.
 
 ### Installation of GlycoProteinBuilder
 export GEMSHOME=<Your Path To Gems > # eg: export GEMSHOME=/home/oliver/Programs/gems
 
-qmake
-
-make
+g++ -std=c++0x -I$GEMSHOME/gmml/includes/* -L$GEMSHOME/gmml//bin/ *.cpp -lgmml -o gp_builder
 
 ### Setup
 Edit or create an input.txt file and place in a folder called inputs. See inputs/input.txt for an example.

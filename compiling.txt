@@ -1,3 +1,2 @@
 export GEMSHOME=/home/oliver/Programs/gems
-qmake
-make
+g++ -std=c++0x -I$GEMSHOME/gmml/includes/* -L$GEMSHOME/gmml//bin/ *.cpp -lgmml -o gp_builder
