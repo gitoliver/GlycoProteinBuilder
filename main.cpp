@@ -25,7 +25,7 @@ typedef std::vector<Residue*> ResidueVector;
 typedef std::vector<Assembly*> AssemblyVector;
 typedef GeometryTopology::Coordinate Vector;
 typedef std::vector<GlycosylationSite*> GlycoSiteVector;
-typedef std::vector<AttachedRotamer*> AttachedRotamerVector;
+//typedef std::vector<AttachedGlycan*> AttachedGlycanVector;
 
 //void FindConnectedAtoms(Atom *atom, Assembly::AtomVector &visitedAtoms);
 
@@ -133,9 +133,11 @@ int main()
             GlycosylationSite* glycosite = *it;
             if (glycosite->GetGlycanName().compare(0, glycosite->GetGlycanName().size(), dirp->d_name, 0, glycosite->GetGlycanName().size()) == 0 )
             {
-                Assembly temp_assembly(filepath, gmml::InputFileType::PDB);
-                temp_assembly.BuildStructureByDistance();
-                glycosite->AddRotamer(new AttachedRotamer(temp_assembly));
+                Assembly input_glycan(filepath, gmml::InputFileType::PDB);
+                input_glycan.BuildStructureByDistance();
+               // glycosite->SetAttachedGlycan(input_glycan);
+                //glycosite->AddGlycan(new AttachedGlycan(input_glycan));
+                glycosite->AttachGlycan(input_glycan, &glycoprotein);
             }
         }
     }
@@ -155,28 +157,28 @@ int main()
     {
         GlycosylationSite* glycosite = *it;
         //std::cout << "Adding " << glycosite->GetGlycanName() << " to " << glycosite->GetResidue()->GetName() << std::endl;
-        AttachedRotamerVector rotamers = glycosite->GetAttachedRotamers();
-        for (AttachedRotamerVector::iterator itt = rotamers.begin(); itt != rotamers.end(); ++itt)
-        {
-            AttachedRotamer *rotamer = *itt;
-           // std::cout << "Calling prepare glycans with " << glycosite->GetResidue()->GetName() << std::endl;
-            rotamer->Prepare_Glycans_For_Superimposition_To_Particular_Residue(glycosite->GetResidue()->GetName());
-            rotamer->Superimpose_Glycan_To_Glycosite(glycosite->GetResidue());
+       // AttachedGlycanVector glycans = glycosite->GetAttachedGlycan();
+     //   for (AttachedGlycanVector::iterator itt = glycans.begin(); itt != glycans.end(); ++itt)
+     //   {
+            Assembly *attached_glycan = glycosite->GetAttachedGlycan();
+            //std::cout << "Calling prepare glycans with " << glycosite->GetResidue()->GetName() << std::endl;
+           // attached_glycan->Prepare_Glycans_For_Superimposition_To_Particular_Residue(glycosite->GetResidue()->GetName());
+           // attached_glycan->Superimpose_Glycan_To_Glycosite(glycosite->GetResidue());
             //Write out a pdb file:
-           // std::stringstream ss;
+            //std::stringstream ss;
             //ss << working_Directory + "/outputs/addedGlycan_" << i << "_" << j << ".pdb";
-            //PdbFileSpace::PdbFile *outputPdbFileGlycoProtein = rotamer->GetAttachedRotamer()->BuildPdbFileStructureFromAssembly(-1,0);
+            //PdbFileSpace::PdbFile *outputPdbFileGlycoProtein = glycan->GetAttachedGlycan()->BuildPdbFileStructureFromAssembly(-1,0);
             //outputPdbFileGlycoProtein->Write(ss.str());
 
-            // This is just temporary, I need to decide which rotamer to add
+            // This is just temporary, I need to decide which glycan to add
             if (j == 0)
             {
-                glycoprotein.MergeAssembly(rotamer->GetAttachedRotamer());
-                //glycoprotein.AddAssembly(rotamer->GetAttachedRotamer());
+                //glycoprotein.MergeAssembly(attached_glycan->GetGlycan());
             }
             ++j;
-        }
-        j = 0; // reset rotamer counter. Used only for output file names.
+            glycoprotein.MergeAssembly(attached_glycan);
+     //   }
+        j = 0; // reset glycan counter. Used only for output file names.
         ++i; // increment residue counter. Used only for output file names.
     }
 

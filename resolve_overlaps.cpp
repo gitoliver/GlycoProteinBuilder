@@ -50,8 +50,8 @@ void resolve_overlaps::monte_carlo(Assembly glycoprotein, GlycoSiteVector glycos
   for(GlycoSiteVector::iterator it1 = glycosites.begin(); it1 != glycosites.end(); ++it1)
   {
       GlycosylationSite *glycosite = *it1; // I always do this so I can autocomplete GlycosylationSite functions. There are better ways now with auto, but this is C++98 compliant.
-      Assembly *glycan = glycosite->GetAttachedRotamers().at(0)->GetAttachedRotamer(); // In future there will be only one rotamer per site, this looks silly as it is now.
-      //Assembly *glycan = glycosite->GetGlycan(); // This is what it will be.
+      //Assembly *glycan = glycosite->GetAttachedGlycan()->GetGlycan(); // In future there will be only one rotamer per site, this looks silly as it is now.
+      Assembly *glycan = glycosite->GetAttachedGlycan(); // This is what it will be.
       Residue *linkage_residue = glycosite->GetResidue();
       AtomVector atoms = linkage_residue->GetAtoms(); // Fingers crossed these will be pointers to atoms in glycoprotein.
       Atom *atom1, *atom2, *atom3, *atom4, *atom5;

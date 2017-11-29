@@ -2,8 +2,8 @@
 #define GLYCOSYLATIONSITE_H
 
 //#include <iostream>
-//#include "/home/oliver/Programs/gems/gmml/includes/gmml.hpp"
-#include "attachedrotamer.h"
+#include "/home/oliver/Programs/gems/gmml/includes/gmml.hpp"
+//#include "attachedglycan.h"
 
 class GlycosylationSite
 {
@@ -12,15 +12,13 @@ public:
     //                    TYPE DEFINITION                   //
     //////////////////////////////////////////////////////////
 
-    typedef std::vector<AttachedRotamer*> AttachedRotamerVector;
-
     //////////////////////////////////////////////////////////
     //                       CONSTRUCTOR                    //
     //////////////////////////////////////////////////////////
 
     GlycosylationSite();
     GlycosylationSite(std::string glycan_name);
-    GlycosylationSite(std::string glycan_name, Residue* residue, AttachedRotamerVector attached_rotamers);
+    GlycosylationSite(std::string glycan_name, Residue* residue, Assembly glycan);
     ~GlycosylationSite();
     //////////////////////////////////////////////////////////
     //                       ACCESSOR                       //
@@ -28,11 +26,14 @@ public:
 
     std::string GetGlycanName();
     Residue* GetResidue();
-    AttachedRotamerVector GetAttachedRotamers();
+    Assembly* GetAttachedGlycan();
 
     //////////////////////////////////////////////////////////
     //                       FUNCTIONS                      //
     //////////////////////////////////////////////////////////
+    void AttachGlycan(Assembly glycan, Assembly *glycoprotein);
+    void Prepare_Glycans_For_Superimposition_To_Particular_Residue(std::string amino_acid_name);
+    void Superimpose_Glycan_To_Glycosite(Residue *glycosite_residue);
 
     //////////////////////////////////////////////////////////
     //                       MUTATOR                        //
@@ -40,8 +41,7 @@ public:
 
     void SetGlycanName(std::string glycan_name);
     void SetResidue(Residue* residue);
-    void SetAttachedRotamers(AttachedRotamerVector attached_rotamers);
-    void AddRotamer(AttachedRotamer *rotamer);
+    void SetGlycan(Assembly glycan);
 
     //////////////////////////////////////////////////////////
     //                       DISPLAY FUNCTION               //
@@ -50,13 +50,22 @@ public:
     //void Print(std::ostream& out = std::cout);
 
 private:
+
+    //////////////////////////////////////////////////////////
+    //                       FUNCTIONS                      //
+    //////////////////////////////////////////////////////////
+
     //////////////////////////////////////////////////////////
     //                       ATTRIBUTES                     //
     //////////////////////////////////////////////////////////
 
     std::string glycan_name_;
     Residue* residue_;                                  /*!< A pointer back to the residue for this glycosite >*/
-    AttachedRotamerVector attached_rotamers_;
+    Assembly glycan_;
+
+    // Get rid of this
+    Assembly superimposition_atoms_;             /*!< The 3 atoms used for superimposition of glycan to sidechain CHANGE ME TO ATOMVECTOR USED ONLY WITHIN FUNCTION>*/
+    Assembly alternate_sidechain_;
 
 };
 
