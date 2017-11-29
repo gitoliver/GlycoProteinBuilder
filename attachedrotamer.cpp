@@ -77,7 +77,6 @@ void AttachedRotamer::Prepare_Glycans_For_Superimposition_To_Particular_Residue(
        if(atom->GetName().compare("C1")==0)
            atomC1 = atom;  
     }
-
     // Delete aglycon atoms from glycan.
     Residue * aglycon = glycan_rotamer_.GetAllResiduesOfAssembly().at(0);
     AtomVector aglycon_Atoms = aglycon->GetAtoms();

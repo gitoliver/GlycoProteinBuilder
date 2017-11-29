@@ -54,7 +54,7 @@ void resolve_overlaps::monte_carlo(Assembly glycoprotein, GlycoSiteVector glycos
       //Assembly *glycan = glycosite->GetGlycan(); // This is what it will be.
       Residue *linkage_residue = glycosite->GetResidue();
       AtomVector atoms = linkage_residue->GetAtoms(); // Fingers crossed these will be pointers to atoms in glycoprotein.
-      Atom *atom1, *atom2, *atom3, *atom4;
+      Atom *atom1, *atom2, *atom3, *atom4, *atom5;
       for(AtomVector::iterator atom_iter = atoms.begin(); atom_iter != atoms.end(); ++atom_iter)
       {
           if ( (*atom_iter)->GetName().compare("N")==0 )
@@ -73,13 +73,21 @@ void resolve_overlaps::monte_carlo(Assembly glycoprotein, GlycoSiteVector glycos
           {
               atom4 = *atom_iter;
           }
+          if ( (*atom_iter)->GetName().compare("ND2")==0 )
+          {
+              atom5 = *atom_iter; // So can do chi2 at same time.
+          }
       }
       double random_dihedral = (rand() % 360) + 1 - 180;
       std::cout << "Trying dihedral: " << random_dihedral << std::endl;
-      glycoprotein.SetDihedral(atom1, atom2, atom3, atom4, random_dihedral);
+      glycoprotein.SetDihedral(atom1, atom2, atom3, atom4, random_dihedral); // CHI1
+      random_dihedral = (rand() % 360) + 1 - 180;
+      glycoprotein.SetDihedral(atom2, atom3, atom4, atom5, random_dihedral); // CHI2
 
       std::cout << "SCORE: " << gmml::CalculateAtomicOverlaps(protein, glycan->GetAllAtomsOfAssembly()) << std::endl;
   }
+  PdbFileSpace::PdbFile *outputPdbFile1 = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
+  outputPdbFile1->Write("outputs/Glycoprotein_OlyExample.pdb");
   // END OF OG EXAMPLE. I left your old code below.
 
   // cout << "OVERLAP: " << glycoprotein.CalculateAtomicOverlaps( &glycoprotein ) << endl << endl;

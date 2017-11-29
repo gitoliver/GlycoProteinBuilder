@@ -63,8 +63,8 @@ private:
     //////////////////////////////////////////////////////////
 
     Assembly glycan_rotamer_;                                            /*!< An assembly for this shape >*/
-    Assembly superimposition_atoms_;
-    Assembly alternate_sidechain_;
+    Assembly superimposition_atoms_;                                     /*!< The 3 atoms used for superimposition of glycan to sidechain >*/
+    Assembly alternate_sidechain_;                                       /*!< Not sure. I think I was going to keep the original sidechain position and only alter the alternative >*/
     OverlapVector overlaps_;
 };
 
