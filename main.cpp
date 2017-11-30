@@ -55,7 +55,7 @@ int main()
     //************************************************//
 
     GlycoSiteVector glycoSites;
-    std::string proteinPDB, glycanDirectory, buffer, parameterDirectory;
+    std::string proteinPDB, glycanDirectory, buffer;
     std::vector<std::string> glycositeList, listOfGlycans;
     std::ifstream inf (working_Directory + "/inputs/" + "input.txt");
     if (!inf)
@@ -135,8 +135,6 @@ int main()
             {
                 Assembly input_glycan(filepath, gmml::InputFileType::PDB);
                 input_glycan.BuildStructureByDistance();
-               // glycosite->SetAttachedGlycan(input_glycan);
-                //glycosite->AddGlycan(new AttachedGlycan(input_glycan));
                 glycosite->AttachGlycan(input_glycan, &glycoprotein);
             }
         }
@@ -146,6 +144,7 @@ int main()
     //************************************************//
     // Superimposition                                //
     //************************************************//
+  /*
     std::cout << "Superimposition" << std::endl;
 
     int j = 0, i = 0;
@@ -181,6 +180,7 @@ int main()
         j = 0; // reset glycan counter. Used only for output file names.
         ++i; // increment residue counter. Used only for output file names.
     }
+    */
 
     PdbFileSpace::PdbFile *outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
     outputPdbFileGlycoProteinAll->Write(working_Directory + "/outputs/GlycoProtein.pdb");
