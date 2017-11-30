@@ -95,11 +95,9 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
 
    // Assembly* assembly = new Assembly();
     Residue* super_residue = new Residue();
-    Residue* alt_residue = new Residue();
-    super_residue->SetAssembly(&superimposition_atoms_);
-    superimposition_atoms_.AddResidue(super_residue);
-
-   // PdbFileSpace::PdbFile *outputPdbFile = new PdbFileSpace::PdbFile();
+    //Residue* alt_residue = new Residue();
+    super_residue->SetAssembly(&glycan_);
+    glycan_.AddResidue(super_residue);
 
     if (amino_acid_name.compare("ASN")==0)
     {
@@ -109,15 +107,15 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
         Atom *atomND2 = new Atom(super_residue, "ND2", (gmml::get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 109.3, 180, 1.53)));
         Atom *atomCG = new Atom(super_residue, "CG", (gmml::get_cartesian_point_from_internal_coords(atomO5, atomC1, atomND2, 109.3, 261, 1.325)));
         Atom *atomOD1 = new Atom(super_residue, "OD1", (gmml::get_cartesian_point_from_internal_coords(atomC1, atomND2, atomCG, 126, 0, 1.22)));
-        Atom *atomCB = new Atom(super_residue, "CB", (gmml::get_cartesian_point_from_internal_coords(atomC1, atomND2, atomCG, 114, 177.3, 1.53)));
-        Atom *atomCA = new Atom(super_residue, "CA", (gmml::get_cartesian_point_from_internal_coords(atomND2, atomCG, atomCB, 111, 177.6, 1.53)));
-        Atom *atomN = new Atom(super_residue, "N", (gmml::get_cartesian_point_from_internal_coords(atomCG, atomCB, atomCA, 111, 191.6, 1.453)));
+   //     Atom *atomCB = new Atom(super_residue, "CB", (gmml::get_cartesian_point_from_internal_coords(atomC1, atomND2, atomCG, 114, 177.3, 1.53)));
+   //     Atom *atomCA = new Atom(super_residue, "CA", (gmml::get_cartesian_point_from_internal_coords(atomND2, atomCG, atomCB, 111, 177.6, 1.53)));
+   //     Atom *atomN = new Atom(super_residue, "N", (gmml::get_cartesian_point_from_internal_coords(atomCG, atomCB, atomCA, 111, 191.6, 1.453)));
 
         super_residue->AddAtom(atomCG);
         super_residue->AddAtom(atomOD1);
         super_residue->AddAtom(atomND2);
-        superimposition_atoms_.BuildStructureByDistance();
-
+        superimposition_atoms_ = super_residue->GetAtoms();
+    /*
         alt_residue->SetName("NLN");
         alt_residue->SetId("NLN_?_1_?_?_1");
         alt_residue->SetAssembly(&alternate_sidechain_);
@@ -129,6 +127,7 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
         alt_residue->AddAtom(atomOD1);
         alt_residue->AddAtom(atomND2);
         alternate_sidechain_.BuildStructureByDistance();
+        */
 
        // outputPdbFile = alternate_sidechain_.BuildPdbFileStructureFromAssembly();
        // outputPdbFile->Write("/home/oliver/Programs/Cplusplus/GlycoproteinBuilder/glycoproteinBuilder/outputs/NLN_AlignedToGlycan.pdb");
@@ -141,14 +140,15 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
         Atom *atomOG1 = new Atom(super_residue, "OG", (gmml::get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
         Atom *atomCB = new Atom(super_residue, "CB", (gmml::get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOG1, 109.3, 75, 1.53)));
         Atom *atomCA = new Atom(super_residue, "CA", (gmml::get_cartesian_point_from_internal_coords(atomC1, atomOG1, atomCB, 109.3, 125, 1.53)));
-        Atom *atomN = new Atom(super_residue, "N", (gmml::get_cartesian_point_from_internal_coords(atomOG1, atomCB, atomCA, 109.3, 180, 1.53)));
-        Atom *atomCG2 = new Atom(super_residue, "CG2", (gmml::get_cartesian_point_from_internal_coords(atomC1, atomOG1, atomCB, 109.3, -60, 1.53)));
+       // Atom *atomN = new Atom(super_residue, "N", (gmml::get_cartesian_point_from_internal_coords(atomOG1, atomCB, atomCA, 109.3, 180, 1.53)));
+       // Atom *atomCG2 = new Atom(super_residue, "CG2", (gmml::get_cartesian_point_from_internal_coords(atomC1, atomOG1, atomCB, 109.3, -60, 1.53)));
 
         super_residue->AddAtom(atomCA);
         super_residue->AddAtom(atomCB);
         super_residue->AddAtom(atomOG1);
-        superimposition_atoms_.BuildStructureByDistance();
+        superimposition_atoms_ = super_residue->GetAtoms();
 
+        /*
         alt_residue->SetName("OLS");
         alt_residue->SetId("OLS_?_1_?_?_1");
         alt_residue->SetAssembly(&alternate_sidechain_);
@@ -157,8 +157,9 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
         alt_residue->AddAtom(atomCA);
         alt_residue->AddAtom(atomCB);
         alt_residue->AddAtom(atomOG1);
+        */
 
-        if (amino_acid_name.compare("SER")==0)
+       /* if (amino_acid_name.compare("SER")==0)
         {
             alternate_sidechain_.BuildStructureByDistance();
         }
@@ -170,6 +171,11 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
             atomOG1->SetName("OG1"); // It's OG in Ser.
             alternate_sidechain_.BuildStructureByDistance();
         }
+        */
+        if (amino_acid_name.compare("THR")==0)
+        {
+            atomOG1->SetName("OG1"); // It's OG in Ser.
+        }
     }
 
     else if (amino_acid_name.compare("TYR")==0)
@@ -180,19 +186,19 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
         Atom *atomOH = new Atom(super_residue, "OH", (gmml::get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
         Atom *atomCZ = new Atom(super_residue, "CZ", (gmml::get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOH, 117, 60, 1.35)));
         Atom *atomCE1 = new Atom(super_residue, "CE1", (gmml::get_cartesian_point_from_internal_coords(atomC1, atomOH, atomCZ, 120, 180, 1.37)));
-        Atom *atomCD1 = new Atom(super_residue, "CD1", (gmml::get_cartesian_point_from_internal_coords(atomOH, atomCZ, atomCE1, 120, 180, 1.37)));
+      /*  Atom *atomCD1 = new Atom(super_residue, "CD1", (gmml::get_cartesian_point_from_internal_coords(atomOH, atomCZ, atomCE1, 120, 180, 1.37)));
         Atom *atomCE2 = new Atom(super_residue, "CE2", (gmml::get_cartesian_point_from_internal_coords(atomC1, atomOH, atomCZ, 120, 0, 1.37)));
         Atom *atomCD2 = new Atom(super_residue, "CD2", (gmml::get_cartesian_point_from_internal_coords(atomOH, atomCZ, atomCE2, 120, 180, 1.37)));
         Atom *atomCG = new Atom(super_residue, "CG", (gmml::get_cartesian_point_from_internal_coords(atomCZ, atomCE2, atomCD2, 120, 0, 1.37)));
         Atom *atomCB = new Atom(super_residue, "CB", (gmml::get_cartesian_point_from_internal_coords(atomCE2, atomCD2, atomCG, 122, 180, 1.51)));
         Atom *atomCA = new Atom(super_residue, "CA", (gmml::get_cartesian_point_from_internal_coords(atomCD2, atomCG, atomCB, 111, -107, 1.55)));
         Atom *atomN = new Atom(super_residue, "N", (gmml::get_cartesian_point_from_internal_coords(atomCG, atomCB, atomCA, 114, -170, 1.44)));
-
+*/
         super_residue->AddAtom(atomCE1);
         super_residue->AddAtom(atomCZ);
         super_residue->AddAtom(atomOH);
-        superimposition_atoms_.BuildStructureByDistance();
-
+        superimposition_atoms_ = super_residue->GetAtoms();
+/*
         alt_residue->SetName("OLY");
         alt_residue->SetId("OLY_?_1_?_?_1");
         alt_residue->SetAssembly(&alternate_sidechain_);
@@ -208,6 +214,7 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
         alt_residue->AddAtom(atomCD2);
         alt_residue->AddAtom(atomCG);
         alternate_sidechain_.BuildStructureByDistance();
+        */
     }
     return;
 }
@@ -216,39 +223,42 @@ void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_resid
 {
     // Get the 3 target atoms from protein residue.
     std::cout << "Superimposing to " << glycosite_residue->GetName() << std::endl;
-    AtomVector target_atoms = glycosite_residue->GetAtoms();
-    AtomVector super_atoms = superimposition_atoms_.GetAllAtomsOfAssembly();
-    Assembly* assemblyTarget = new Assembly();
-    Residue* residueTarget = new Residue();
+    AtomVector protein_atoms = glycosite_residue->GetAtoms();
+    AtomVector target_atoms;
+    //AtomVector super_atoms = superimposition_atoms_.GetAllAtomsOfAssembly();
+  //  Assembly* assemblyTarget = new Assembly();
+   // Residue* residueTarget = new Residue();
     Atom* last_protein_atom;
-    for(AtomVector::iterator it1 = target_atoms.begin(); it1 != target_atoms.end(); ++it1)
+    for(AtomVector::iterator it1 = protein_atoms.begin(); it1 != protein_atoms.end(); ++it1)
     {
-        Atom *target_atom = (*it1);
-        for(AtomVector::iterator it2 = super_atoms.begin(); it2 != super_atoms.end(); ++it2)
+        Atom *protein_atom = (*it1);
+        for(AtomVector::iterator it2 = superimposition_atoms_.begin(); it2 != superimposition_atoms_.end(); ++it2)
         {
             Atom *super_atom = (*it2);
-            if (target_atom->GetName() == super_atom->GetName())
+            if (protein_atom->GetName() == super_atom->GetName())
             {
-                residueTarget->AddAtom(target_atom);
+                target_atoms.push_back(protein_atom);
                 std::cout << "Here1" << std::endl;
-                if (super_atom == super_atoms.back()) // This is just to set the bonding correctly.
+                if (super_atom == superimposition_atoms_.back()) // This is just to set the bonding correctly.
                 {
                     std::cout << "here2" << std::endl;
-                    last_protein_atom = target_atom;
+                    last_protein_atom = protein_atom;
                 }
             }
         }
     }
-    residueTarget->SetAssembly(assemblyTarget);
-    assemblyTarget->AddResidue(residueTarget);
-    assemblyTarget->BuildStructureByDistance();
+   // residueTarget->SetAssembly(assemblyTarget);
+   // assemblyTarget->AddResidue(residueTarget);
+  //  assemblyTarget->BuildStructureByDistance();
 
     //std::cout << "Here now" << std::endl;
    //superimposition_atoms_.Print();
    // std::cout << "How now" << std::endl;
    // glycan_.Print();
 
-    gmml::Superimpose(&superimposition_atoms_, assemblyTarget, &glycan_);
+    AtomVector glycan_atoms = glycan_.GetAllAtomsOfAssembly();
+
+    gmml::Superimpose(superimposition_atoms_, target_atoms, glycan_atoms);
 
     Residue* reducing_Residue = glycan_.GetAllResiduesOfAssembly().at(1); // I assume I assumed something stupid here.
     //std::cout << "Reducing residue is " << reducing_Residue->GetName() << std::endl;
@@ -263,8 +273,6 @@ void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_resid
 
     last_protein_atom->GetNode()->AddNodeNeighbor(atomC1);
     atomC1->GetNode()->AddNodeNeighbor(last_protein_atom);
-
-   // std::cout << "Brown cow" << std::endl;
 
     //AtomVector newSideChainAtoms = alternate_sidechain_.GetAllAtomsOfAssembly();
     //glycosite_residue->ReplaceAtomCoordinates(&newSideChainAtoms);

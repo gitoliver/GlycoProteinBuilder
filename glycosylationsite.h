@@ -62,10 +62,8 @@ private:
     std::string glycan_name_;
     Residue* residue_;                                  /*!< A pointer back to the residue for this glycosite >*/
     Assembly glycan_;
-
-    // Get rid of this
-    Assembly superimposition_atoms_;             /*!< The 3 atoms used for superimposition of glycan to sidechain CHANGE ME TO ATOMVECTOR USED ONLY WITHIN FUNCTION>*/
-    Assembly alternate_sidechain_;
+    AtomVector superimposition_atoms_;               /*!< The 3 atoms used for superimposition of glycan to sidechain >*/
+    //Assembly alternate_sidechain_;
 
 };
 
