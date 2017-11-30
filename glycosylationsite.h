@@ -2,7 +2,7 @@
 #define GLYCOSYLATIONSITE_H
 
 //#include <iostream>
-#include "/home/oliver/Programs/gems/gmml/includes/gmml.hpp"
+#include "/home/ubunter/software/gems/gmml/includes/gmml.hpp"
 //#include "attachedglycan.h"
 
 class GlycosylationSite
