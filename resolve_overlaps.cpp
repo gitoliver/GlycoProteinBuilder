@@ -28,58 +28,58 @@ void resolve_overlaps::monte_carlo(Assembly glycoprotein, GlycoSiteVector glycos
     int seed = time(NULL);
     srand(seed);
     std::cout << "USING SEED:    " << seed << "\n";
-    ResidueVector residues = glycoprotein.GetAllResiduesOfAssembly();
+    //ResidueVector residues = glycoprotein.GetAllResiduesOfAssembly();
 
     /////////////////// Get pointers to protein and glycan parts of assembly ///
     AtomVector protein = glycoprotein.GetAllAtomsOfAssemblyWithinProteinResidues();
     AtomVector glycans = glycoprotein.GetAllAtomsOfAssemblyNotWithinProteinResidues();
 
-    /////////////////// SCORE IT FIRST /////////////////////////////////////////
-    double best_score = gmml::CalculateAtomicOverlaps(protein, glycans); // I've made a function you can pass atomvectors to. USE THIS TO CHECK CLASH
+    /////////////////// OVERLAP IT FIRST /////////////////////////////////////////
+    double best_overlap = gmml::CalculateAtomicOverlaps(protein, glycans); // I've made a function you can pass atomvectors to. USE THIS TO CHECK OVERLAP
     std::cout << "TOTAL GLYCANS: " << glycosites.size() << "\n";
-    std::cout << "INITIAL SCORE: " << best_score << "\n\n\n";
+    std::cout << "INITIAL OVERLAP: " << best_overlap << "\n\n\n";
 
     int cycle = 1, max_tries = 5000;
     while (cycle <= max_tries)
     {
         std::cout << "---------------------\nCYCLE: " << cycle++ << "\n\n";
-        /////////////////// SCORING N STUFF ////////////////////////////////////////
-        double total_glycoprotein_score =0;
-        Residue *worst_residue;
-        ResidueVector overall_clash_above_threshold; // the overall clash score is above threshold
-        ResidueVector glypro_clash_above_threshold; // the glycan-protein clash score is above threshold
-        // ResidueVector glygly_clash_above_threshold; // the glycan-glycan clash score is above threshold
+        /////////////////// OVERLAPS N STUFF ////////////////////////////////////////
+        double total_glycoprotein_overlap = 0.0;
+        //Residue *worst_residue;
+        ResidueVector overall_overlap_above_threshold; // the overall overlap overlap is above threshold
+        ResidueVector glycan_protein_overlap_above_threshold; // the glycan-protein overlap overlap is above threshold
+        // ResidueVector glygly_overlap_above_threshold; // the glycan-glycan overlap overlap is above threshold
         for(GlycoSiteVector::iterator it1 = glycosites.begin(); it1 != glycosites.end(); ++it1)
         {
-            GlycosylationSite *current_glyan = *it1;
-            double current_glycan_score = gmml::CalculateAtomicOverlaps(protein, current_glyan->GetAttachedGlycan()->GetAllAtomsOfAssembly());
-            double glycan_score_on_protein = current_glycan_score; // score of the glycan clashing against protein
+            GlycosylationSite *current_glycan = *it1;
+            double current_glycan_overlap = gmml::CalculateAtomicOverlaps(protein, current_glycan->GetAttachedGlycan()->GetAllAtomsOfAssembly());
+            double glycan_overlap_with_protein = current_glycan_overlap; // overlap of the glycan overlaping against protein
             for(GlycoSiteVector::iterator it2 = glycosites.begin(); it2 != glycosites.end(); ++it2)
             {
-                GlycosylationSite *comparison_glyan = *it2;
-                if (current_glyan != comparison_glyan) // dont score against yourself
-                { // score of the glycan clashing against other glycans
-                    current_glycan_score += gmml::CalculateAtomicOverlaps(comparison_glyan->GetAttachedGlycan()->GetAllAtomsOfAssembly(), current_glyan->GetAttachedGlycan()->GetAllAtomsOfAssembly());
+                GlycosylationSite *comparison_glycan = *it2;
+                if (current_glycan != comparison_glycan) // dont overlap against yourself
+                { // overlap of the glycan overlaping against other glycans
+                    current_glycan_overlap += gmml::CalculateAtomicOverlaps(comparison_glycan->GetAttachedGlycan()->GetAllAtomsOfAssembly(), current_glycan->GetAttachedGlycan()->GetAllAtomsOfAssembly());
                 }
             }
-            std::cout << current_glyan->GetResidue()->GetId() << "\t\t"; // PRINT the identity of the residue!
-            total_glycoprotein_score += current_glycan_score;
-            std::cout << "CLASH SURFACE: " << glycan_score_on_protein << "\t\t";
-            if (glycan_score_on_protein > 100) // set a threshold score!? (THIS CRITERIA IS CURRENTLY NOT BEING USED)
-            { // make residue vector of condition: the glycan-protein clash score is above threshold
-                glypro_clash_above_threshold.push_back(current_glyan->GetResidue());
+            std::cout << current_glycan->GetResidue()->GetId() << "\t\t"; // PRINT the identity of the residue!
+            total_glycoprotein_overlap += current_glycan_overlap;
+            std::cout << "GLYCAN-PROTEIN OVERLAP: " << glycan_overlap_with_protein << "\t\t";
+            if (glycan_overlap_with_protein > 100) // set a threshold overlap!? (THIS CRITERIA IS CURRENTLY NOT BEING USED)
+            { // make residue vector of condition: the glycan-protein overlap overlap is above threshold
+                glycan_protein_overlap_above_threshold.push_back(current_glycan->GetResidue());
             }
-            std::cout << "CLASH OVERALL:   " << current_glycan_score << "\n";
-            if (current_glycan_score > 5) // set a threshold score!?
-            { // make residue vector of condition: the full clash score is above threshold
-                overall_clash_above_threshold.push_back(current_glyan->GetResidue());
+            std::cout << "TOTAL OVERLAP:   " << current_glycan_overlap << "\n";
+            if (current_glycan_overlap > 5) // set a threshold overlap!?
+            { // make residue vector of condition: the full overlap overlap is above threshold
+                overall_overlap_above_threshold.push_back(current_glycan->GetResidue());
             }
         }
-        std::cout << "CURRENT POSE:  " << total_glycoprotein_score << "\n";
-        std::cout << "VECTOR SIZE-full:  " << overall_clash_above_threshold.size() << "\t";
-        std::cout << "VECTOR SIZE-glyp:  " << glypro_clash_above_threshold.size() << "\n\n";
+        std::cout << "CURRENT POSE:  " << total_glycoprotein_overlap << "\n";
+        std::cout << "VECTOR SIZE-full:  " << overall_overlap_above_threshold.size() << "\t";
+        std::cout << "VECTOR SIZE-glyp:  " << glycan_protein_overlap_above_threshold.size() << "\n\n";
 
-        if (overall_clash_above_threshold.size()==0) // if the score is good, output a pdb file, else do it again!
+        if (overall_overlap_above_threshold.size()==0) // if the overlap is good, output a pdb file, else do it again!
         {
             std::cout << "BRING IT IN BOIZ, WE GOT OURSELVES A BIG ONE!!!!!!!!!!!!!!!!!\n\n";
             PdbFileSpace::PdbFile *outputPdbFile1 = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
@@ -90,7 +90,7 @@ void resolve_overlaps::monte_carlo(Assembly glycoprotein, GlycoSiteVector glycos
         // outputPdbFile1->Write("outputs/wayland_stuff/Glycoprotein"+to_string(cycle-1)+".pdb");
 
         /////////////////// MOVE GLYCAN CHAINS N STUFF /////////////////////////////
-        ResidueVector move_these_guys =  overall_clash_above_threshold;
+        ResidueVector move_these_guys =  overall_overlap_above_threshold;
         for(ResidueVector::iterator it1 = move_these_guys.begin(); it1!=move_these_guys.end(); ++it1)
         {
             AtomVector atoms = (*it1)->GetAtoms();
