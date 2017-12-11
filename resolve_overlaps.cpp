@@ -16,185 +16,72 @@ using namespace MolecularModeling;
 using namespace GeometryTopology;
 using namespace gmml;
 
-// // makes a fat atom vector based on residues of assembly; if residue is a glycan, use midpoint of C1 and C4; radius of 4
-// AtomVector FatAtomMode_Glycan(ResidueVector residuevector)
-// {
-//     AtomVector fat_atom_vector;
-//     for(ResidueVector::iterator resi_it = residuevector.begin(); resi_it != residuevector.end(); ++resi_it)
-//     {
-//         AtomVector atoms = (*resi_it)->GetAtoms();
-//         Atom *C1, *C4;
-//         bool create_fatom = false;
-//         for(AtomVector::iterator atom_iter = atoms.begin(); atom_iter != atoms.end(); ++atom_iter)
-//         {
-//             if ( (*atom_iter)->GetName().compare("C1")==0 )
-//             {
-//                 C1 = *atom_iter;
-//                 create_fatom = true;
-//             }
-//             if ( (*atom_iter)->GetName().compare("C4")==0 ) C4 = *atom_iter;
-//         }
-//         if (create_fatom)
-//         {
-//             Atom fat_atom;
-//             Coordinate new_point;
-//             CoordinateVector new_point_vector;
-//             new_point.SetX((C1->GetCoordinates().at(0)->GetX() + C4->GetCoordinates().at(0)->GetX()) / 2);
-//             new_point.SetY((C1->GetCoordinates().at(0)->GetY() + C4->GetCoordinates().at(0)->GetY()) / 2);
-//             new_point.SetZ((C1->GetCoordinates().at(0)->GetZ() + C4->GetCoordinates().at(0)->GetZ()) / 2);
-//             new_point_vector.push_back(&new_point);
-//             fat_atom.SetCoordinates(new_point_vector);
-//             fat_atom.SetName("4");
-//             // std::cout << C1->GetCoordinates().at(0)->GetX() << "\n";
-//             // std::cout << fat_atom.GetCoordinates().at(0)->GetX() << "\n";
-//             fat_atom_vector.push_back(&fat_atom);
-//         }
-//     }
-//     // std::cout << fat_atom_vector.size() << "\n";
-//     // std::cout << residuevector.size() << "\n";
-//     return fat_atom_vector;
-// }
-//
-// // makes a fat atom vector based on residues of assembly; if residue is a amino acid, use atom CA; radius of 4
-// AtomVector FatAtomMode_Protein(ResidueVector residuevector)
-// {
-//     AtomVector fat_atom_vector;
-//     for(ResidueVector::iterator resi_it = residuevector.begin(); resi_it != residuevector.end(); ++resi_it)
-//     {
-//         AtomVector atoms = (*resi_it)->GetAtoms();
-//         Atom *CA;
-//         bool create_fatom = false;
-//         for(AtomVector::iterator atom_iter = atoms.begin(); atom_iter != atoms.end(); ++atom_iter)
-//         {
-//             if ( (*atom_iter)->GetName().compare("CA")==0 )
-//             {
-//                 CA = *atom_iter;
-//                 create_fatom = true;
-//             }
-//         }
-//         if (create_fatom)
-//         {
-//             Atom fat_atom;
-//             Coordinate new_point;
-//             CoordinateVector new_point_vector;
-//             new_point.SetX(CA->GetCoordinates().at(0)->GetX());
-//             new_point.SetY(CA->GetCoordinates().at(0)->GetY());
-//             new_point.SetZ(CA->GetCoordinates().at(0)->GetZ());
-//             new_point_vector.push_back(&new_point);
-//             fat_atom.SetCoordinates(new_point_vector);
-//             fat_atom.SetName("4");
-//             // std::cout << C1->GetCoordinates().at(0)->GetX() << "\n";
-//             // std::cout << fat_atom.GetCoordinates().at(0)->GetX() << "\n";
-//             fat_atom_vector.push_back(&fat_atom);
-//         }
-//     }
-//     // std::cout << fat_atom_vector.size() << "\n";
-//     // std::cout << residuevector.size() << "\n";
-//                 std::cout << "----------- section ---\n";
-//     // std::cout << fat_atom_vector.at(0)->GetName() << "\n";
-//     std::cout << fat_atom_vector.at(0)->GetCoordinates().at(0)->GetZ() << "\n";
-//                 std::cout << "----------- section ---\n";
-//     return fat_atom_vector;
-// }
-
-// makes a new vector of fat atoms from the protein CA
-AtomVector FatAtomMode_Protein(Assembly protein)
+void print_coords(Atom* atom)
 {
-    std::cout << "----------- block --\n";
-    AtomVector fatom_protein;
-    AtomVector atoms = protein.GetAllAtomsOfAssembly();
-    // Residue* dummy_res = new Residue();
+    Coordinate coord = atom->GetCoordinates().at(0);
+    std::cout << coord.GetX() << "\t" << coord.GetY() << "\t" << coord.GetZ() << "\n";
+}
 
-    for (AtomVector::iterator atom_iter = atoms.begin(); atom_iter != atoms.end(); ++atom_iter)
+// adds the fat atoms to the glycoprotein itself (remember to remove them later or something!)
+void Implant_FatAtoms(Assembly glycoprotein, GlycoSiteVector glycosites)
+{
+    ResidueVector all_residues = glycoprotein.GetAllResiduesOfAssembly();
+    for (ResidueVector::iterator resi_iter = all_residues.begin(); resi_iter != all_residues.end(); ++resi_iter)
     {
-        if ( (*atom_iter)->GetName().compare("CA")==0 )
+        // std::cout << (*resi_iter)->GetName() << "\t" << (*resi_iter)->CheckIfProtein() << endl;
+        if ((*resi_iter)->CheckIfProtein()==1) // the current residue is an amino acid
         {
-            Atom *fatomCA = new Atom( (*atom_iter)->GetResidue(), "3fatom", (*atom_iter)->GetCoordinates());
-            fatom_protein.push_back(fatomCA);
-
-            // Atom *fatomCA = new Atom(dummy_res, "3fatom", (*atom_iter)->GetCoordinates());
-            // fatom_protein.push_back(fatomCA);
+            // std::cout << (*resi_iter)->GetName() << "\tA\t" << (*resi_iter)->CheckIfProtein() << endl;
+            Atom *atomCA;
+            AtomVector atoms = (*resi_iter)->GetAtoms();
+            for (AtomVector::iterator atom_iter = atoms.begin(); atom_iter != atoms.end(); ++atom_iter)
+            {
+                if ( (*atom_iter)->GetName().compare("CA")==0 ) atomCA = *atom_iter;
+            }
+            Atom* fatom = new Atom(*resi_iter, "4fatom", atomCA->GetCoordinates());
+            (*resi_iter)->AddAtom(fatom);
+        }
+        if ((*resi_iter)->CheckIfProtein()==0) // the current residue is an glycan (or something else?)
+        {
+            // std::cout << (*resi_iter)->GetName() << "\tG\t" << (*resi_iter)->CheckIfProtein() << endl;
+            Atom* fatom = new Atom(*resi_iter, "3fatom", (*resi_iter)->GetRingCenter());
+            (*resi_iter)->AddAtom(fatom);
         }
     }
-    return fatom_protein;
 }
 
-// makes a new vector of fat atoms from the monosaccharide ring center
-AtomVector FatAtomMode_Glycan(Assembly glycan)
+// removes the fat atoms from the glycoprotein; do this before trying to spit out a pdb file
+void Sacrifice_FatAtoms(Assembly glycoprotein)
 {
-    AtomVector fatom_glycan;
-    ResidueVector monosacs = glycan.GetAllResiduesOfAssembly();
-    for (ResidueVector::iterator resi_iter = monosacs.begin(); resi_iter != monosacs.end(); ++resi_iter)
+    ResidueVector all_residues = glycoprotein.GetAllResiduesOfAssembly();
+    for (ResidueVector::iterator resi_iter = all_residues.begin(); resi_iter != all_residues.end(); ++resi_iter)
     {
-        Atom *fatomRINGCENTER = new Atom( (*resi_iter), "4fatom", (*resi_iter)->GetRingCenter());
-        fatom_glycan.push_back(fatomRINGCENTER);
-    }
-    return fatom_glycan;
-}
-
-// adds fat atoms to the assembly
-void Implant_FatAtoms(Assembly glycoprotein)
-{
-    ResidueVector glycoprotein_residues = glycoprotein.GetAllResiduesOfAssembly();
-    for(ResidueVector::iterator it1 = glycoprotein_residues.begin(); it1!=glycoprotein_residues.end(); ++it1)
-    {
-        AtomVector atoms = (*it1)->GetAtoms();
-        if ( (*it1)->CheckIfProtein()) // it is a protein
+        AtomVector atoms = (*resi_iter)->GetAtoms();
+        for (AtomVector::iterator atom_iter = atoms.begin(); atom_iter != atoms.end(); ++atom_iter)
         {
-            for(AtomVector::iterator atom_iter = atoms.begin(); atom_iter != atoms.end(); ++atom_iter)
+            if ((*atom_iter)->GetName().find("fatom")==1)
             {
-                std::cout << "----------- break -\n";
-                Atom atomCA;
-                bool hasCA = false;
-                if ( (*atom_iter)->GetName().compare("CA")==0 )
-                {
-                    std::cout << "----------- break\n";
-                    atomCA = *atom_iter;
-                    hasCA = true;
-                }
-                if (hasCA)
-                {
-                    GeometryTopology::Coordinate new_point;
-
-                    new_point.SetX(atomCA.GetCoordinates().at(0)->GetX());
-                    new_point.SetY(atomCA.GetCoordinates().at(0)->GetY());
-                    new_point.SetZ(atomCA.GetCoordinates().at(0)->GetZ());
-
-                    Atom* fatom = new Atom(*it1, "3f", new_point);
-                    (*it1)->AddAtom(fatom);
-                    std::cout << "pro\n";
-                }
+                std::cout << (*atom_iter)->GetName() << "\n";
+                (*resi_iter)->RemoveAtom(*atom_iter);
             }
         }
-        // if (!(*it1)->CheckIfProtein()) // it is a glycan
-        // {
-        //     for(AtomVector::iterator atom_iter = atoms.begin(); atom_iter != atoms.end(); ++atom_iter)
-        //     {
-        //         if ( (*atom_iter)->GetName().compare("C1")==0 )
-        //         {
-        //             C1 = *atom_iter;
-        //         }
-        //
-        //
-        //
-        //         if ( (*atom_iter)->GetName().compare("CA")==0 )
-        //         {
-        //             GeometryTopology::Coordinate new_point;
-        //
-        //             new_point.SetX((*atom_iter)->GetCoordinates().at(0)->GetX());
-        //             new_point.SetY((*atom_iter)->GetCoordinates().at(0)->GetY());
-        //             new_point.SetZ((*atom_iter)->GetCoordinates().at(0)->GetZ());
-        //
-        //             Atom *atomOH = new Atom(*it1, "3f", new_point);
-        //             std::cout << "gly\n";
-        //         }
-        //     }
-        // }
     }
 }
 
-// taken from gmml/src/MolecularModeling/overlaps.cc
-// plan to modify the code to work with fat atoms
+//
+// {
+//     AtomVector atoms = glycoprotein.GetAllAtomsOfAssembly();
+//     for (AtomVector::iterator atom_iter = atoms.begin(); atom_iter != atoms.end(); ++atom_iter)
+//     {
+//         if ((*atom_iter)->GetName().find("fatom")==1)
+//         {
+//             (*atom_iter)->
+//             // std::cout << (*atom_iter)->GetName() << "\n";
+//         }
+//     }
+// }
+
+// taken from gmml/src/MolecularModeling/overlaps.cc; plan to modify the code to work with fat atoms
 double ModifiedCalculateAtomicOverlaps(AtomVector atomsA, AtomVector atomsB)
 {
     double distance = 0.0, totalOverlap = 0.0;
@@ -224,46 +111,46 @@ double ModifiedCalculateAtomicOverlaps(AtomVector atomsA, AtomVector atomsB)
 }
 
 // the fat atom score function (work in progress) much faster and messy
-ResidueVector ResiFilter_ScoreFatAtoms(Assembly* glycoprotein, GlycoSiteVector* glycosites, double* overlap_score)
-{
-    ResidueVector filtered_residues_list;
-    AtomVector protein = glycoprotein->GetAllAtomsOfAssemblyWithinProteinResidues();
-    AtomVector glycans = glycoprotein->GetAllAtomsOfAssemblyNotWithinProteinResidues();
-
-    std::cout << "----------- looky here\n";
-    AtomVector fatom_protein = FatAtomMode_Protein(glycoprotein);
-    std::cout << "----------- looky here\n";
-
-    double total_glycoprotein_overlap = 0.0;
-
-    for(GlycoSiteVector::iterator it1 = glycosites->begin(); it1 != glycosites->end(); ++it1)
-    {
-        GlycosylationSite *current_glycan = *it1;
-        double current_glycan_overlap = gmml::CalculateAtomicOverlaps(protein, current_glycan->GetAttachedGlycan()->GetAllAtomsOfAssembly());
-        double glycan_overlap_with_protein = current_glycan_overlap; // overlap of the glycan overlaping against protein
-        for(GlycoSiteVector::iterator it2 = glycosites->begin(); it2 != glycosites->end(); ++it2)
-        {
-            GlycosylationSite *comparison_glycan = *it2;
-            if (current_glycan != comparison_glycan) // dont overlap against yourself
-            { // overlap of the glycan overlaping against other glycans
-                current_glycan_overlap += gmml::CalculateAtomicOverlaps(comparison_glycan->GetAttachedGlycan()->GetAllAtomsOfAssembly(), current_glycan->GetAttachedGlycan()->GetAllAtomsOfAssembly());
-            }
-        }
-
-        std::cout << current_glycan->GetResidue()->GetId() << "\t\t"; // PRINT the identity of the residue!
-        total_glycoprotein_overlap += current_glycan_overlap;
-
-        std::cout << "GLYCAN-PROTEIN: " << glycan_overlap_with_protein << "\t\t";
-        // std::cout << "TOTAL:   " << current_glycan_overlap << "\n";
-        std::cout << "GLYCAN-GLYCAN: " << current_glycan_overlap - glycan_overlap_with_protein << "\n";
-        if (current_glycan_overlap > 5) // set a threshold overlap!?
-        { // make residue vector of condition: the full overlap overlap is above threshold
-            filtered_residues_list.push_back(current_glycan->GetResidue());
-        }
-        *overlap_score = total_glycoprotein_overlap;
-    }
-    return filtered_residues_list;
-}
+// ResidueVector ResiFilter_ScoreFatAtoms(Assembly* glycoprotein, GlycoSiteVector* glycosites, double* overlap_score)
+// {
+//     ResidueVector filtered_residues_list;
+//     AtomVector protein = glycoprotein->GetAllAtomsOfAssemblyWithinProteinResidues();
+//     AtomVector glycans = glycoprotein->GetAllAtomsOfAssemblyNotWithinProteinResidues();
+//
+//     std::cout << "----------- looky here\n";
+//     AtomVector fatom_protein = FatAtomMode_Protein(glycoprotein);
+//     std::cout << "----------- looky here\n";
+//
+//     double total_glycoprotein_overlap = 0.0;
+//
+//     for(GlycoSiteVector::iterator it1 = glycosites->begin(); it1 != glycosites->end(); ++it1)
+//     {
+//         GlycosylationSite *current_glycan = *it1;
+//         double current_glycan_overlap = gmml::CalculateAtomicOverlaps(protein, current_glycan->GetAttachedGlycan()->GetAllAtomsOfAssembly());
+//         double glycan_overlap_with_protein = current_glycan_overlap; // overlap of the glycan overlaping against protein
+//         for(GlycoSiteVector::iterator it2 = glycosites->begin(); it2 != glycosites->end(); ++it2)
+//         {
+//             GlycosylationSite *comparison_glycan = *it2;
+//             if (current_glycan != comparison_glycan) // dont overlap against yourself
+//             { // overlap of the glycan overlaping against other glycans
+//                 current_glycan_overlap += gmml::CalculateAtomicOverlaps(comparison_glycan->GetAttachedGlycan()->GetAllAtomsOfAssembly(), current_glycan->GetAttachedGlycan()->GetAllAtomsOfAssembly());
+//             }
+//         }
+//
+//         std::cout << current_glycan->GetResidue()->GetId() << "\t\t"; // PRINT the identity of the residue!
+//         total_glycoprotein_overlap += current_glycan_overlap;
+//
+//         std::cout << "GLYCAN-PROTEIN: " << glycan_overlap_with_protein << "\t\t";
+//         // std::cout << "TOTAL:   " << current_glycan_overlap << "\n";
+//         std::cout << "GLYCAN-GLYCAN: " << current_glycan_overlap - glycan_overlap_with_protein << "\n";
+//         if (current_glycan_overlap > 5) // set a threshold overlap!?
+//         { // make residue vector of condition: the full overlap overlap is above threshold
+//             filtered_residues_list.push_back(current_glycan->GetResidue());
+//         }
+//         *overlap_score = total_glycoprotein_overlap;
+//     }
+//     return filtered_residues_list;
+// }
 
 // the original score function and filter; single atom resolution and relatively slow
 ResidueVector ResiFilter_ScoreTrueOverlap(Assembly* glycoprotein, GlycoSiteVector* glycosites, double* overlap_score)
@@ -385,18 +272,38 @@ void resolve_overlaps::monte_carlo(Assembly glycoprotein, GlycoSiteVector glycos
 
     ResidueVector residuevector = glycoprotein.GetAllResiduesOfAssembly();
 
+    Implant_FatAtoms(glycoprotein, glycosites);
+    { // this scope be for testing and stuff
+        ResidueVector all_residues = glycoprotein.GetAllResiduesOfAssembly();
+        for (ResidueVector::iterator resi_iter = all_residues.begin(); resi_iter != all_residues.end(); ++resi_iter)
+        {
+            std::cout << (*resi_iter)->GetName() << "\n";
+            AtomVector atoms = (*resi_iter)->GetAtoms();
+            for (AtomVector::iterator atom_iter = atoms.begin(); atom_iter != atoms.end(); ++atom_iter)
+            {
+                std::cout << (*atom_iter)->GetName() << "\t";
+                print_coords(*atom_iter);
+            }
+            std::cout << "\n";
 
-    // AtomVector the_atoms = glycoprotein.GetAllAtomsOfAssembly();
-    // for (AtomVector::iterator it = fatoms_protein.begin(); it != fatoms_protein.end(); ++it)
-    // {
-    //     std::cout << (*it)->GetName() << endl;
-    // }
+        }
+    }
+    Sacrifice_FatAtoms(glycoprotein);
+    { // this scope be for testing and stuff
+        ResidueVector all_residues = glycoprotein.GetAllResiduesOfAssembly();
+        for (ResidueVector::iterator resi_iter = all_residues.begin(); resi_iter != all_residues.end(); ++resi_iter)
+        {
+            std::cout << (*resi_iter)->GetName() << "\n";
+            AtomVector atoms = (*resi_iter)->GetAtoms();
+            for (AtomVector::iterator atom_iter = atoms.begin(); atom_iter != atoms.end(); ++atom_iter)
+            {
+                std::cout << (*atom_iter)->GetName() << "\t";
+                print_coords(*atom_iter);
+            }
+            std::cout << "\n";
 
-
-    // AtomVector fatoms_protein = FatAtomMode_Protein(glycoprotein);
-
-    // std::cout << fatoms_protein.size() << "\n";
-    // Implant_FatAtoms(glycoprotein);
+        }
+    }
 
 
     int cycle = 1, max_tries = 2;
@@ -405,8 +312,7 @@ void resolve_overlaps::monte_carlo(Assembly glycoprotein, GlycoSiteVector glycos
         double overlap_score = 0.0;
 
         std::cout << "----------- cycle\n";
-        // ResidueVector move_these_guys = ResiFilter_ScoreTrueOverlap(&glycoprotein, &glycosites, &overlap_score);
-        ResidueVector move_these_guys = ResiFilter_ScoreFatAtoms(&glycoprotein, &glycosites, &overlap_score);
+        ResidueVector move_these_guys = ResiFilter_ScoreTrueOverlap(&glycoprotein, &glycosites, &overlap_score);
 
         std::cout << "OVERALL: " << overlap_score << "\n\n";
 
