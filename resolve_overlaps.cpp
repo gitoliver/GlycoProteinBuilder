@@ -5,8 +5,10 @@
 #include <string>
 
 // Change this next line to your PATH:
-#include "/home/ubunter/software/gems/gmml/includes/MolecularModeling/assembly.hpp"
-#include "/home/ubunter/software/gems/gmml/includes/MolecularModeling/overlaps.hpp"
+//#include "/home/ubunter/software/gems/gmml/includes/MolecularModeling/assembly.hpp"
+//#include "/home/ubunter/software/gems/gmml/includes/MolecularModeling/overlaps.hpp"
+#include "../../../gems/gmml/includes/MolecularModeling/assembly.hpp"
+#include "../../../gems/gmml/includes/MolecularModeling/overlaps.hpp"
 // #include "/home/oliver/Programs/gems/gmml/includes/MolecularModeling/assembly.hpp"
 // #include "/home/oliver/Programs/gems/gmml/includes/MolecularModeling/overlaps.hpp"
 #include "resolve_overlaps.h"
