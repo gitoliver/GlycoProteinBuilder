@@ -7,10 +7,10 @@
 // Change this next line to your PATH:
 //#include "/home/ubunter/software/gems/gmml/includes/MolecularModeling/assembly.hpp"
 //#include "/home/ubunter/software/gems/gmml/includes/MolecularModeling/overlaps.hpp"
-#include "../../../gems/gmml/includes/MolecularModeling/assembly.hpp"
-#include "../../../gems/gmml/includes/MolecularModeling/overlaps.hpp"
 // #include "/home/oliver/Programs/gems/gmml/includes/MolecularModeling/assembly.hpp"
 // #include "/home/oliver/Programs/gems/gmml/includes/MolecularModeling/overlaps.hpp"
+#include "../../../gems/gmml/includes/MolecularModeling/assembly.hpp"
+#include "../../../gems/gmml/includes/MolecularModeling/overlaps.hpp"
 #include "resolve_overlaps.h"
 
 using namespace std;
@@ -18,6 +18,7 @@ using namespace MolecularModeling;
 using namespace GeometryTopology;
 using namespace gmml;
 
+// print xyz coords, just used for debugging
 void print_coords(Atom* atom)
 {
     Coordinate coord = atom->GetCoordinates().at(0);
@@ -81,30 +82,83 @@ AtomVector Filter_FatAtoms(AtomVector atoms)
     return fat_atoms_vector;
 }
 
-// taken from gmml/src/MolecularModeling/overlaps.cc; plan to modify the code to work with fat atoms
+// most of this is copied from gmml; used by ONLY the fat atom mode score; [TWEAK SETTINGS]
+double Atomwise_CalculateAtomicOverlaps(Atom *atomA, Atom *atomB, double radiusA, double radiusB)
+{
+    double distance = atomA->GetDistanceToAtom(atomB);
+    if (radiusA == -0.1) // default value is -0.1, but user can provide.
+    {
+        // element info not usually set, so I look at first letter of atom name. This may be why you're reading this.
+        if (atomA->GetName().at(0) == '3') radiusA = 3.00; // for fat atom mode
+        if (atomA->GetName().at(0) == '4') radiusA = 4.00; // for fat atom mode
+        if (atomA->GetName().at(0) == '5') radiusA = 5.00; // for fat atom mode
+        if (atomA->GetName().at(0) == '6') radiusA = 6.00; // for fat atom mode
+    }
+    if (radiusB == -0.1) // default value is -0.1, but user can provide.
+    {
+        if (atomB->GetName().at(0) == '3') radiusB = 3.00; // for fat atom mode
+        if (atomB->GetName().at(0) == '4') radiusB = 4.00; // for fat atom mode
+        if (atomB->GetName().at(0) == '5') radiusB = 5.00; // for fat atom mode
+        if (atomB->GetName().at(0) == '6') radiusB = 6.00; // for fat atom mode
+    }
+    // std::cout << "Distance: " << distance << " radiusA: " << radiusA << " radiusB: " << radiusB << std::endl;
+    double overlap = 0.0;
+    if (radiusA + radiusB > distance + 0.6)
+    { // 0.6 overlap is deemed acceptable. (Copying chimera:)
+        // Eqn 1, Rychkov and Petukhov, J. Comput. Chem., 2006, Joint Neighbours. Each atom against each atom, so overlap can be "double" counted. See paper.
+        overlap = ( 2 * (PI_RADIAN) * radiusA* ( radiusA - distance / 2 - ( ( (radiusA*radiusA) - (radiusB*radiusB) ) / (2 * distance) ) ) );
+    }
+    // std::cout << "Non-normalized Overlap=" << totalOverlap << std::endl;
+    return overlap;
+}
+
+// taken from gmml/src/MolecularModeling/overlaps.cc; plan to modify the code to work with fat atoms; [TWEAK SETTINGS]
+double modified_CalculateAtomicOverlaps(AtomVector atomsA, AtomVector atomsB)
+{
+    double distance = 0.0, totalOverlap = 0.0;
+    for(AtomVector::iterator it1 = atomsA.begin(); it1 != atomsA.end(); ++it1)
+    {
+        for(AtomVector::iterator it2 = atomsB.begin(); it2 != atomsB.end(); ++it2)
+        {
+            Atom *atomA = *it1;
+            Atom *atomB = *it2;
+            if ( (atomA->GetCoordinates().at(0)->GetX() - atomB->GetCoordinates().at(0)->GetX()) < 2.0 ) // This is faster than calulating distance, and rules out tons of atom pairs.
+            {
+                distance = atomA->GetDistanceToAtom(atomB);
+                if ( ( distance < 8.0 ) && ( distance > 0.0 ) ) //Close enough to overlap, but not the same atom
+                {
+                    totalOverlap += Atomwise_CalculateAtomicOverlaps(atomA, atomB, -0.1, -0.1); // This calls the overloaded version with default values
+                }
+            }
+        }
+    }
+    return (totalOverlap / CARBON_SURFACE_AREA); //Normalise to area of a buried carbon
+}
 
 // the fat atom score function (work in progress) much faster and messy
 ResidueVector ResiFilter_ScoreFatAtomOverlap(Assembly* glycoprotein, GlycoSiteVector* glycosites, double* overlap_score)
 {
     ResidueVector filtered_residues_list;
-    AtomVector protein = Filter_FatAtoms(glycoprotein->GetAllAtomsOfAssemblyWithinProteinResidues());
-    AtomVector glycans = Filter_FatAtoms(glycoprotein->GetAllAtomsOfAssemblyNotWithinProteinResidues());
-
+    AtomVector fatom_protein = Filter_FatAtoms(glycoprotein->GetAllAtomsOfAssemblyWithinProteinResidues());
+    // AtomVector glycans = Filter_FatAtoms(glycoprotein->GetAllAtomsOfAssemblyNotWithinProteinResidues());
     double total_glycoprotein_overlap = 0.0;
 
     for(GlycoSiteVector::iterator it1 = glycosites->begin(); it1 != glycosites->end(); ++it1)
     {
         GlycosylationSite *current_glycan = *it1;
-        double current_glycan_overlap = gmml::CalculateAtomicOverlaps(protein, current_glycan->GetAttachedGlycan()->GetAllAtomsOfAssembly());
+        double current_glycan_overlap = modified_CalculateAtomicOverlaps(fatom_protein, Filter_FatAtoms(current_glycan->GetAttachedGlycan()->GetAllAtomsOfAssembly()));
         double glycan_overlap_with_protein = current_glycan_overlap; // overlap of the glycan overlaping against protein
+
         for(GlycoSiteVector::iterator it2 = glycosites->begin(); it2 != glycosites->end(); ++it2)
         {
             GlycosylationSite *comparison_glycan = *it2;
             if (current_glycan != comparison_glycan) // dont overlap against yourself
             { // overlap of the glycan overlaping against other glycans
-                current_glycan_overlap += gmml::CalculateAtomicOverlaps(comparison_glycan->GetAttachedGlycan()->GetAllAtomsOfAssembly(), current_glycan->GetAttachedGlycan()->GetAllAtomsOfAssembly());
+                current_glycan_overlap += modified_CalculateAtomicOverlaps(Filter_FatAtoms(comparison_glycan->GetAttachedGlycan()->GetAllAtomsOfAssembly()), Filter_FatAtoms(current_glycan->GetAttachedGlycan()->GetAllAtomsOfAssembly()));
             }
         }
+
+
 
         std::cout << current_glycan->GetResidue()->GetId() << "\t\t"; // PRINT the identity of the residue!
         total_glycoprotein_overlap += current_glycan_overlap;
@@ -120,7 +174,6 @@ ResidueVector ResiFilter_ScoreFatAtomOverlap(Assembly* glycoprotein, GlycoSiteVe
     }
     return filtered_residues_list;
 }
-
 
 // the original score function and filter; single atom resolution and relatively slow
 ResidueVector ResiFilter_ScoreTrueOverlap(Assembly* glycoprotein, GlycoSiteVector* glycosites, double* overlap_score)
@@ -253,27 +306,23 @@ void resolve_overlaps::monte_carlo(Assembly glycoprotein, GlycoSiteVector glycos
     //     }
     // }
 
-    // Sacrifice_FatAtoms(glycoprotein);
-
-    int cycle = 1, max_tries = 2;
+    int cycle = 1, max_tries = 3;
     while (cycle <= max_tries)
     {
         double overlap_score = 0.0;
-
-        std::cout << "=========== cycle\n";
-
-        std::cout << "----- norm\n";
-        ResidueVector move_these_guys = ResiFilter_ScoreTrueOverlap(&glycoprotein, &glycosites, &overlap_score);
-
-        std::cout << "\n----- fat atom\n";
+        std::cout << "=========== cycle ===========\n";
+        ///////////////////////////////////////////////// SCORE IT USING FAT ATOMS
+        std::cout << "\n----- fat atoms\n";
         Implant_FatAtoms(glycoprotein, glycosites);
         ResidueVector merb_these_guys = ResiFilter_ScoreFatAtomOverlap(&glycoprotein, &glycosites, &overlap_score);
         Sacrifice_FatAtoms(glycoprotein);
-
         std::cout << "OVERALL: " << overlap_score << "\n\n";
-
+        ///////////////////////////////////////////////// SCORE IT USING NORMAL ATOMS
+        std::cout << "----- normal atoms\n";
+        ResidueVector move_these_guys = ResiFilter_ScoreTrueOverlap(&glycoprotein, &glycosites, &overlap_score);
+        std::cout << "OVERALL: " << overlap_score << "\n\n";
+        /////////////////////////////////////////////////
         ResiRotor_FullRange(&glycoprotein, &move_these_guys);
         cycle++;
     }
-
 }
