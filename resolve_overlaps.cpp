@@ -136,7 +136,7 @@ double modified_CalculateAtomicOverlaps(AtomVector atomsA, AtomVector atomsB)
 }
 
 // the fat atom score function (work in progress) much faster and messy
-ResidueVector ResiFilter_ScoreFatAtomOverlap(Assembly* glycoprotein, GlycoSiteVector* glycosites, double* overlap_score)
+ResidueVector ResiFilter_ScoreFatAtomOverlap(Assembly* glycoprotein, GlycoSiteVector* glycosites, double* overlap_score, double threshold)
 {
     ResidueVector filtered_residues_list;
     AtomVector fatom_protein = Filter_FatAtoms(glycoprotein->GetAllAtomsOfAssemblyWithinProteinResidues());
@@ -158,15 +158,13 @@ ResidueVector ResiFilter_ScoreFatAtomOverlap(Assembly* glycoprotein, GlycoSiteVe
             }
         }
 
-
-
         std::cout << current_glycan->GetResidue()->GetId() << "\t\t"; // PRINT the identity of the residue!
         total_glycoprotein_overlap += current_glycan_overlap;
 
         std::cout << "GLYCAN-PROTEIN: " << glycan_overlap_with_protein << "\t\t";
         // std::cout << "TOTAL:   " << current_glycan_overlap << "\n";
         std::cout << "GLYCAN-GLYCAN: " << current_glycan_overlap - glycan_overlap_with_protein << "\n";
-        if (current_glycan_overlap > 5) // set a threshold overlap!?
+        if (current_glycan_overlap > threshold) // set a threshold overlap!?
         { // make residue vector of condition: the full overlap overlap is above threshold
             filtered_residues_list.push_back(current_glycan->GetResidue());
         }
@@ -176,7 +174,7 @@ ResidueVector ResiFilter_ScoreFatAtomOverlap(Assembly* glycoprotein, GlycoSiteVe
 }
 
 // the original score function and filter; single atom resolution and relatively slow
-ResidueVector ResiFilter_ScoreTrueOverlap(Assembly* glycoprotein, GlycoSiteVector* glycosites, double* overlap_score)
+ResidueVector ResiFilter_ScoreTrueOverlap(Assembly* glycoprotein, GlycoSiteVector* glycosites, double* overlap_score, double threshold)
 {
     ResidueVector filtered_residues_list;
     AtomVector protein = glycoprotein->GetAllAtomsOfAssemblyWithinProteinResidues();
@@ -197,20 +195,31 @@ ResidueVector ResiFilter_ScoreTrueOverlap(Assembly* glycoprotein, GlycoSiteVecto
                 current_glycan_overlap += gmml::CalculateAtomicOverlaps(comparison_glycan->GetAttachedGlycan()->GetAllAtomsOfAssembly(), current_glycan->GetAttachedGlycan()->GetAllAtomsOfAssembly());
             }
         }
-
         std::cout << current_glycan->GetResidue()->GetId() << "\t\t"; // PRINT the identity of the residue!
         total_glycoprotein_overlap += current_glycan_overlap;
 
         std::cout << "GLYCAN-PROTEIN: " << glycan_overlap_with_protein << "\t\t";
         // std::cout << "TOTAL:   " << current_glycan_overlap << "\n";
         std::cout << "GLYCAN-GLYCAN: " << current_glycan_overlap - glycan_overlap_with_protein << "\n";
-        if (current_glycan_overlap > 5) // set a threshold overlap!?
+        if (current_glycan_overlap > threshold) // set a threshold overlap!?
         { // make residue vector of condition: the full overlap overlap is above threshold
             filtered_residues_list.push_back(current_glycan->GetResidue());
         }
         *overlap_score = total_glycoprotein_overlap;
     }
     return filtered_residues_list;
+}
+
+// random number generator; allows full range rotation
+double RandomAngle_360range()
+{
+    return (rand() % 360) + 1 - 180;
+}
+
+// random number generator; specify a maximum step size relative to a start point
+double RandomAngle_PlusMinusX(double start_point, int max_step_size)
+{
+    return start_point + (rand() % (max_step_size * 2)) - max_step_size;
 }
 
 // torsion adjuster function, samples 360 deg for chi1 & 2 (1 degree increments)
@@ -230,9 +239,9 @@ void ResiRotor_FullRange(Assembly* glycoprotein, ResidueVector* move_these_guys)
                 if ( (*atom_iter)->GetName().compare("CG" )==0 ) atom4 = *atom_iter;
                 if ( (*atom_iter)->GetName().compare("ND2")==0 ) atom5 = *atom_iter;
             }
-            double random_dihedral = (rand() % 360) + 1 - 180;
+            double random_dihedral = RandomAngle_360range();
             glycoprotein->SetDihedral(atom1, atom2, atom3, atom4, random_dihedral); // CHI1
-            random_dihedral = (rand() % 360) + 1 - 180;
+            random_dihedral = RandomAngle_360range();
             glycoprotein->SetDihedral(atom2, atom3, atom4, atom5, random_dihedral); // CHI2
         }
         if( (*it1)->GetName().compare("TYR")==0 || (*it1)->GetName().compare("OLY")==0 )
@@ -245,9 +254,9 @@ void ResiRotor_FullRange(Assembly* glycoprotein, ResidueVector* move_these_guys)
                 if ( (*atom_iter)->GetName().compare("CG" )==0 ) atom4 = *atom_iter;
                 if ( (*atom_iter)->GetName().compare("CD1")==0 ) atom5 = *atom_iter;
             }
-            double random_dihedral = (rand() % 360) + 1 - 180;
+            double random_dihedral = RandomAngle_360range();
             glycoprotein->SetDihedral(atom1, atom2, atom3, atom4, random_dihedral); // CHI1
-            random_dihedral = (rand() % 360) + 1 - 180;
+            random_dihedral = RandomAngle_360range();
             glycoprotein->SetDihedral(atom2, atom3, atom4, atom5, random_dihedral); // CHI2
         }
         if( (*it1)->GetName().compare("THR")==0 || (*it1)->GetName().compare("OLT")==0 )
@@ -259,7 +268,7 @@ void ResiRotor_FullRange(Assembly* glycoprotein, ResidueVector* move_these_guys)
                 if ( (*atom_iter)->GetName().compare("CB" )==0 ) atom3 = *atom_iter;
                 if ( (*atom_iter)->GetName().compare("OG1")==0 ) atom4 = *atom_iter;
             }
-            double random_dihedral = (rand() % 360) + 1 - 180;
+            double random_dihedral = RandomAngle_360range();
             glycoprotein->SetDihedral(atom1, atom2, atom3, atom4, random_dihedral); // CHI1
         }
         if( (*it1)->GetName().compare("SER")==0 || (*it1)->GetName().compare("OLS")==0 )
@@ -271,10 +280,86 @@ void ResiRotor_FullRange(Assembly* glycoprotein, ResidueVector* move_these_guys)
                 if ( (*atom_iter)->GetName().compare("CB" )==0 ) atom3 = *atom_iter;
                 if ( (*atom_iter)->GetName().compare("OG" )==0 ) atom4 = *atom_iter;
             }
-            double random_dihedral = (rand() % 360) + 1 - 180;
+            double random_dihedral = RandomAngle_360range();
             glycoprotein->SetDihedral(atom1, atom2, atom3, atom4, random_dihedral); // CHI1
         }
     }
+}
+
+// torsion adjuster function, samples 360 deg for chi1 & 2 (1 degree increments)
+void ResiRotor_(Assembly* glycoprotein, ResidueVector* move_these_guys)
+{
+    for(ResidueVector::iterator it1 = move_these_guys->begin(); it1!=move_these_guys->end(); ++it1)
+    {
+        AtomVector atoms = (*it1)->GetAtoms();
+        Atom *atom1, *atom2, *atom3, *atom4, *atom5;
+        if( (*it1)->GetName().compare("ASN")==0 || (*it1)->GetName().compare("NLN")==0 )
+        { // (THIS IS A GOOD CODE FOLDING SPOT!) if your residue is an ASN or NLN: move chi1 and chi2!
+            for(AtomVector::iterator atom_iter = atoms.begin(); atom_iter != atoms.end(); ++atom_iter)
+            {
+                if ( (*atom_iter)->GetName().compare("N"  )==0 ) atom1 = *atom_iter;
+                if ( (*atom_iter)->GetName().compare("CA" )==0 ) atom2 = *atom_iter;
+                if ( (*atom_iter)->GetName().compare("CB" )==0 ) atom3 = *atom_iter;
+                if ( (*atom_iter)->GetName().compare("CG" )==0 ) atom4 = *atom_iter;
+                if ( (*atom_iter)->GetName().compare("ND2")==0 ) atom5 = *atom_iter;
+            }
+            double random_dihedral = RandomAngle_360range();
+            glycoprotein->SetDihedral(atom1, atom2, atom3, atom4, random_dihedral); // CHI1
+            random_dihedral = RandomAngle_360range();
+            glycoprotein->SetDihedral(atom2, atom3, atom4, atom5, random_dihedral); // CHI2
+        }
+        if( (*it1)->GetName().compare("TYR")==0 || (*it1)->GetName().compare("OLY")==0 )
+        { // (THIS IS A GOOD CODE FOLDING SPOT!) if your residue is an TYR or OLY: move chi1 and chi2!
+            for(AtomVector::iterator atom_iter = atoms.begin(); atom_iter != atoms.end(); ++atom_iter)
+            {
+                if ( (*atom_iter)->GetName().compare("N"  )==0 ) atom1 = *atom_iter;
+                if ( (*atom_iter)->GetName().compare("CA" )==0 ) atom2 = *atom_iter;
+                if ( (*atom_iter)->GetName().compare("CB" )==0 ) atom3 = *atom_iter;
+                if ( (*atom_iter)->GetName().compare("CG" )==0 ) atom4 = *atom_iter;
+                if ( (*atom_iter)->GetName().compare("CD1")==0 ) atom5 = *atom_iter;
+            }
+            double random_dihedral = RandomAngle_360range();
+            glycoprotein->SetDihedral(atom1, atom2, atom3, atom4, random_dihedral); // CHI1
+            random_dihedral = RandomAngle_360range();
+            glycoprotein->SetDihedral(atom2, atom3, atom4, atom5, random_dihedral); // CHI2
+        }
+        if( (*it1)->GetName().compare("THR")==0 || (*it1)->GetName().compare("OLT")==0 )
+        { // (THIS IS A GOOD CODE FOLDING SPOT!) if your residue is an THR or OLT: move chi1!
+            for(AtomVector::iterator atom_iter = atoms.begin(); atom_iter != atoms.end(); ++atom_iter)
+            {
+                if ( (*atom_iter)->GetName().compare("N"  )==0 ) atom1 = *atom_iter;
+                if ( (*atom_iter)->GetName().compare("CA" )==0 ) atom2 = *atom_iter;
+                if ( (*atom_iter)->GetName().compare("CB" )==0 ) atom3 = *atom_iter;
+                if ( (*atom_iter)->GetName().compare("OG1")==0 ) atom4 = *atom_iter;
+            }
+            double random_dihedral = RandomAngle_360range();
+            glycoprotein->SetDihedral(atom1, atom2, atom3, atom4, random_dihedral); // CHI1
+        }
+        if( (*it1)->GetName().compare("SER")==0 || (*it1)->GetName().compare("OLS")==0 )
+        { // (THIS IS A GOOD CODE FOLDING SPOT!) if your residue is an SER or OLS: move chi1!
+            for(AtomVector::iterator atom_iter = atoms.begin(); atom_iter != atoms.end(); ++atom_iter)
+            {
+                if ( (*atom_iter)->GetName().compare("N"  )==0 ) atom1 = *atom_iter;
+                if ( (*atom_iter)->GetName().compare("CA" )==0 ) atom2 = *atom_iter;
+                if ( (*atom_iter)->GetName().compare("CB" )==0 ) atom3 = *atom_iter;
+                if ( (*atom_iter)->GetName().compare("OG" )==0 ) atom4 = *atom_iter;
+            }
+            double random_dihedral = RandomAngle_360range();
+            glycoprotein->SetDihedral(atom1, atom2, atom3, atom4, random_dihedral); // CHI1
+        }
+    }
+}
+
+void write_pdb_file(Assembly glycoprotein, int cycle, string summary_filename, double score)
+{
+    string pdb_filename = "outputs/pose_" + to_string(cycle) + ".pdb";
+    PdbFileSpace::PdbFile *outputPdbFile1 = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
+    outputPdbFile1->Write(pdb_filename);
+
+    ofstream summary;   // write a file that describes the best conformations found
+    summary.open(summary_filename, ios::out | ios::app);
+    summary << score << "\t" << "pose_" << cycle << ".pdb\n";
+    summary.close();
 }
 
 // basically the main function that does all the work
@@ -287,42 +372,40 @@ void resolve_overlaps::monte_carlo(Assembly glycoprotein, GlycoSiteVector glycos
     int seed = time(NULL);
     srand(seed);
     std::cout << "USING SEED:    " << seed << "\n";
-
+    ////////////////////////////////////////////////////////////////////////////
     AtomVector protein = glycoprotein.GetAllAtomsOfAssemblyWithinProteinResidues();     // WITHOUT fat atoms
     AtomVector glycans = glycoprotein.GetAllAtomsOfAssemblyNotWithinProteinResidues();  // WITHOUT fat atoms
-    // ResidueVector residuevector = glycoprotein.GetAllResiduesOfAssembly();
-    // Implant_FatAtoms(glycoprotein, glycosites);
-    // { // this scope be for testing and stuff
-    //     ResidueVector all_residues = glycoprotein.GetAllResiduesOfAssembly();
-    //     for (ResidueVector::iterator resi_iter = all_residues.begin(); resi_iter != all_residues.end(); ++resi_iter)
-    //     {
-    //         std::cout << (*resi_iter)->GetName() << "\n";
-    //         AtomVector atoms = (*resi_iter)->GetAtoms();
-    //         for (AtomVector::iterator atom_iter = atoms.begin(); atom_iter != atoms.end(); ++atom_iter)
-    //         {
-    //             if ((*atom_iter)->GetName().find("fatom")==1) print_coords(*atom_iter);
-    //         }
-    //         std::cout << "\n";
-    //     }
-    // }
 
-    int cycle = 1, max_tries = 3;
-    while (cycle <= max_tries)
+    string summary_filename = "outputs/output_summary.txt";
+    double best_score_fat  = -0.1, best_score_normal = -0.1;
+    int cycle = 1, max_cycles = 600;
+    while (cycle <= max_cycles)
     {
-        double overlap_score = 0.0;
-        std::cout << "=========== cycle ===========\n";
-        ///////////////////////////////////////////////// SCORE IT USING FAT ATOMS
+        std::cout << "============================ CYCLE " << cycle <<"\n";
+        ResidueVector move_these_guys;
+        double overlap_score = -0.1;
+
         std::cout << "\n----- fat atoms\n";
         Implant_FatAtoms(glycoprotein, glycosites);
-        ResidueVector merb_these_guys = ResiFilter_ScoreFatAtomOverlap(&glycoprotein, &glycosites, &overlap_score);
+        move_these_guys = ResiFilter_ScoreFatAtomOverlap(&glycoprotein, &glycosites, &overlap_score, 2.0); // SCORE IT USING FAT ATOMS
         Sacrifice_FatAtoms(glycoprotein);
         std::cout << "OVERALL: " << overlap_score << "\n\n";
-        ///////////////////////////////////////////////// SCORE IT USING NORMAL ATOMS
-        std::cout << "----- normal atoms\n";
-        ResidueVector move_these_guys = ResiFilter_ScoreTrueOverlap(&glycoprotein, &glycosites, &overlap_score);
-        std::cout << "OVERALL: " << overlap_score << "\n\n";
-        /////////////////////////////////////////////////
-        ResiRotor_FullRange(&glycoprotein, &move_these_guys);
         cycle++;
+        if (overlap_score < best_score_fat || best_score_fat == -0.1)
+        {
+            best_score_fat = overlap_score;
+            write_pdb_file(glycoprotein, cycle, summary_filename, overlap_score);
+        }
+
+        ///////////////////////////////////////////////// SCORE IT USING NORMAL ATOMS
+        // std::cout << "----- normal atoms\n";
+        // ResidueVector move_these_guys = ResiFilter_ScoreTrueOverlap(&glycoprotein, &glycosites, &overlap_score, 2.0);
+        // std::cout << "OVERALL: " << overlap_score << "\n\n";
+        /////////////////////////////////////////////////
+
+        ResiRotor_FullRange(&glycoprotein, &move_these_guys);
+        // std::cin.get();
+
     }
+    std::cout << best_score_fat << "\n";
 }
