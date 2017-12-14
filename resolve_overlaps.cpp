@@ -210,6 +210,18 @@ ResidueVector ResiFilter_ScoreTrueOverlap(Assembly* glycoprotein, GlycoSiteVecto
     return filtered_residues_list;
 }
 
+// not actually a score function; simply outputs all glycosylated residues to SHUFFLE with the ResiRotor functions
+ResidueVector ResiFilter_Aggregate(Assembly* glycoprotein, GlycoSiteVector* glycosites)
+{
+    ResidueVector filtered_residues_list;
+    for(GlycoSiteVector::iterator it1 = glycosites->begin(); it1 != glycosites->end(); ++it1)
+    {
+        GlycosylationSite *current_glycan = *it1;
+        filtered_residues_list.push_back(current_glycan->GetResidue());
+    }
+    return filtered_residues_list;
+}
+
 // random number generator; allows full range rotation
 double RandomAngle_360range()
 {
@@ -286,8 +298,8 @@ void ResiRotor_FullRange(Assembly* glycoprotein, ResidueVector* move_these_guys)
     }
 }
 
-// torsion adjuster function, samples 360 deg for chi1 & 2 (1 degree increments)
-void ResiRotor_(Assembly* glycoprotein, ResidueVector* move_these_guys)
+// torsion adjuster function, restricts movement to +/- a given range with RandomAngle_PlusMinusX()
+void ResiRotor_BabyStep(Assembly* glycoprotein, ResidueVector* move_these_guys)
 {
     for(ResidueVector::iterator it1 = move_these_guys->begin(); it1!=move_these_guys->end(); ++it1)
     {
@@ -303,9 +315,9 @@ void ResiRotor_(Assembly* glycoprotein, ResidueVector* move_these_guys)
                 if ( (*atom_iter)->GetName().compare("CG" )==0 ) atom4 = *atom_iter;
                 if ( (*atom_iter)->GetName().compare("ND2")==0 ) atom5 = *atom_iter;
             }
-            double random_dihedral = RandomAngle_360range();
+            double random_dihedral = RandomAngle_PlusMinusX(glycoprotein->CalculateTorsionAngleByAtoms(atom1, atom2, atom3, atom4), 6);
             glycoprotein->SetDihedral(atom1, atom2, atom3, atom4, random_dihedral); // CHI1
-            random_dihedral = RandomAngle_360range();
+            random_dihedral = RandomAngle_PlusMinusX(glycoprotein->CalculateTorsionAngleByAtoms(atom2, atom3, atom4, atom5), 6);
             glycoprotein->SetDihedral(atom2, atom3, atom4, atom5, random_dihedral); // CHI2
         }
         if( (*it1)->GetName().compare("TYR")==0 || (*it1)->GetName().compare("OLY")==0 )
@@ -318,9 +330,9 @@ void ResiRotor_(Assembly* glycoprotein, ResidueVector* move_these_guys)
                 if ( (*atom_iter)->GetName().compare("CG" )==0 ) atom4 = *atom_iter;
                 if ( (*atom_iter)->GetName().compare("CD1")==0 ) atom5 = *atom_iter;
             }
-            double random_dihedral = RandomAngle_360range();
+            double random_dihedral = RandomAngle_PlusMinusX(glycoprotein->CalculateTorsionAngleByAtoms(atom1, atom2, atom3, atom4), 6);
             glycoprotein->SetDihedral(atom1, atom2, atom3, atom4, random_dihedral); // CHI1
-            random_dihedral = RandomAngle_360range();
+            random_dihedral = RandomAngle_PlusMinusX(glycoprotein->CalculateTorsionAngleByAtoms(atom2, atom3, atom4, atom5), 6);
             glycoprotein->SetDihedral(atom2, atom3, atom4, atom5, random_dihedral); // CHI2
         }
         if( (*it1)->GetName().compare("THR")==0 || (*it1)->GetName().compare("OLT")==0 )
@@ -332,7 +344,7 @@ void ResiRotor_(Assembly* glycoprotein, ResidueVector* move_these_guys)
                 if ( (*atom_iter)->GetName().compare("CB" )==0 ) atom3 = *atom_iter;
                 if ( (*atom_iter)->GetName().compare("OG1")==0 ) atom4 = *atom_iter;
             }
-            double random_dihedral = RandomAngle_360range();
+            double random_dihedral = RandomAngle_PlusMinusX(glycoprotein->CalculateTorsionAngleByAtoms(atom1, atom2, atom3, atom4), 6);
             glycoprotein->SetDihedral(atom1, atom2, atom3, atom4, random_dihedral); // CHI1
         }
         if( (*it1)->GetName().compare("SER")==0 || (*it1)->GetName().compare("OLS")==0 )
@@ -344,7 +356,7 @@ void ResiRotor_(Assembly* glycoprotein, ResidueVector* move_these_guys)
                 if ( (*atom_iter)->GetName().compare("CB" )==0 ) atom3 = *atom_iter;
                 if ( (*atom_iter)->GetName().compare("OG" )==0 ) atom4 = *atom_iter;
             }
-            double random_dihedral = RandomAngle_360range();
+            double random_dihedral = RandomAngle_PlusMinusX(glycoprotein->CalculateTorsionAngleByAtoms(atom1, atom2, atom3, atom4), 6);
             glycoprotein->SetDihedral(atom1, atom2, atom3, atom4, random_dihedral); // CHI1
         }
     }
@@ -372,40 +384,63 @@ void resolve_overlaps::monte_carlo(Assembly glycoprotein, GlycoSiteVector glycos
     int seed = time(NULL);
     srand(seed);
     std::cout << "USING SEED:    " << seed << "\n";
+    std::cout << setprecision(6); // make it so my tabs wont be ruined by the number output
     ////////////////////////////////////////////////////////////////////////////
     AtomVector protein = glycoprotein.GetAllAtomsOfAssemblyWithinProteinResidues();     // WITHOUT fat atoms
     AtomVector glycans = glycoprotein.GetAllAtomsOfAssemblyNotWithinProteinResidues();  // WITHOUT fat atoms
 
     string summary_filename = "outputs/output_summary.txt";
     double best_score_fat  = -0.1, best_score_normal = -0.1;
-    int cycle = 1, max_cycles = 600;
+    int cycle = 0, cycles_since_last_improvement = 0, max_cycles = 16000;
     while (cycle <= max_cycles)
     {
+        cycle++;
+        cycles_since_last_improvement++;
         std::cout << "============================ CYCLE " << cycle <<"\n";
+        bool fine_tune = false;
         ResidueVector move_these_guys;
-        double overlap_score = -0.1;
+        double score_to_improve = -0.1, overlap_score = -0.1;
 
         std::cout << "\n----- fat atoms\n";
         Implant_FatAtoms(glycoprotein, glycosites);
         move_these_guys = ResiFilter_ScoreFatAtomOverlap(&glycoprotein, &glycosites, &overlap_score, 2.0); // SCORE IT USING FAT ATOMS
         Sacrifice_FatAtoms(glycoprotein);
         std::cout << "OVERALL: " << overlap_score << "\n\n";
-        cycle++;
         if (overlap_score < best_score_fat || best_score_fat == -0.1)
         {
             best_score_fat = overlap_score;
+            ////////////////////////////////////////////////////////////////////
+            std::cout << "----- normal atoms\n";
+            ResidueVector move_these_guys_real = ResiFilter_ScoreTrueOverlap(&glycoprotein, &glycosites, &overlap_score, 2.0);
+            std::cout << "OVERALL: " << overlap_score << "\n\n";
             write_pdb_file(glycoprotein, cycle, summary_filename, overlap_score);
+            best_score_normal = overlap_score;
+            ////////////////////////////////////////////////////////////////////
+            cycles_since_last_improvement = 0;
+            // score_to_improve = overlap_score;
+            // fine_tune = true;
         }
-
-        ///////////////////////////////////////////////// SCORE IT USING NORMAL ATOMS
-        // std::cout << "----- normal atoms\n";
-        // ResidueVector move_these_guys = ResiFilter_ScoreTrueOverlap(&glycoprotein, &glycosites, &overlap_score, 2.0);
-        // std::cout << "OVERALL: " << overlap_score << "\n\n";
-        /////////////////////////////////////////////////
-
+        // if (fine_tune = true && cycle > 200)
+        // {
+        //     while (overlap_score < score_to_improve+120)
+        //     {
+        //         cycle++;
+        //         std::cout << "============================ CYCLE " << cycle <<"\n";
+        //         ResidueVector nudge_these_guys = ResiFilter_ScoreTrueOverlap(&glycoprotein, &glycosites, &overlap_score, 2.0);
+        //         ResiRotor_BabyStep(&glycoprotein, &nudge_these_guys);
+        //         std::cout << "OVERALL: " << overlap_score << "\n\n";
+        //         if (overlap_score < score_to_improve)
+        //         {
+        //             score_to_improve = overlap_score;
+        //             write_pdb_file(glycoprotein, cycle, summary_filename, overlap_score);
+        //         }
+        //     }
+        // }
         ResiRotor_FullRange(&glycoprotein, &move_these_guys);
-        // std::cin.get();
-
+        if (cycles_since_last_improvement > 2700) // allow a certain number of tries before shuffling the protein
+        {
+            ResidueVector shuffle_these_guys = ResiFilter_Aggregate(&glycoprotein, &glycosites);
+            ResiRotor_FullRange(&glycoprotein, &shuffle_these_guys);
+        }
     }
-    std::cout << best_score_fat << "\n";
 }
