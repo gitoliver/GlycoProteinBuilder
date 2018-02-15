@@ -15,11 +15,10 @@ typedef std::vector<GlycosylationSite*> GlycoSiteVector;
 
 //*******************************************
 
-using namespace MolecularModeling;
 
 namespace resolve_overlaps
 {
-    void monte_carlo(Assembly glycoprotein, GlycoSiteVector glycosites);
+    void monte_carlo(MolecularModeling::Assembly glycoprotein, GlycoSiteVector glycosites);
 }
 
 #endif // RESOLVE_OVERLAPS_H
