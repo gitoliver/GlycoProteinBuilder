@@ -16,7 +16,6 @@ public:
     //                    TYPE DEFINITION                   //
     //////////////////////////////////////////////////////////
     //typedef std::vector<Atom*> AtomVector;
-    typedef std::vector<GlycosylationSite*> GlycoSiteVector;
 
     //////////////////////////////////////////////////////////
     //                       CONSTRUCTOR                    //
@@ -38,14 +37,19 @@ public:
     double GetProteinOverlap();
     double GetChi1Value();
     double GetChi2Value();
+    AtomVector GetSelfGlycanBeads();
+    AtomVector GetProteinBeads();
+    AtomVector GetOtherGlycanBeads();
 
     //////////////////////////////////////////////////////////
     //                       FUNCTIONS                      //
     //////////////////////////////////////////////////////////
     void AttachGlycan(Assembly glycan, Assembly *glycoprotein);
+
     //double calculate_overlaps(Atomvector all_atoms);
     //void calculate_protein_overlap(Atomvector );
-    void SetDihedralAtoms(Residue* residue);
+    double calculate_bead_overlaps();
+    void SetChiAtoms(Residue* residue);
 
     //////////////////////////////////////////////////////////
     //                       MUTATOR                        //
@@ -58,6 +62,10 @@ public:
     void SetProteinOverlap(double overlap);
     void SetChi1Value(double angle, Assembly *glycoprotein);
     void SetChi2Value(double angle, Assembly *glycoprotein);
+    void SetSelfGlycanBeads(AtomVector *beads);
+    void SetProteinBeads(AtomVector *beads);
+    void SetOtherGlycanBeads(AtomVector *beads);
+
 
     //////////////////////////////////////////////////////////
     //                       DISPLAY FUNCTION               //
@@ -86,6 +94,10 @@ private:
     double protein_overlap_;
     AtomVector chi1_;
     AtomVector chi2_;
+    AtomVector self_glycan_beads_;
+    AtomVector other_glycan_beads_;
+    AtomVector protein_beads_;
+
     //Assembly alternate_sidechain_;
 
 };

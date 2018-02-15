@@ -9,11 +9,13 @@ typedef std::vector<Residue*> ResidueVector;
 typedef std::vector<Atom*> AtomVector;
 //*******************************************
 
-AtomVector Add_Beads(Assembly glycoprotein, GlycoSiteVector glycosites);
+void Add_Beads(Assembly glycoprotein, GlycoSiteVector glycosites);
 void Remove_Beads(Assembly glycoprotein);
+double Calculate_Bead_Overlap(AtomVector beads);
+
+
 double Atomwise_CalculateAtomicOverlaps(Atom *atomA, Atom *atomB, double radiusA, double radiusB);
 double modified_CalculateAtomicOverlaps(AtomVector atomsA, AtomVector atomsB);
-void fast_overlap_calculation();
 
 #endif // BEAD_RESIDUES_H
 

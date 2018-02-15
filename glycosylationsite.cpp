@@ -65,6 +65,33 @@ double GlycosylationSite::GetProteinOverlap()
     return protein_overlap_;
 }
 
+double GetChi1Value()
+{
+    std::cout << "Oh no I didn't write this" << std::endl;
+}
+
+double GetChi2Value()
+{
+    std::cout << "Oh no I didn't write this" << std::endl;
+}
+
+AtomVector GlycosylationSite::GetSelfGlycanBeads()
+{
+    return self_glycan_beads_;
+}
+
+AtomVector GlycosylationSite::GetProteinBeads()
+{
+    return protein_beads_;
+}
+
+AtomVector GlycosylationSite::GetOtherGlycanBeads()
+{
+    return other_glycan_beads_;
+}
+
+
+
 //////////////////////////////////////////////////////////
 //                       FUNCTIONS                      //
 //////////////////////////////////////////////////////////
@@ -305,11 +332,12 @@ void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_resid
 }
 
 // This is a stupid way to do it. Need dihedral class but in a rush. Fix later.
-void GlycosylationSite::SetDihedralAtoms(Residue* residue)
+// Also stupid: need to use the atoms in the glycan for chi2.
+void GlycosylationSite::SetChiAtoms(Residue* residue)
 {
     AtomVector atoms = residue->GetAtoms();
     Atom *atom1, *atom2, *atom3, *atom4, *atom5;
-    bool chi2 = false;
+    bool is_Chi2 = false;
     for(AtomVector::iterator it1 = atoms.begin(); it1 != atoms.end(); ++it1)
     {
         Atom *atom = *it1;
@@ -319,14 +347,50 @@ void GlycosylationSite::SetDihedralAtoms(Residue* residue)
         if ( atom->GetName().compare("CG" )==0 ) { atom4 = atom; } // Asn + Tyr
         if ( atom->GetName().compare("OG1")==0 ) { atom4 = atom; } // Thr
         if ( atom->GetName().compare("OG" )==0 ) { atom4 = atom; } // Ser
-        if ( atom->GetName().compare("ND2")==0 ) { atom5 = atom; chi2 = true; } // Asn
-        if ( atom->GetName().compare("CD1")==0 ) { atom5 = atom; chi2 = true; } // Tyr
+        if ( atom->GetName().compare("ND2")==0 ) { atom5 = atom; is_Chi2 = true; } // Asn
+        if ( atom->GetName().compare("CD1")==0 ) { atom5 = atom; is_Chi2 = true; } // Tyr
     }
     chi1_ = {atom1, atom2, atom3, atom4};
-    if (chi2)
+    if (is_Chi2)
     {
         chi2_ = {atom2, atom3, atom4, atom5};
     }
+}
+
+ double GlycosylationSite::calculate_bead_overlaps()
+ {
+    double glycan_radius = 3.0, protein_radius = 4.0; // Should cover whole residue.
+    double distance = 0.0, total_overlap = 0.0, protein_overlap = 0.0, glycan_overlap = 0.0;
+    for(AtomVector::iterator it1 = self_glycan_beads_.begin(); it1 != self_glycan_beads_.end(); ++it1)
+    {
+        Atom *atomA = *it1;
+        for(AtomVector::iterator it2 = protein_beads_.begin(); it2 != protein_beads_.end(); ++it2)
+        {  
+            Atom *atomB = *it2;
+            if ( (atomA->GetCoordinates().at(0)->GetX() - atomB->GetCoordinates().at(0)->GetX()) < (glycan_radius + protein_radius) ) // This is faster than calulating distance, and rules out tons of atom pairs.
+            {
+                distance = atomA->GetDistanceToAtom(atomB);
+                if ( ( distance < (glycan_radius + protein_radius) ) && ( distance > 0.0 ) ) //Close enough to overlap, but not the same atom
+                {
+                    protein_overlap += gmml::CalculateAtomicOverlaps(atomA, atomB, glycan_radius, protein_radius); // This calls the version with radius values
+                }
+            }
+        }
+        for(AtomVector::iterator it2 = other_glycan_beads_.begin(); it2 != other_glycan_beads_.end(); ++it2)
+        {
+            Atom *atomB = *it2;
+            if ( (atomA->GetCoordinates().at(0)->GetX() - atomB->GetCoordinates().at(0)->GetX()) < 6.0 ) // This is faster than calulating distance, and rules out tons of atom pairs.
+            {
+                distance = atomA->GetDistanceToAtom(atomB);
+                if ( ( distance < (glycan_radius + glycan_radius) ) && ( distance > 0.0 ) ) //Close enough to overlap, but not the same atom
+                {
+                    glycan_overlap += gmml::CalculateAtomicOverlaps(atomA, atomB, glycan_radius, glycan_radius); // This calls the version with radius values
+                }
+            }
+        }
+    }
+    total_overlap = (protein_overlap + glycan_overlap); // Perhaps will want these individual values, can split function into two.
+    return (total_overlap / gmml::CARBON_SURFACE_AREA); //Normalise to area of a buried carbon
 }
 
 //////////////////////////////////////////////////////////
@@ -341,7 +405,7 @@ void GlycosylationSite::SetGlycanName(std::string glycan_name)
 void GlycosylationSite::SetResidue(Residue* residue)
 {
     residue_ = residue;
-    this->SetDihedralAtoms(residue);
+    this->SetChiAtoms(residue);
 }
 
 void GlycosylationSite::SetGlycan(Assembly glycan)
@@ -374,6 +438,19 @@ void GlycosylationSite::SetChi2Value(double angle, Assembly *glycoprotein)
     Atom *atom3 = chi1_.at(2);
     Atom *atom4 = chi1_.at(3);
     glycoprotein->SetDihedral(atom1, atom2, atom3, atom4, angle);
+}
+
+void GlycosylationSite::SetSelfGlycanBeads(AtomVector *beads)
+{
+    self_glycan_beads_ = *beads;
+}
+void GlycosylationSite::SetProteinBeads(AtomVector *beads)
+{
+    protein_beads_ = *beads;
+}
+void GlycosylationSite::SetOtherGlycanBeads(AtomVector *beads)
+{
+    other_glycan_beads_ = *beads;
 }
 //////////////////////////////////////////////////////////
 //                       DISPLAY FUNCTION               //

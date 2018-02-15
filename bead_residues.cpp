@@ -1,10 +1,10 @@
 #include "bead_residues.h"
 
-AtomVector Add_Beads(MolecularModeling::Assembly glycoprotein, GlycoSiteVector glycosites)
+void Add_Beads(MolecularModeling::Assembly glycoprotein, GlycoSiteVector glycosites)
 {
-	AtomVector beads; // Will be returned.
+	AtomVector protein_beads; 
     ResidueVector all_residues = glycoprotein.GetAllResiduesOfAssembly();
-    beads.resize(all_residues.size()); // resource efficient to set size of beads now. Know size as one bead per residue.
+    // Go through, find all protein residues, add bead on CA atom.
     for (ResidueVector::iterator it1 = all_residues.begin(); it1 != all_residues.end(); ++it1)
     {
         Residue *residue = *it1;
@@ -21,21 +21,31 @@ AtomVector Add_Beads(MolecularModeling::Assembly glycoprotein, GlycoSiteVector g
                 {
                     Atom* bead_atom = new Atom(residue, "3fat", atom->GetCoordinates());
                     residue->AddAtom(bead_atom);
-                    beads.push_back(bead_atom);
+                    protein_beads.push_back(bead_atom);
                 }
             }
         }
-        else // the current residue is an glycan (or something else?!?:O)
+    }
+    // Go through all glycosite glycans, add bead in center of each residue, attach it to one other atom in residue.
+    // Then set protein_beads
+    for (GlycoSiteVector::iterator it1 = glycosites.begin(); it1 != glycosites.end(); ++it1)
+    {
+    	GlycosylationSite *glycosite = *it1;
+    	glycosite->SetProteinBeads(&protein_beads);
+    	AtomVector these_beads;
+    	ResidueVector glycan_residues = glycosite->GetAttachedGlycan()->GetAllResiduesOfAssembly();
+        for (ResidueVector::iterator it2 = all_residues.begin(); it2 != all_residues.end(); ++it2)
         {
-            if (residue->GetName().compare("SUP") !=0) // don't add one to the superimposition atoms
+        	Residue *residue = *it2;
+        	if (residue->GetName().compare("SUP") !=0) // don't add one to the superimposition atoms
             {
                 // std::cout << (*resi_iter)->GetName() << "\tG\t" << (*resi_iter)->CheckIfProtein() << endl;
                 Atom* bead_atom = new Atom(residue, "4fat", residue->GetGeometricCenter());
                 residue->AddAtom(bead_atom);
-                beads.push_back(bead_atom);
+                these_beads.push_back(bead_atom);
                 //Bond bead_atom to any other atom in residue so when glycan is moved, bead_atom moves too.
                 Atom *any_atom = residue->GetAtoms().at(0); // 0 is arbitrary, any atom would do.
-                std::cout << "Blow here?" << any_atom->GetId() << std::endl;
+                //std::cout << "Blow here?" << any_atom->GetId() << std::endl;
                 any_atom->GetNode()->AddNodeNeighbor(bead_atom);
                 AtomVector temp = {any_atom};
                 AtomNode *node = new AtomNode(); // DELETE IS FOR LOSERS.
@@ -43,8 +53,29 @@ AtomVector Add_Beads(MolecularModeling::Assembly glycoprotein, GlycoSiteVector g
                 bead_atom->GetNode()->SetNodeNeighbors(temp);
             }
         }
+        glycosite->SetSelfGlycanBeads(&these_beads);
     }
-    return beads;
+
+    // Now find beads from other glycans and add them to list of other_glycan_beads for each glycosite
+    for (GlycoSiteVector::iterator it1 = glycosites.begin(); it1 != glycosites.end(); ++it1)
+    {
+    	GlycosylationSite *glycosite1 = *it1;
+    	AtomVector other_glycan_beads;
+    	for (GlycoSiteVector::iterator it2 = glycosites.begin(); it2 != glycosites.end(); ++it2)
+    	{
+    		GlycosylationSite *glycosite2 = *it2;
+    		if(glycosite1 != glycosite2) // Check if same site
+    		{
+    			// append each other glycosite's beads to list of other_glycan_beads: a.insert(std::end(a), std::begin(b), std::end(b));
+    			AtomVector temp = glycosite2->GetSelfGlycanBeads();
+
+    			other_glycan_beads.insert(std::end(other_glycan_beads), std::begin(temp), std::end(temp));
+
+    		}
+
+    	}
+    	glycosite1->SetOtherGlycanBeads(&other_glycan_beads);
+    }
 }
 
 void Remove_Beads(MolecularModeling::Assembly glycoprotein)
@@ -63,6 +94,11 @@ void Remove_Beads(MolecularModeling::Assembly glycoprotein)
             }
         }
     }
+}
+
+double Calculate_Bead_Overlap(AtomVector beads)
+{
+
 }
 
 // most of this is copied from gmml; used by ONLY the fat atom mode score; [TWEAK SETTINGS]
