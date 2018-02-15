@@ -30,19 +30,12 @@ typedef std::vector<GlycosylationSite*> GlycoSiteVector;
 /*******************************************/
 /* Function Declarations                   */
 /*******************************************/
+void Find_and_Prepare_Protein_Residues_for_Glycosylation(GlycoSiteVector *glycosites, ResidueVector *protein_residues, const std::vector<std::string> *glycositeList);
 
-void GetCenterOfGeometry(Assembly *assembly, GeometryTopology::Coordinate *center);
-double GetDistanceToAtom(Atom *A, Atom *otherAtom);
-double CalculateAtomicOverlaps(Assembly *assemblyA, Assembly *assemblyB);
-
-void GetResidueRingCenter (Residue *residue, GeometryTopology::Coordinate *center);
-void Find_and_Prepare_Protein_Residues_for_Glycosylation(GlycoSiteVector *glycosites, ResidueVector *protein_residues, const std::vector<std::__cxx11::string> *glycositeList);
-
-//int main(int argc, char *argv[])
 int main()
 {
     std::string working_Directory = Find_Program_Working_Directory();
-    std::string installation_Directory = Find_Program_Installation_Directory();
+    //std::string installation_Directory = Find_Program_Installation_Directory();
 
     //************************************************//
     // Reading input file                             //
@@ -96,8 +89,8 @@ int main()
     Assembly glycoprotein ((working_Directory + "/inputs/" + proteinPDB), gmml::InputFileType::PDB);
     glycoprotein.BuildStructureByDistance();
 
-    ResidueVector protein_residues = glycoprotein.GetResidues();
-    Find_and_Prepare_Protein_Residues_for_Glycosylation(&glycoSites, &protein_residues, &glycositeList);
+    ResidueVector glycoprotein_residues = glycoprotein.GetResidues();
+    Find_and_Prepare_Protein_Residues_for_Glycosylation(&glycoSites, &glycoprotein_residues, &glycositeList);
 
     //************************************************//
     // Load glycan files from directory               //
@@ -152,14 +145,14 @@ int main()
 void Find_and_Prepare_Protein_Residues_for_Glycosylation(GlycoSiteVector *glycosites, ResidueVector *protein_residues, const std::vector<std::string> *glycositeList)
 {
     int i = 0;
-    for(std::vector<std::string>::const_iterator it = glycositeList->begin(); it != glycositeList->end(); ++it)
+    for(std::vector<std::string>::const_iterator it1 = glycositeList->begin(); it1 != glycositeList->end(); ++it1)
     {
-        std::string glycosite = (*it);
+        std::string glycosite = (*it1);
         std::cout << "Preparing glycosite: " << glycosite << std::endl;
-        for(ResidueVector::iterator itt = protein_residues->begin(); itt != protein_residues->end(); ++itt)
+        for(ResidueVector::iterator it2 = protein_residues->begin(); it2 != protein_residues->end(); ++it2)
         {
             // Comparing strings is easier:
-            Residue *residue = (*itt);
+            Residue *residue = (*it2);
             std::string id = residue->GetId();
             std::string formatted_glycosite = "_" + glycosite + "_";
             // If the residue number in the input file is equal to the current residue number
@@ -171,89 +164,14 @@ void Find_and_Prepare_Protein_Residues_for_Glycosylation(GlycoSiteVector *glycos
                 //glycosites->push_back(residue);
                 glycosites->at(i)->SetResidue(residue);
                 ++i;
-                //prepare_Glycans_For_Superimposition_To_Particular_Residue(working_Directory, residue->GetName(), &glycan); //OG NOT HAVING glycan SET WILL BREAK IT LATER!!!!!!!!!!!!!!!!!!!!!!!!!
-              /*  if (residue->GetName().compare("SER")==0)
-                    residue->SetName("OLS");
-                if (residue->GetName().compare("THR")==0)
-                    residue->SetName("OLT");
-                if (residue->GetName().compare("ASN")==0)
-                    residue->SetName("NLN");
-                if (residue->GetName().compare("TYR")==0)
-                    residue->SetName("OLY");
-                    */
             }
         }
     }
 }
 
-double GetDistanceToAtom(Atom *A, Atom *otherAtom)
-{
-    double x = ( A->GetCoordinates().at(0)->GetX() - otherAtom->GetCoordinates().at(0)->GetX() );
-    double y = ( A->GetCoordinates().at(0)->GetY() - otherAtom->GetCoordinates().at(0)->GetY() );
-    double z = ( A->GetCoordinates().at(0)->GetZ() - otherAtom->GetCoordinates().at(0)->GetZ() );
 
-    return sqrt( (x*x) + (y*y) + (z*z) );
-}
 
-double CalculateAtomicOverlaps(Assembly *assemblyA, Assembly *assemblyB)
-{
-    AtomVector assemblyAAtoms = assemblyA->GetAllAtomsOfAssembly();
-    AtomVector assemblyBAtoms = assemblyB->GetAllAtomsOfAssembly();
 
-    double rA = 0.0, rB = 0.0, distance = 0.0, totalOverlap = 0.0;
-
-    for(AtomVector::iterator atomA = assemblyAAtoms.begin(); atomA != assemblyAAtoms.end(); atomA++)
-    {
-        for(AtomVector::iterator atomB = assemblyBAtoms.begin(); atomB != assemblyBAtoms.end(); atomB++)
-        {
-            distance = GetDistanceToAtom((*atomA), (*atomB));
-            if ( ( distance < 3.6 ) && ( distance > 0.0 ) ) //Close enough to overlap, but not the same atom
-            {
-                // element info not set, so I look at first letter of atom name.
-                if ((*atomA)->GetName().at(0) == 'C') rA = 1.70;
-                if ((*atomA)->GetName().at(0) == 'O') rA = 1.52;
-                if ((*atomA)->GetName().at(0) == 'N') rA = 1.55;
-                if ((*atomA)->GetName().at(0) == 'S') rA = 1.80;
-
-                if ((*atomB)->GetName().at(0) == 'C') rB = 1.70;
-                if ((*atomB)->GetName().at(0) == 'O') rB = 1.52;
-                if ((*atomB)->GetName().at(0) == 'N') rB = 1.55;
-                if ((*atomB)->GetName().at(0) == 'S') rB = 1.80;
-       //         std::cout << "Distance=" << distance << " rA=" << rA << " rB=" << rB << std::endl;
-                if (rA + rB > distance + 0.6){ // 0.6 overlap is deemed acceptable. (Copying chimera:)
-
-                    totalOverlap += ( 2 * PI * rA* ( rA - distance / 2 - ( ( (rA*rA) - (rB*rB) ) / (2 * distance) ) ) );
-
-                    //std::cout << "Overlap=" << totalOverlap << std::endl;
-                }
-            }
-        }
-    }
-    return totalOverlap;
-}
-
-void GetCenterOfGeometry(Assembly *assembly, GeometryTopology::Coordinate *center)
-{
-    double sumX=0.0;
-    double sumY=0.0;
-    double sumZ=0.0;
-
-    CoordinateVector all_coords = assembly->GetAllCoordinates();
-    for(CoordinateVector::iterator it = all_coords.begin(); it != all_coords.end(); it++)
-    {
-
-        GeometryTopology::Coordinate coord = *it;
-        sumX += coord.GetX();
-        sumY += coord.GetY();
-        sumZ += coord.GetZ();
-    }
-
-    center->SetX( (sumX / all_coords.size()) );
-    center->SetY( (sumY / all_coords.size()) );
-    center->SetZ( (sumZ / all_coords.size()) );
-
-    return;
-}
 
 /*void FindConnectedAtoms(Atom *atom, Assembly::AtomVector &visitedAtoms){
 
@@ -282,34 +200,6 @@ void GetCenterOfGeometry(Assembly *assembly, GeometryTopology::Coordinate *cente
 }
 */
 
-// Change Coordinate so I can do coordinate.subtract(coordinate);
-GeometryTopology::Coordinate subtract_coordinates(GeometryTopology::Coordinate minuaend, GeometryTopology::Coordinate subtrahend)
-{
-    GeometryTopology::Coordinate new_coordinate ( (minuaend.GetX()-subtrahend.GetX()), (minuaend.GetY()-subtrahend.GetY()), (minuaend.GetZ()-subtrahend.GetZ()) );
-    return new_coordinate;
-}
 
-void GetResidueRingCenter (Residue *residue, GeometryTopology::Coordinate *center)
-{
-    double sumX = 0.0, sumY = 0.0, sumZ = 0.0;
-    int numberOfRingAtoms = 0;
-    AtomVector atoms = residue->GetAtoms();
 
-    for(Assembly::AtomVector::iterator atom = atoms.begin(); atom != atoms.end(); atom++)
-    {
-
-        if ( (*atom)->GetIsRing() )
-        {
-            numberOfRingAtoms++;
-            std::cout << "Atom is ring: " << (*atom)->GetName() << std::endl;
-            sumX += (*atom)->GetCoordinates().at(0)->GetX();
-            sumY += (*atom)->GetCoordinates().at(0)->GetY();
-            sumZ += (*atom)->GetCoordinates().at(0)->GetZ();
-        }
-    }
-    center->SetX( sumX / numberOfRingAtoms  );
-    center->SetY( sumY / numberOfRingAtoms  );
-    center->SetZ( sumZ / numberOfRingAtoms  );
-    return;
-}
 

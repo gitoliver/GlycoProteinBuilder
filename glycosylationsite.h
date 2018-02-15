@@ -3,8 +3,11 @@
 
 //#include <iostream>
 //#include "/home/ubunter/software/gems/gmml/includes/gmml.hpp"
-#include "../../../gems/gmml/includes/gmml.hpp"
+#include "../../gems/gmml/includes/gmml.hpp"
+
 //#include "attachedglycan.h"
+
+
 
 class GlycosylationSite
 {
@@ -12,7 +15,7 @@ public:
     //////////////////////////////////////////////////////////
     //                    TYPE DEFINITION                   //
     //////////////////////////////////////////////////////////
-
+    //typedef std::vector<Atom*> AtomVector;
     //////////////////////////////////////////////////////////
     //                       CONSTRUCTOR                    //
     //////////////////////////////////////////////////////////
@@ -28,13 +31,19 @@ public:
     std::string GetGlycanName();
     Residue* GetResidue();
     Assembly* GetAttachedGlycan();
+    double GetTotalOverlap();
+    double GetGlycanOverlap();
+    double GetProteinOverlap();
+    double GetChi1Value();
+    double GetChi2Value();
 
     //////////////////////////////////////////////////////////
     //                       FUNCTIONS                      //
     //////////////////////////////////////////////////////////
     void AttachGlycan(Assembly glycan, Assembly *glycoprotein);
-    void Prepare_Glycans_For_Superimposition_To_Particular_Residue(std::string amino_acid_name);
-    void Superimpose_Glycan_To_Glycosite(Residue *glycosite_residue);
+    //double calculate_overlaps(Atomvector all_atoms);
+    //void calculate_protein_overlap(Atomvector );
+    void SetDihedralAtoms(Residue* residue);
 
     //////////////////////////////////////////////////////////
     //                       MUTATOR                        //
@@ -43,6 +52,10 @@ public:
     void SetGlycanName(std::string glycan_name);
     void SetResidue(Residue* residue);
     void SetGlycan(Assembly glycan);
+    void SetGlycanOverlap(double overlap);
+    void SetProteinOverlap(double overlap);
+    void SetChi1Value(double angle, Assembly *glycoprotein);
+    void SetChi2Value(double angle, Assembly *glycoprotein);
 
     //////////////////////////////////////////////////////////
     //                       DISPLAY FUNCTION               //
@@ -56,6 +69,9 @@ private:
     //                       FUNCTIONS                      //
     //////////////////////////////////////////////////////////
 
+    void Prepare_Glycans_For_Superimposition_To_Particular_Residue(std::string amino_acid_name);
+    void Superimpose_Glycan_To_Glycosite(Residue *glycosite_residue);
+
     //////////////////////////////////////////////////////////
     //                       ATTRIBUTES                     //
     //////////////////////////////////////////////////////////
@@ -64,6 +80,10 @@ private:
     Residue* residue_;                                  /*!< A pointer back to the residue for this glycosite >*/
     Assembly glycan_;
     AtomVector superimposition_atoms_;               /*!< The 3 atoms used for superimposition of glycan to sidechain >*/
+    double glycan_overlap_;
+    double protein_overlap_;
+    AtomVector chi1_;
+    AtomVector chi2_;
     //Assembly alternate_sidechain_;
 
 };

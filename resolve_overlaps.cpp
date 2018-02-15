@@ -5,12 +5,8 @@
 #include <string>
 
 // Change this next line to your PATH:
-//#include "/home/ubunter/software/gems/gmml/includes/MolecularModeling/assembly.hpp"
-//#include "/home/ubunter/software/gems/gmml/includes/MolecularModeling/overlaps.hpp"
-// #include "/home/oliver/Programs/gems/gmml/includes/MolecularModeling/assembly.hpp"
-// #include "/home/oliver/Programs/gems/gmml/includes/MolecularModeling/overlaps.hpp"
-#include "../../../gems/gmml/includes/MolecularModeling/assembly.hpp"
-#include "../../../gems/gmml/includes/MolecularModeling/overlaps.hpp"
+#include "../../gems/gmml/includes/MolecularModeling/assembly.hpp"
+#include "../../gems/gmml/includes/MolecularModeling/overlaps.hpp"
 #include "resolve_overlaps.h"
 
 using namespace std;
@@ -25,47 +21,63 @@ void print_coords(Atom* atom)
     std::cout << atom->GetName() << "\t" << coord.GetX() << "\t" << coord.GetY() << "\t" << coord.GetZ() << "\n";
 }
 
-// adds the fat atoms to the glycoprotein itself (remember to remove them later or something!)
-void Implant_FatAtoms(Assembly glycoprotein, GlycoSiteVector glycosites)
+// adds the fat atoms to the glycoprotein itself (remember to remove them later)
+void Add_FatAtoms(Assembly glycoprotein, GlycoSiteVector glycosites)
 {
     ResidueVector all_residues = glycoprotein.GetAllResiduesOfAssembly();
-    for (ResidueVector::iterator resi_iter = all_residues.begin(); resi_iter != all_residues.end(); ++resi_iter)
+    for (ResidueVector::iterator it1 = all_residues.begin(); it1 != all_residues.end(); ++it1)
     {
+        Residue *residue = *it1;
         // std::cout << (*resi_iter)->GetName() << "\t" << (*resi_iter)->CheckIfProtein() << endl;
-        if ((*resi_iter)->CheckIfProtein()==1) // the current residue is an amino acid
+        if (residue->CheckIfProtein()==1) // the current residue is an amino acid
         {
-            // std::cout << (*resi_iter)->GetName() << "\tA\t" << (*resi_iter)->CheckIfProtein() << endl;
+            //std::cout << residue->GetName() << "\tA\t" << residue->CheckIfProtein() << endl;
             Atom *atomCA;
-            AtomVector atoms = (*resi_iter)->GetAtoms();
-            for (AtomVector::iterator atom_iter = atoms.begin(); atom_iter != atoms.end(); ++atom_iter)
+            AtomVector atoms = residue->GetAtoms();
+            for (AtomVector::iterator it2 = atoms.begin(); it2 != atoms.end(); ++it2)
             {
-                if ( (*atom_iter)->GetName().compare("CA")==0 ) atomCA = *atom_iter;
+                Atom *atom = *it2;
+                if (atom->GetName().compare("CA")==0)
+                {
+                    Atom* fatom = new Atom(residue, "3fat", atom->GetCoordinates());
+                    residue->AddAtom(fatom);
+                }
             }
-            Atom* fatom = new Atom(*resi_iter, "3fatom", atomCA->GetCoordinates());
-            (*resi_iter)->AddAtom(fatom);
         }
-        if ((*resi_iter)->CheckIfProtein()==0) // the current residue is an glycan (or something else?)
+        else // the current residue is an glycan (or something else?!?:O)
         {
-            // std::cout << (*resi_iter)->GetName() << "\tG\t" << (*resi_iter)->CheckIfProtein() << endl;
-            Atom* fatom = new Atom(*resi_iter, "4fatom", (*resi_iter)->GetRingCenter());
-            (*resi_iter)->AddAtom(fatom);
+            if (residue->GetName().compare("SUP") !=0) // don't add one to the superimposition atoms
+            {
+                // std::cout << (*resi_iter)->GetName() << "\tG\t" << (*resi_iter)->CheckIfProtein() << endl;
+                Atom* fatom = new Atom(residue, "4fat", residue->GetGeometricCenter());
+                residue->AddAtom(fatom);
+                //Bond fatom to any other atom in residue so when glycan is moved, fatom moves too.
+                Atom *any_atom = residue->GetAtoms().at(0); // 0 is arbitrary, any atom would do.
+                std::cout << "Blow here?" << any_atom->GetId() << std::endl;
+                any_atom->GetNode()->AddNodeNeighbor(fatom);
+                AtomVector temp = {any_atom};
+                AtomNode *node = new AtomNode(); // DELETE IS FOR LOSERS.
+                fatom->SetNode(node);
+                fatom->GetNode()->SetNodeNeighbors(temp);
+            }
         }
     }
 }
 
 // removes the fat atoms from the glycoprotein; do this before trying to spit out a pdb file
-void Sacrifice_FatAtoms(Assembly glycoprotein)
+void Remove_FatAtoms(Assembly glycoprotein)
 {
     ResidueVector all_residues = glycoprotein.GetAllResiduesOfAssembly();
-    for (ResidueVector::iterator resi_iter = all_residues.begin(); resi_iter != all_residues.end(); ++resi_iter)
+    for (ResidueVector::iterator it1 = all_residues.begin(); it1 != all_residues.end(); ++it1)
     {
-        AtomVector atoms = (*resi_iter)->GetAtoms();
-        for (AtomVector::iterator atom_iter = atoms.begin(); atom_iter != atoms.end(); ++atom_iter)
+        Residue *residue = *it1;
+        AtomVector atoms = residue->GetAtoms();
+        for (AtomVector::iterator it2 = atoms.begin(); it2 != atoms.end(); ++it2)
         {
-            if ((*atom_iter)->GetName().find("fatom")==1)
+            Atom *atom = *it2;
+            if (atom->GetName().find("fat")==1)
             {
-                // std::cout << "deleting: "<< (*atom_iter)->GetName() << "\n";
-                (*resi_iter)->RemoveAtom(*atom_iter);
+                residue->RemoveAtom(atom);
             }
         }
     }
@@ -75,9 +87,10 @@ void Sacrifice_FatAtoms(Assembly glycoprotein)
 AtomVector Filter_FatAtoms(AtomVector atoms)
 {
     AtomVector fat_atoms_vector;
-    for (AtomVector::iterator atom_iter = atoms.begin(); atom_iter != atoms.end(); ++atom_iter)
+    for (AtomVector::iterator it1 = atoms.begin(); it1 != atoms.end(); ++it1)
     {
-        if ((*atom_iter)->GetName().find("fatom")==1) fat_atoms_vector.push_back(*atom_iter);
+        Atom *atom = *it1;
+        if (atom->GetName().find("fat")==1) fat_atoms_vector.push_back(atom);
     }
     return fat_atoms_vector;
 }
@@ -378,7 +391,6 @@ void write_pdb_file(Assembly glycoprotein, int cycle, string summary_filename, d
 void resolve_overlaps::monte_carlo(Assembly glycoprotein, GlycoSiteVector glycosites)
 {
     // glycosites contains pointers to the residues in glycoprotein that have a glycan attached to them. GetResidue()
-    // Each glycosite can have multiple "rotamers" aka "glycan shapes" that are attached. This is due to an old design plan.
     std::cout << "----------- start ----------\n";
     /////////////////// SEED THE RANDOMNESS N STUFF ////////////////////////////
     int seed = time(NULL);
@@ -392,6 +404,8 @@ void resolve_overlaps::monte_carlo(Assembly glycoprotein, GlycoSiteVector glycos
     string summary_filename = "outputs/output_summary.txt";
     double best_score_fat  = -0.1, best_score_normal = -0.1;
     int cycle = 0, cycles_since_last_improvement = 0, max_cycles = 16000;
+    std::cout << "\n----- fat atoms\n";
+    Add_FatAtoms(glycoprotein, glycosites);
     while (cycle <= max_cycles)
     {
         cycle++;
@@ -401,10 +415,10 @@ void resolve_overlaps::monte_carlo(Assembly glycoprotein, GlycoSiteVector glycos
         ResidueVector move_these_guys;
         double score_to_improve = -0.1, overlap_score = -0.1;
 
-        std::cout << "\n----- fat atoms\n";
-        Implant_FatAtoms(glycoprotein, glycosites);
+        
+        
         move_these_guys = ResiFilter_ScoreFatAtomOverlap(&glycoprotein, &glycosites, &overlap_score, 2.0); // SCORE IT USING FAT ATOMS
-        Sacrifice_FatAtoms(glycoprotein);
+        //Remove_FatAtoms(glycoprotein);
         std::cout << "OVERALL: " << overlap_score << "\n\n";
         if (overlap_score < best_score_fat || best_score_fat == -0.1)
         {

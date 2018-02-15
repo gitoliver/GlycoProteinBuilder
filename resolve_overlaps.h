@@ -2,7 +2,7 @@
 #define RESOLVE_OVERLAPS_H
 
 //#include "/home/ubunter/software/gems/gmml/includes/gmml.hpp"
-#include "../../../gems/gmml/includes/gmml.hpp"
+#include "../../gems/gmml/includes/gmml.hpp"
 #include "glycosylationsite.h"
 
 //*******************************************
