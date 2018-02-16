@@ -136,7 +136,8 @@ int main()
     // Overlaps                                       //
     //************************************************//
 
-    resolve_overlaps::monte_carlo(glycoprotein, glycoSites);
+    //resolve_overlaps::monte_carlo(glycoprotein, glycoSites);
+    resolve_overlaps::example_for_Gordon(glycoprotein, glycoSites);
 
     std::cout << "Program got to end ok" << std::endl;
     return 0;

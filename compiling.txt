@@ -1,5 +1,2 @@
 export GEMSHOME=/home/oliver/Programs/gems
-
-
-export LD_LIBRARY_PATH=$GEMSHOME/gmml/bin
-g++ -std=c++0x -I$GEMSHOME/gmml/includes/* -L$GEMSHOME/gmml//bin/ *.cpp -lgmml -o gp_builder
+g++ -std=c++0x -I$GEMSHOME/gmml/includes/* -L$GEMSHOME/gmml//bin/ -Wl,-rpath,$GEMSHOME/gmml/bin/ *.cpp -lgmml -o gp_builder

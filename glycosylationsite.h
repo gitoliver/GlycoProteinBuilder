@@ -81,6 +81,7 @@ private:
 
     void Prepare_Glycans_For_Superimposition_To_Particular_Residue(std::string amino_acid_name);
     void Superimpose_Glycan_To_Glycosite(Residue *glycosite_residue);
+    double CalculateTorsionAngle(AtomVector atoms);
 
     //////////////////////////////////////////////////////////
     //                       ATTRIBUTES                     //

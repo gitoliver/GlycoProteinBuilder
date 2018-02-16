@@ -65,14 +65,14 @@ double GlycosylationSite::GetProteinOverlap()
     return protein_overlap_;
 }
 
-double GetChi1Value()
+double GlycosylationSite::GetChi1Value()
 {
-    std::cout << "Oh no I didn't write this" << std::endl;
+    return GlycosylationSite::CalculateTorsionAngle(chi1_);
 }
 
-double GetChi2Value()
+double GlycosylationSite::GetChi2Value()
 {
-    std::cout << "Oh no I didn't write this" << std::endl;
+    return GlycosylationSite::CalculateTorsionAngle(chi2_);
 }
 
 AtomVector GlycosylationSite::GetSelfGlycanBeads()
@@ -357,8 +357,8 @@ void GlycosylationSite::SetChiAtoms(Residue* residue)
     }
 }
 
- double GlycosylationSite::calculate_bead_overlaps()
- {
+double GlycosylationSite::calculate_bead_overlaps()
+{
     double glycan_radius = 3.0, protein_radius = 4.0; // Should cover whole residue.
     double distance = 0.0, total_overlap = 0.0, protein_overlap = 0.0, glycan_overlap = 0.0;
     for(AtomVector::iterator it1 = self_glycan_beads_.begin(); it1 != self_glycan_beads_.end(); ++it1)
@@ -389,8 +389,43 @@ void GlycosylationSite::SetChiAtoms(Residue* residue)
             }
         }
     }
+    SetGlycanOverlap(glycan_overlap);
+    SetProteinOverlap(protein_overlap); 
     total_overlap = (protein_overlap + glycan_overlap); // Perhaps will want these individual values, can split function into two.
     return (total_overlap / gmml::CARBON_SURFACE_AREA); //Normalise to area of a buried carbon
+}
+
+// Copied this from gmml Assembly.
+double GlycosylationSite::CalculateTorsionAngle(AtomVector atoms)
+{
+    double current_dihedral = 0.0;
+
+    GeometryTopology::Coordinate *atom1_crd = atoms.at(0)->GetCoordinates().at(0);
+    GeometryTopology::Coordinate *atom2_crd = atoms.at(1)->GetCoordinates().at(0);
+    GeometryTopology::Coordinate *atom3_crd = atoms.at(2)->GetCoordinates().at(0);
+    GeometryTopology::Coordinate *atom4_crd = atoms.at(3)->GetCoordinates().at(0);
+
+    GeometryTopology::Coordinate* b1 = new GeometryTopology::Coordinate(*atom2_crd);
+    b1->operator -(*atom1_crd);
+    GeometryTopology::Coordinate* b2 = new GeometryTopology::Coordinate(*atom3_crd);
+    b2->operator -(*atom2_crd);
+    GeometryTopology::Coordinate* b3 = new GeometryTopology::Coordinate(*atom4_crd);
+    b3->operator -(*atom3_crd);
+    GeometryTopology::Coordinate* b4 = new GeometryTopology::Coordinate(*b2);
+    b4->operator *(-1);
+
+    GeometryTopology::Coordinate* b2xb3 = new GeometryTopology::Coordinate(*b2);
+    b2xb3->CrossProduct(*b3);
+
+    GeometryTopology::Coordinate* b1_m_b2n = new GeometryTopology::Coordinate(*b1);
+    b1_m_b2n->operator *(b2->length());
+
+    GeometryTopology::Coordinate* b1xb2 = new GeometryTopology::Coordinate(*b1);
+    b1xb2->CrossProduct(*b2);
+
+    current_dihedral = atan2(b1_m_b2n->DotProduct(*b2xb3), b1xb2->DotProduct(*b2xb3));
+    delete b1, b2, b3, b4, b2xb3, b1_m_b2n, b1xb2; 
+    return current_dihedral;
 }
 
 //////////////////////////////////////////////////////////
