@@ -47,7 +47,6 @@ int main()
 
     GlycosylationSiteVector glycoSites;
     std::string proteinPDB, glycanDirectory, buffer;
-    StringVector glycositeResidueList, listOfGlycans;
     std::ifstream inf (working_Directory + "/inputs/" + "input.txt");
     if (!inf)
     {
@@ -75,32 +74,7 @@ int main()
                 getline(inf, buffer);
             }
         }
-        buffer = "Flushed";
-        if(strInput == "Protein Residue list:") // Reads lines until it finds a line with "END"
-        {
-            getline(inf, buffer);
-            while(buffer != "END")
-            {
-                glycositeResidueList.push_back(buffer);
-                std::cout << "Found glycosite:" << buffer << std::endl;
-                getline(inf, buffer);
-            }
-        }
-        buffer = "Flushed";
-        if(strInput == "Glycan id list:")
-        {
-            getline(inf, buffer);
-            while(buffer != "END")
-            {
-                listOfGlycans.push_back(buffer);
-                //glycoSites.push_back(new GlycosylationSite(buffer));
-                std::cout << "Found glycan:" << buffer << std::endl;
-                getline(inf, buffer);          
-            }
-        }
     }
-   // GlycosylationSiteVector glycoSites;
-    //glycoSites.resize(listOfGlycans.size()); // Efficient
 
     //************************************************//
     // Load Protein PDB file                          //
