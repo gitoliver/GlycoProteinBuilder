@@ -272,21 +272,21 @@ void write_pdb_file(Assembly glycoprotein, int cycle, string summary_filename, d
 void resolve_overlaps::example_for_Gordon(Assembly glycoprotein, GlycoSiteVector glycosites)
 {
     double site_total_overlap = 0.0, site_glycan_overlap = 0.0, site_protein_overlap = 0.0, new_dihedral_value = 0.0;
-    std::cout << "Site | Total | Protein | Glycan " << std::endl;
+    std::cout << "      Site        | Total | Protein | Glycan " << std::endl;
+
     for (GlycoSiteVector::iterator it1 = glycosites.begin(); it1 != glycosites.end(); ++it1)
     {
         GlycosylationSite *current_glycosite = *it1; //I always do this for readability.
-        site_total_overlap = current_glycosite->calculate_bead_overlaps(); // Must repeat after rotating chi1, chi2.
+        site_total_overlap = current_glycosite->Calculate_bead_overlaps(); // Must repeat after rotating chi1, chi2.
         site_glycan_overlap = current_glycosite->GetGlycanOverlap(); // If you wish to have this level of detail
         site_protein_overlap = current_glycosite->GetProteinOverlap(); // If you wish to have this level of detail
-        std::cout << current_glycosite->GetResidue()->GetName() << " | " << site_total_overlap << " | " << site_protein_overlap  << " | " << site_glycan_overlap << std::endl;
+        current_glycosite->Print_bead_overlaps();
         new_dihedral_value = RandomAngle_PlusMinusX(current_glycosite->GetChi1Value(), 6);
         current_glycosite->SetChi1Value(new_dihedral_value, &glycoprotein);
-
-
-
+        //new_dihedral_value = RandomAngle_PlusMinusX(current_glycosite->GetChi2Value(), 6);
+       // current_glycosite->SetChi2Value(new_dihedral_value, &glycoprotein);
+        current_glycosite->Calculate_and_print_bead_overlaps();
     }
-    std::cout << "Site | Total | Protein | Glycan " << std::endl;
 }
 
 // basically the main function that does all the work

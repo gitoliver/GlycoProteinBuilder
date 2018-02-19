@@ -15,6 +15,7 @@
 #include "glycosylationsite.h"
 #include "io.h"
 #include "resolve_overlaps.h"
+#include "bead_residues.h"
 
 constexpr auto PI = 3.14159265358979323846;
 
@@ -128,15 +129,26 @@ int main()
     }
     closedir( dp );
 
-
+    
     PdbFileSpace::PdbFile *outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
     outputPdbFileGlycoProteinAll->Write(working_Directory + "/outputs/GlycoProtein.pdb");
 
     //************************************************//
     // Overlaps                                       //
     //************************************************//
+   // Assembly *glycan_atoms = glycoSites.at(0)->GetAttachedGlycan();
+   // ResidueVector residues = glycan_atoms->GetResidues();
+   // for(ResidueVector::iterator it1 = residues.begin(); it1 != residues.end(); ++it1)
+   // {
+  //      Residue *residue = *it1;
+//std::cout << residue->GetId() << std::endl;
+  //  }
+    //glycan_atoms->Print();
+
+
 
     //resolve_overlaps::monte_carlo(glycoprotein, glycoSites);
+    Add_Beads(glycoprotein, glycoSites);
     resolve_overlaps::example_for_Gordon(glycoprotein, glycoSites);
 
     std::cout << "Program got to end ok" << std::endl;

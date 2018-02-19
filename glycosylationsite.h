@@ -23,7 +23,7 @@ public:
 
     GlycosylationSite();
     GlycosylationSite(std::string glycan_name);
-    GlycosylationSite(std::string glycan_name, Residue* residue, Assembly glycan);
+    GlycosylationSite(std::string glycan_name, Assembly glycan, Residue* residue);
     ~GlycosylationSite();
     //////////////////////////////////////////////////////////
     //                       ACCESSOR                       //
@@ -48,7 +48,9 @@ public:
 
     //double calculate_overlaps(Atomvector all_atoms);
     //void calculate_protein_overlap(Atomvector );
-    double calculate_bead_overlaps();
+    double Calculate_bead_overlaps();
+    double Calculate_and_print_bead_overlaps();
+    
     void SetChiAtoms(Residue* residue);
 
     //////////////////////////////////////////////////////////
@@ -70,6 +72,8 @@ public:
     //////////////////////////////////////////////////////////
     //                       DISPLAY FUNCTION               //
     //////////////////////////////////////////////////////////
+
+    void Print_bead_overlaps();
 
     //void Print(std::ostream& out = std::cout);
 
