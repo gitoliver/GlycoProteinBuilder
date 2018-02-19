@@ -31,22 +31,22 @@ AtomVector Filter_Beads(AtomVector atoms)
 
 
 // the fat atom score function (work in progress) much faster and messy
-ResidueVector ResiFilter_ScoreFatAtomOverlap(Assembly* glycoprotein, GlycoSiteVector* glycosites, double* overlap_score, double threshold)
+ResidueVector ResiFilter_ScoreFatAtomOverlap(Assembly* glycoprotein, GlycosylationSiteVector* glycosites, double* overlap_score, double threshold)
 {
     ResidueVector filtered_residues_list;
     AtomVector fatom_protein = Filter_Beads(glycoprotein->GetAllAtomsOfAssemblyWithinProteinResidues());
     // AtomVector glycans = Filter_Beads(glycoprotein->GetAllAtomsOfAssemblyNotWithinProteinResidues());
     double total_glycoprotein_overlap = 0.0;
 
-    for(GlycoSiteVector::iterator it1 = glycosites->begin(); it1 != glycosites->end(); ++it1)
+    for(GlycosylationSiteVector::iterator it1 = glycosites->begin(); it1 != glycosites->end(); ++it1)
     {
-        GlycosylationSite *current_glycan = *it1;
+        GlycosylationSite *current_glycan = &(*it1);
         double current_glycan_overlap = modified_CalculateAtomicOverlaps(fatom_protein, Filter_Beads(current_glycan->GetAttachedGlycan()->GetAllAtomsOfAssembly()));
         double glycan_overlap_with_protein = current_glycan_overlap; // overlap of the glycan overlaping against protein
 
-        for(GlycoSiteVector::iterator it2 = glycosites->begin(); it2 != glycosites->end(); ++it2)
+        for(GlycosylationSiteVector::iterator it2 = glycosites->begin(); it2 != glycosites->end(); ++it2)
         {
-            GlycosylationSite *comparison_glycan = *it2;
+            GlycosylationSite *comparison_glycan = &(*it2);
             if (current_glycan != comparison_glycan) // dont overlap against yourself
             { // overlap of the glycan overlaping against other glycans
                 current_glycan_overlap += modified_CalculateAtomicOverlaps(Filter_Beads(comparison_glycan->GetAttachedGlycan()->GetAllAtomsOfAssembly()), Filter_Beads(current_glycan->GetAttachedGlycan()->GetAllAtomsOfAssembly()));
@@ -69,7 +69,7 @@ ResidueVector ResiFilter_ScoreFatAtomOverlap(Assembly* glycoprotein, GlycoSiteVe
 }
 
 // the original score function and filter; single atom resolution and relatively slow
-ResidueVector ResiFilter_ScoreTrueOverlap(Assembly* glycoprotein, GlycoSiteVector* glycosites, double* overlap_score, double threshold)
+ResidueVector ResiFilter_ScoreTrueOverlap(Assembly* glycoprotein, GlycosylationSiteVector* glycosites, double* overlap_score, double threshold)
 {
     ResidueVector filtered_residues_list;
     AtomVector protein = glycoprotein->GetAllAtomsOfAssemblyWithinProteinResidues();
@@ -77,14 +77,14 @@ ResidueVector ResiFilter_ScoreTrueOverlap(Assembly* glycoprotein, GlycoSiteVecto
 
     double total_glycoprotein_overlap = 0.0;
 
-    for(GlycoSiteVector::iterator it1 = glycosites->begin(); it1 != glycosites->end(); ++it1)
+    for(GlycosylationSiteVector::iterator it1 = glycosites->begin(); it1 != glycosites->end(); ++it1)
     {
-        GlycosylationSite *current_glycan = *it1;
+        GlycosylationSite *current_glycan = &(*it1);
         double current_glycan_overlap = gmml::CalculateAtomicOverlaps(protein, current_glycan->GetAttachedGlycan()->GetAllAtomsOfAssembly());
         double glycan_overlap_with_protein = current_glycan_overlap; // overlap of the glycan overlaping against protein
-        for(GlycoSiteVector::iterator it2 = glycosites->begin(); it2 != glycosites->end(); ++it2)
+        for(GlycosylationSiteVector::iterator it2 = glycosites->begin(); it2 != glycosites->end(); ++it2)
         {
-            GlycosylationSite *comparison_glycan = *it2;
+            GlycosylationSite *comparison_glycan = &(*it2);
             if (current_glycan != comparison_glycan) // dont overlap against yourself
             { // overlap of the glycan overlaping against other glycans
                 current_glycan_overlap += gmml::CalculateAtomicOverlaps(comparison_glycan->GetAttachedGlycan()->GetAllAtomsOfAssembly(), current_glycan->GetAttachedGlycan()->GetAllAtomsOfAssembly());
@@ -106,12 +106,12 @@ ResidueVector ResiFilter_ScoreTrueOverlap(Assembly* glycoprotein, GlycoSiteVecto
 }
 
 // not actually a score function; simply outputs all glycosylated residues to SHUFFLE with the ResiRotor functions
-ResidueVector ResiFilter_Aggregate(Assembly* glycoprotein, GlycoSiteVector* glycosites)
+ResidueVector ResiFilter_Aggregate(Assembly* glycoprotein, GlycosylationSiteVector* glycosites)
 {
     ResidueVector filtered_residues_list;
-    for(GlycoSiteVector::iterator it1 = glycosites->begin(); it1 != glycosites->end(); ++it1)
+    for(GlycosylationSiteVector::iterator it1 = glycosites->begin(); it1 != glycosites->end(); ++it1)
     {
-        GlycosylationSite *current_glycan = *it1;
+        GlycosylationSite *current_glycan = &(*it1);
         filtered_residues_list.push_back(current_glycan->GetResidue());
     }
     return filtered_residues_list;
@@ -269,14 +269,14 @@ void write_pdb_file(Assembly glycoprotein, int cycle, string summary_filename, d
     summary.close();
 }
 
-void resolve_overlaps::example_for_Gordon(Assembly glycoprotein, GlycoSiteVector glycosites)
+void resolve_overlaps::example_for_Gordon(Assembly glycoprotein, GlycosylationSiteVector glycosites)
 {
     double site_total_overlap = 0.0, site_glycan_overlap = 0.0, site_protein_overlap = 0.0, new_dihedral_value = 0.0;
     std::cout << "      Site        | Total | Protein | Glycan " << std::endl;
 
-    for (GlycoSiteVector::iterator it1 = glycosites.begin(); it1 != glycosites.end(); ++it1)
+    for (GlycosylationSiteVector::iterator it1 = glycosites.begin(); it1 != glycosites.end(); ++it1)
     {
-        GlycosylationSite *current_glycosite = *it1; //I always do this for readability.
+        GlycosylationSite *current_glycosite = &(*it1); //I always do this for readability.
         site_total_overlap = current_glycosite->Calculate_bead_overlaps(); // Must repeat after rotating chi1, chi2.
         site_glycan_overlap = current_glycosite->GetGlycanOverlap(); // If you wish to have this level of detail
         site_protein_overlap = current_glycosite->GetProteinOverlap(); // If you wish to have this level of detail
@@ -290,7 +290,7 @@ void resolve_overlaps::example_for_Gordon(Assembly glycoprotein, GlycoSiteVector
 }
 
 // basically the main function that does all the work
-void resolve_overlaps::monte_carlo(Assembly glycoprotein, GlycoSiteVector glycosites)
+void resolve_overlaps::monte_carlo(Assembly glycoprotein, GlycosylationSiteVector glycosites)
 {
     // glycosites contains pointers to the residues in glycoprotein that have a glycan attached to them. GetResidue()
     std::cout << "----------- start ----------\n";
@@ -307,7 +307,7 @@ void resolve_overlaps::monte_carlo(Assembly glycoprotein, GlycoSiteVector glycos
     double best_score_fat  = -0.1, best_score_normal = -0.1;
     int cycle = 0, cycles_since_last_improvement = 0, max_cycles = 16000;
     std::cout << "\n----- fat atoms\n";
-    Add_Beads(glycoprotein, glycosites);
+    Add_Beads(&glycoprotein, &glycosites);
     while (cycle <= max_cycles)
     {
         cycle++;

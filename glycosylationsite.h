@@ -23,13 +23,15 @@ public:
 
     GlycosylationSite();
     GlycosylationSite(std::string glycan_name);
-    GlycosylationSite(std::string glycan_name, Assembly glycan, Residue* residue);
+    GlycosylationSite(std::string glycan_name, std::string residue_number_);
+    //GlycosylationSite(std::string glycan_name, std::string residue_number_, Assembly glycan, Residue* residue);
     ~GlycosylationSite();
     //////////////////////////////////////////////////////////
     //                       ACCESSOR                       //
     //////////////////////////////////////////////////////////
 
     std::string GetGlycanName();
+    std::string GetResidueNumber();
     Residue* GetResidue();
     Assembly* GetAttachedGlycan();
     double GetTotalOverlap();
@@ -58,6 +60,7 @@ public:
     //////////////////////////////////////////////////////////
 
     void SetGlycanName(std::string glycan_name);
+    void SetResidueNumber(std::string residue_number);
     void SetResidue(Residue* residue);
     void SetGlycan(Assembly glycan);
     void SetGlycanOverlap(double overlap);
@@ -92,6 +95,7 @@ private:
     //////////////////////////////////////////////////////////
 
     std::string glycan_name_;
+    std::string residue_number_;
     Residue* residue_;                                  /*!< A pointer back to the residue for this glycosite >*/
     Assembly glycan_;
     AtomVector superimposition_atoms_;               /*!< The 3 atoms used for superimposition of glycan to sidechain >*/

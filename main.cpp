@@ -25,13 +25,16 @@ typedef std::vector<GeometryTopology::Coordinate*> CoordinateVector;
 typedef std::vector<Residue*> ResidueVector;
 typedef std::vector<Assembly*> AssemblyVector;
 typedef GeometryTopology::Coordinate Vector;
-typedef std::vector<GlycosylationSite*> GlycoSiteVector;
+typedef std::vector<GlycosylationSite> GlycosylationSiteVector;
+typedef std::vector<std::string> StringVector;
 //typedef std::vector<AttachedGlycan*> AttachedGlycanVector;
 
 /*******************************************/
 /* Function Declarations                   */
 /*******************************************/
-void Find_and_Prepare_Protein_Residues_for_Glycosylation(GlycoSiteVector *glycosites, ResidueVector *protein_residues, const std::vector<std::string> *glycositeList);
+//void Find_and_Prepare_Protein_Residues_for_Glycosylation(GlycoSiteVector *glycosites, ResidueVector *protein_residues, const std::vector<std::string> *glycositeResidueList);
+void AttachGlycans(Assembly *glycoprotein, GlycosylationSiteVector *glycoSites);
+
 
 int main()
 {
@@ -42,9 +45,9 @@ int main()
     // Reading input file                             //
     //************************************************//
 
-    GlycoSiteVector glycoSites;
+    GlycosylationSiteVector glycoSites;
     std::string proteinPDB, glycanDirectory, buffer;
-    std::vector<std::string> glycositeList, listOfGlycans;
+    StringVector glycositeResidueList, listOfGlycans;
     std::ifstream inf (working_Directory + "/inputs/" + "input.txt");
     if (!inf)
     {
@@ -59,12 +62,22 @@ int main()
             getline(inf, proteinPDB);
         if(strInput == "Glycans:")
             getline(inf, glycanDirectory);
+        if(strInput == "Protein Residue, Glycan Name:")
+        {
+            getline(inf, buffer);
+            while(buffer != "END")
+            {
+                StringVector splitLine = split(buffer, ',');
+                glycoSites.emplace_back(splitLine.at(0), splitLine.at(1));
+                getline(inf, buffer);
+            }
+        }
         if(strInput == "Protein Residue list:") // Reads lines until it finds a line with "END"
         {
             getline(inf, buffer);
             while(buffer != "END")
             {
-                glycositeList.push_back(buffer);
+                glycositeResidueList.push_back(buffer);
                 std::cout << "Found glycosite:" << buffer << std::endl;
                 getline(inf, buffer);
             }
@@ -76,12 +89,14 @@ int main()
             while(buffer != "END")
             {
                 listOfGlycans.push_back(buffer);
-                glycoSites.push_back(new GlycosylationSite(buffer));
+                //glycoSites.push_back(new GlycosylationSite(buffer));
                 std::cout << "Found glycan:" << buffer << std::endl;
                 getline(inf, buffer);          
             }
         }
     }
+   // GlycosylationSiteVector glycoSites;
+    //glycoSites.resize(listOfGlycans.size()); // Efficient
 
     //************************************************//
     // Load Protein PDB file                          //
@@ -90,8 +105,11 @@ int main()
     Assembly glycoprotein ((working_Directory + "/inputs/" + proteinPDB), gmml::InputFileType::PDB);
     glycoprotein.BuildStructureByDistance();
 
-    ResidueVector glycoprotein_residues = glycoprotein.GetResidues();
-    Find_and_Prepare_Protein_Residues_for_Glycosylation(&glycoSites, &glycoprotein_residues, &glycositeList);
+    AttachGlycans(glycoprotein.GetResidues(), glycositeResidueList, &glycoSites, listOfGlycans);
+
+
+  //  ResidueVector glycoprotein_residues = ;
+  //  Find_and_Prepare_Protein_Residues_for_Glycosylation(&glycoSites, &glycoprotein_residues, &glycositeResidueList);
 
     //************************************************//
     // Load glycan files from directory               //
@@ -116,9 +134,9 @@ int main()
         // If the file is a directory (or is in some way invalid) we'll skip it
         if (stat( filepath.c_str(), &filestat )) continue; // Is it a valid file?
         if (S_ISDIR( filestat.st_mode ))         continue; // Is it a directory?
-        for (GlycoSiteVector::iterator it = glycoSites.begin(); it != glycoSites.end(); ++it)
+        for (GlycosylationSiteVector::iterator it = glycoSites.begin(); it != glycoSites.end(); ++it)
         {
-            GlycosylationSite* glycosite = *it;
+            GlycosylationSite* glycosite = &(*it);
             if (glycosite->GetGlycanName().compare(0, glycosite->GetGlycanName().size(), dirp->d_name, 0, glycosite->GetGlycanName().size()) == 0 )
             {
                 Assembly input_glycan(filepath, gmml::InputFileType::PDB);
@@ -148,17 +166,23 @@ int main()
 
 
     //resolve_overlaps::monte_carlo(glycoprotein, glycoSites);
-    Add_Beads(glycoprotein, glycoSites);
+    Add_Beads(&glycoprotein, &glycoSites);
     resolve_overlaps::example_for_Gordon(glycoprotein, glycoSites);
 
     std::cout << "Program got to end ok" << std::endl;
     return 0;
 }
 
-void Find_and_Prepare_Protein_Residues_for_Glycosylation(GlycoSiteVector *glycosites, ResidueVector *protein_residues, const std::vector<std::string> *glycositeList)
+void AttachGlycans(Assembly *glycoprotein, GlycosylationSiteVector *glycoSites)
 {
     int i = 0;
-    for(std::vector<std::string>::const_iterator it1 = glycositeList->begin(); it1 != glycositeList->end(); ++it1)
+
+
+}
+/*void Find_and_Prepare_Protein_Residues_for_Glycosylation(GlycoSiteVector *glycosites, ResidueVector *protein_residues, const std::vector<std::string> *glycositeResidueList)
+{
+    int i = 0;
+    for(std::vector<std::string>::const_iterator it1 = glycositeResidueList->begin(); it1 != glycositeResidueList->end(); ++it1)
     {
         std::string glycosite = (*it1);
         std::cout << "Preparing glycosite: " << glycosite << std::endl;
@@ -181,6 +205,7 @@ void Find_and_Prepare_Protein_Residues_for_Glycosylation(GlycoSiteVector *glycos
         }
     }
 }
+*/
 
 
 

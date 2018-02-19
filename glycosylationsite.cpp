@@ -18,7 +18,15 @@ GlycosylationSite::GlycosylationSite(std::string glycan_name)
     SetProteinOverlap(0.0);
 }
 
-GlycosylationSite::GlycosylationSite(std::string glycan_name, Assembly glycan, Residue* residue)
+GlycosylationSite::GlycosylationSite(std::string glycan_name, std::string residue_number)
+{
+    SetGlycanName(glycan_name);
+    SetResidueNumber(residue_number);
+    SetGlycanOverlap(0.0);
+    SetProteinOverlap(0.0);
+}
+
+/*GlycosylationSite::GlycosylationSite(std::string glycan_name, Assembly glycan, Residue* residue)
 {
     SetGlycanName(glycan_name);
     SetGlycan(glycan);
@@ -26,6 +34,7 @@ GlycosylationSite::GlycosylationSite(std::string glycan_name, Assembly glycan, R
     SetGlycanOverlap(0.0);
     SetProteinOverlap(0.0);
 }
+*/
 
 GlycosylationSite::~GlycosylationSite()
 {
@@ -39,6 +48,11 @@ GlycosylationSite::~GlycosylationSite()
 std::string GlycosylationSite::GetGlycanName()
 {
     return glycan_name_;
+}
+
+std::string GlycosylationSite::GetResidueNumber()
+{
+    return residue_number_;
 }
 
 Residue* GlycosylationSite::GetResidue()
@@ -470,6 +484,11 @@ double GlycosylationSite::CalculateTorsionAngle(AtomVector atoms)
 void GlycosylationSite::SetGlycanName(std::string glycan_name)
 {
     glycan_name_ = glycan_name;
+}
+
+void GlycosylationSite::SetResidueNumber(std::string residue_number)
+{
+    residue_number_ = residue_number;
 }
 
 void GlycosylationSite::SetResidue(Residue* residue)

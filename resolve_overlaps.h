@@ -11,15 +11,15 @@ typedef std::vector<GeometryTopology::Coordinate*> CoordinateVector;
 typedef std::vector<MolecularModeling::Atom*> AtomVector;
 typedef std::vector<Residue*> ResidueVector;
 typedef std::vector<MolecularModeling::Assembly*> AssemblyVector;
-typedef std::vector<GlycosylationSite*> GlycoSiteVector;
+typedef std::vector<GlycosylationSite> GlycosylationSiteVector;
 
 //*******************************************
 
 
 namespace resolve_overlaps
 {
-    void monte_carlo(MolecularModeling::Assembly glycoprotein, GlycoSiteVector glycosites);
-    void example_for_Gordon(MolecularModeling::Assembly glycoprotein, GlycoSiteVector glycosites);
+    void monte_carlo(MolecularModeling::Assembly glycoprotein, GlycosylationSiteVector glycosites);
+    void example_for_Gordon(MolecularModeling::Assembly glycoprotein, GlycosylationSiteVector glycosites);
 }
 
 #endif // RESOLVE_OVERLAPS_H

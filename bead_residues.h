@@ -4,12 +4,12 @@
 #include "glycosylationsite.h"
 
 //*******************************************
-typedef std::vector<GlycosylationSite*> GlycoSiteVector;
+typedef std::vector<GlycosylationSite> GlycosylationSiteVector;
 typedef std::vector<Residue*> ResidueVector;
 typedef std::vector<Atom*> AtomVector;
 //*******************************************
 
-void Add_Beads(Assembly glycoprotein, GlycoSiteVector glycosites);
+void Add_Beads(Assembly *glycoprotein, GlycosylationSiteVector *glycosites);
 void Remove_Beads(Assembly glycoprotein);
 double Calculate_Bead_Overlap(AtomVector beads);
 
