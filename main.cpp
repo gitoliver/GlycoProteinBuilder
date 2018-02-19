@@ -33,48 +33,22 @@ typedef std::vector<std::string> StringVector;
 /* Function Declarations                   */
 /*******************************************/
 //void Find_and_Prepare_Protein_Residues_for_Glycosylation(GlycoSiteVector *glycosites, ResidueVector *protein_residues, const std::vector<std::string> *glycositeResidueList);
+void Read_Input_File(GlycosylationSiteVector *glycoSites, std::string *proteinPDB, std::string *glycanDirectory, const std::string working_Directory);
 void AttachGlycansToGlycosites(Assembly *glycoprotein, GlycosylationSiteVector *glycoSites, std::string glycanDirectory);
+
 
 
 int main()
 {
-    std::string working_Directory = Find_Program_Working_Directory();
+    //************************************************//
+    // Read input file                                //
+    //************************************************//
+
     //std::string installation_Directory = Find_Program_Installation_Directory();
-
-    //************************************************//
-    // Reading input file                             //
-    //************************************************//
-
     GlycosylationSiteVector glycoSites;
-    std::string proteinPDB, glycanDirectory, buffer;
-    std::ifstream inf (working_Directory + "/inputs/" + "input.txt");
-    if (!inf)
-    {
-        std::cerr << "Uh oh, input file could not be opened for reading!" << std::endl;
-        std::exit(1);
-    }
-    while (inf) // While there's still stuff left to read
-    {
-        std::string strInput;
-        getline(inf, strInput);
-        if(strInput == "Protein:")
-            getline(inf, proteinPDB);
-        if(strInput == "Glycans:")
-        {
-            getline(inf, glycanDirectory);
-            glycanDirectory = working_Directory + "/inputs/" + glycanDirectory;
-        }
-        if(strInput == "Protein Residue, Glycan Name:")
-        {
-            getline(inf, buffer);
-            while(buffer != "END")
-            {
-                StringVector splitLine = split(buffer, ',');
-                glycoSites.emplace_back(splitLine.at(1), splitLine.at(0));
-                getline(inf, buffer);
-            }
-        }
-    }
+    std::string proteinPDB, glycanDirectory;
+    std::string working_Directory = Find_Program_Working_Directory();
+    Read_Input_File(&glycoSites, &proteinPDB, &glycanDirectory, working_Directory);
 
     //************************************************//
     // Load Protein PDB file                          //
@@ -83,21 +57,22 @@ int main()
     Assembly glycoprotein( (working_Directory + "/inputs/" + proteinPDB), gmml::InputFileType::PDB );
     glycoprotein.BuildStructureByDistance();
 
+    //************************************************//
+    // Load Glycans and Attach to glycosites          //
+    //************************************************//
+
     AttachGlycansToGlycosites(&glycoprotein, &glycoSites, glycanDirectory);
 
+    //************************************************//
+    // Resolve Overlaps                               //
+    //************************************************//
 
-  //  ResidueVector glycoprotein_residues = ;
-  //  Find_and_Prepare_Protein_Residues_for_Glycosylation(&glycoSites, &glycoprotein_residues, &glycositeResidueList);
-    
+    // Write initial glycoprotein structure
     PdbFileSpace::PdbFile *outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
     outputPdbFileGlycoProteinAll->Write(working_Directory + "/outputs/GlycoProtein.pdb");
-
-    //************************************************//
-    // Overlaps                                       //
-    //************************************************//
-
-    //resolve_overlaps::monte_carlo(glycoprotein, glycoSites);
+    // Add beads. They make the overlap calculation faster.
     Add_Beads(&glycoprotein, &glycoSites);
+    // This is where the overlaps will be resolved.
     resolve_overlaps::example_for_Gordon(glycoprotein, glycoSites);
 
     std::cout << "Program got to end ok" << std::endl;
@@ -120,7 +95,6 @@ void AttachGlycansToGlycosites(Assembly *glycoprotein, GlycosylationSiteVector *
             {
                 //std::cout << "glycosite: " << glycosite_number << std::endl;
                 //std::cout << "glycosite id:" << id << std::endl;
-                //glycosites->push_back(residue);
                 glycosite->SetResidue(protein_residue);
             }
         }
@@ -159,6 +133,39 @@ void AttachGlycansToGlycosites(Assembly *glycoprotein, GlycosylationSiteVector *
     closedir( dp ); 
 }
 
+
+void Read_Input_File(GlycosylationSiteVector *glycoSites, std::string *proteinPDB, std::string *glycanDirectory, const std::string working_Directory)
+{
+    std::string buffer;
+    std::ifstream inf (working_Directory + "/inputs/" + "input.txt");
+    if (!inf)
+    {
+        std::cerr << "Uh oh, input file could not be opened for reading!" << std::endl;
+        std::exit(1);
+    }
+    while (inf) // While there's still stuff left to read
+    {
+        std::string strInput;
+        getline(inf, strInput);
+        if(strInput == "Protein:")
+            getline(inf, *proteinPDB);
+        if(strInput == "Glycans:")
+        {
+            getline(inf, *glycanDirectory);
+            *glycanDirectory = working_Directory + "/inputs/" + *glycanDirectory;
+        }
+        if(strInput == "Protein Residue, Glycan Name:")
+        {
+            getline(inf, buffer);
+            while(buffer != "END")
+            {
+                StringVector splitLine = split(buffer, ',');
+                glycoSites->emplace_back(splitLine.at(1), splitLine.at(0)); // Creates GlycosylationSite instance on the vector. Love it.
+                getline(inf, buffer);
+            }
+        }
+    }
+}
 
 /*void FindConnectedAtoms(Atom *atom, Assembly::AtomVector &visitedAtoms){
 
