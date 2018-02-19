@@ -33,7 +33,7 @@ typedef std::vector<std::string> StringVector;
 /* Function Declarations                   */
 /*******************************************/
 //void Find_and_Prepare_Protein_Residues_for_Glycosylation(GlycoSiteVector *glycosites, ResidueVector *protein_residues, const std::vector<std::string> *glycositeResidueList);
-void AttachGlycans(Assembly *glycoprotein, GlycosylationSiteVector *glycoSites);
+void AttachGlycansToGlycosites(Assembly *glycoprotein, GlycosylationSiteVector *glycoSites, std::string glycanDirectory);
 
 
 int main()
@@ -61,17 +61,21 @@ int main()
         if(strInput == "Protein:")
             getline(inf, proteinPDB);
         if(strInput == "Glycans:")
+        {
             getline(inf, glycanDirectory);
+            glycanDirectory = working_Directory + "/inputs/" + glycanDirectory;
+        }
         if(strInput == "Protein Residue, Glycan Name:")
         {
             getline(inf, buffer);
             while(buffer != "END")
             {
                 StringVector splitLine = split(buffer, ',');
-                glycoSites.emplace_back(splitLine.at(0), splitLine.at(1));
+                glycoSites.emplace_back(splitLine.at(1), splitLine.at(0));
                 getline(inf, buffer);
             }
         }
+        buffer = "Flushed";
         if(strInput == "Protein Residue list:") // Reads lines until it finds a line with "END"
         {
             getline(inf, buffer);
@@ -102,51 +106,14 @@ int main()
     // Load Protein PDB file                          //
     //************************************************//
 
-    Assembly glycoprotein ((working_Directory + "/inputs/" + proteinPDB), gmml::InputFileType::PDB);
+    Assembly glycoprotein( (working_Directory + "/inputs/" + proteinPDB), gmml::InputFileType::PDB );
     glycoprotein.BuildStructureByDistance();
 
-    AttachGlycans(glycoprotein.GetResidues(), glycositeResidueList, &glycoSites, listOfGlycans);
+    AttachGlycansToGlycosites(&glycoprotein, &glycoSites, glycanDirectory);
 
 
   //  ResidueVector glycoprotein_residues = ;
   //  Find_and_Prepare_Protein_Residues_for_Glycosylation(&glycoSites, &glycoprotein_residues, &glycositeResidueList);
-
-    //************************************************//
-    // Load glycan files from directory               //
-    //************************************************//
-
-    std::string directory = working_Directory + "/inputs/" + glycanDirectory ;
-    std::cout << "directory: " << directory << std::endl;
-    std::string filepath;
-    DIR *dp; // A directory stream
-    struct dirent *dirp; // Contains file serial number and name (char d_name[])
-    struct stat filestat; // Contains info about file, such as device ID, user ID, access time etc
-
-    dp = opendir( directory.c_str() ); //.c_str adds a null character to the end.
-    if (dp == NULL)
-    {
-        std::cout << "Error(" << errno << ") opening " << directory << std::endl;
-        return errno;
-    }
-    while ((dirp = readdir ( dp )))
-    {
-        filepath = directory + "/" + dirp->d_name;
-        // If the file is a directory (or is in some way invalid) we'll skip it
-        if (stat( filepath.c_str(), &filestat )) continue; // Is it a valid file?
-        if (S_ISDIR( filestat.st_mode ))         continue; // Is it a directory?
-        for (GlycosylationSiteVector::iterator it = glycoSites.begin(); it != glycoSites.end(); ++it)
-        {
-            GlycosylationSite* glycosite = &(*it);
-            if (glycosite->GetGlycanName().compare(0, glycosite->GetGlycanName().size(), dirp->d_name, 0, glycosite->GetGlycanName().size()) == 0 )
-            {
-                Assembly input_glycan(filepath, gmml::InputFileType::PDB);
-                input_glycan.BuildStructureByDistance();
-                glycosite->AttachGlycan(input_glycan, &glycoprotein);
-            }
-        }
-    }
-    closedir( dp );
-
     
     PdbFileSpace::PdbFile *outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
     outputPdbFileGlycoProteinAll->Write(working_Directory + "/outputs/GlycoProtein.pdb");
@@ -154,16 +121,6 @@ int main()
     //************************************************//
     // Overlaps                                       //
     //************************************************//
-   // Assembly *glycan_atoms = glycoSites.at(0)->GetAttachedGlycan();
-   // ResidueVector residues = glycan_atoms->GetResidues();
-   // for(ResidueVector::iterator it1 = residues.begin(); it1 != residues.end(); ++it1)
-   // {
-  //      Residue *residue = *it1;
-//std::cout << residue->GetId() << std::endl;
-  //  }
-    //glycan_atoms->Print();
-
-
 
     //resolve_overlaps::monte_carlo(glycoprotein, glycoSites);
     Add_Beads(&glycoprotein, &glycoSites);
@@ -173,42 +130,60 @@ int main()
     return 0;
 }
 
-void AttachGlycans(Assembly *glycoprotein, GlycosylationSiteVector *glycoSites)
+void AttachGlycansToGlycosites(Assembly *glycoprotein, GlycosylationSiteVector *glycoSites, std::string glycanDirectory)
 {
-    int i = 0;
-
-
-}
-/*void Find_and_Prepare_Protein_Residues_for_Glycosylation(GlycoSiteVector *glycosites, ResidueVector *protein_residues, const std::vector<std::string> *glycositeResidueList)
-{
-    int i = 0;
-    for(std::vector<std::string>::const_iterator it1 = glycositeResidueList->begin(); it1 != glycositeResidueList->end(); ++it1)
+    // Find protein residues in Glycoprotein that will get a glycan added. Set Residue in Glycosite.
+    ResidueVector protein_residues = glycoprotein->GetResidues();
+    for(GlycosylationSiteVector::iterator glycosite = glycoSites->begin(); glycosite != glycoSites->end(); ++glycosite)
     {
-        std::string glycosite = (*it1);
-        std::cout << "Preparing glycosite: " << glycosite << std::endl;
-        for(ResidueVector::iterator it2 = protein_residues->begin(); it2 != protein_residues->end(); ++it2)
+        std::string glycosite_number = glycosite->GetResidueNumber();
+        for (ResidueVector::iterator it2 = protein_residues.begin(); it2 != protein_residues.end(); ++it2)
         {
-            // Comparing strings is easier:
-            Residue *residue = (*it2);
-            std::string id = residue->GetId();
-            std::string formatted_glycosite = "_" + glycosite + "_";
-            // If the residue number in the input file is equal to the current residue number
-            //std::cout << "Comparing " << id << " with " << formatted_glycosite << std::endl;
-            if( id.compare(5, formatted_glycosite.size(), formatted_glycosite) == 0)
+            Residue *protein_residue = *it2;
+            std::string id = protein_residue->GetId();
+            std::string formatted_glycosite_number = "_" + glycosite_number + "_";
+            if( id.compare(5, formatted_glycosite_number.size(), formatted_glycosite_number) == 0)
             {
-                std::cout << "glycosite: " << glycosite << std::endl;
-                std::cout << "glycosite id:" << id << std::endl;
+                //std::cout << "glycosite: " << glycosite_number << std::endl;
+                //std::cout << "glycosite id:" << id << std::endl;
                 //glycosites->push_back(residue);
-                glycosites->at(i)->SetResidue(residue);
-                ++i;
+                glycosite->SetResidue(protein_residue);
             }
         }
     }
+    // Load glycan files from directory             
+    //std::cout << "Glycan directory: " << glycanDirectory << std::endl;
+    std::string filepath;
+    DIR *dp; // A directory stream
+    struct dirent *dirp; // Contains file serial number and name (char d_name[])
+    struct stat filestat; // Contains info about file, such as device ID, user ID, access time etc
+
+    dp = opendir( glycanDirectory.c_str() ); //.c_str adds a null character to the end.
+    if (dp == NULL)
+    {
+        std::cout << "Error(" << errno << ") opening " << glycanDirectory << std::endl;
+        return;
+    }
+    while ((dirp = readdir ( dp )))
+    {
+        filepath = glycanDirectory + "/" + dirp->d_name;
+        // If the file is a directory (or is in some way invalid) we'll skip it
+        if (stat( filepath.c_str(), &filestat )) continue; // Is it a valid file?
+        if (S_ISDIR( filestat.st_mode ))         continue; // Is it a directory?
+        for (GlycosylationSiteVector::iterator glycosite = glycoSites->begin(); glycosite != glycoSites->end(); ++glycosite)
+        {
+            //std::cout << "Glycan is " << glycosite->GetGlycanName() << ". d_name is " << dirp->d_name << std::endl;
+            if (glycosite->GetGlycanName().compare(0, glycosite->GetGlycanName().size(), dirp->d_name, 0, glycosite->GetGlycanName().size()) == 0 )
+            {
+                Assembly input_glycan(filepath, gmml::InputFileType::PDB);               
+                input_glycan.BuildStructureByDistance();
+                glycosite->AttachGlycan(input_glycan, glycoprotein);
+                //std::cout << "Added " << glycosite->GetGlycanName() << " to " << glycosite->GetResidueNumber();
+            }
+        }
+    }
+    closedir( dp ); 
 }
-*/
-
-
-
 
 
 /*void FindConnectedAtoms(Atom *atom, Assembly::AtomVector &visitedAtoms){

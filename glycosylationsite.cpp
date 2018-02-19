@@ -120,6 +120,7 @@ void GlycosylationSite::AttachGlycan(Assembly glycan, Assembly *glycoprotein)
     glycoprotein->MergeAssembly(&glycan_); // Add glycan to glycoprotein assembly, allows SetDihedral later.
     this->Prepare_Glycans_For_Superimposition_To_Particular_Residue(residue_->GetName());
     this->Superimpose_Glycan_To_Glycosite(residue_);
+    this->SetChiAtoms(residue_);
 }
 
 void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residue(std::string amino_acid_name)
@@ -366,24 +367,32 @@ void GlycosylationSite::SetChiAtoms(Residue* residue)
         if ( atom->GetName().compare("CD1")==0 ) { atom5 = atom; is_Chi2 = true; } // Tyr
     }
     chi1_ = {atom1, atom2, atom3, atom4};
-    std::cout << "Here Boi" << std::endl;
+    //std::cout << "Here Boi" << std::endl;
     if (!is_Chi2)
     {
-       /* std::cout << "Here Boi" << std::endl;
+        //std::cout << "Here Boi" << std::endl;
         Residue *reducing_Residue = this->GetAttachedGlycan()->GetResidues().at(1);
         //AtomVector reducing_Atoms = glycan_.GetResidues().at(1)->GetAtoms(); // I assume I assumed something stupid here.
         AtomVector reducing_Atoms = reducing_Residue->GetAtoms();
         for(AtomVector::iterator it = reducing_Atoms.begin(); it != reducing_Atoms.end(); ++it)
         {
-            std::cout << "Here now Boi" << std::endl;
+          //  std::cout << "Here now Boi" << std::endl;
             Atom* atom = *it;
-            if(atom->GetName().compare("C1")==0)    {atom5 = atom;}
+            if(atom->GetName().compare("C1")==0)    
+            {
+                atom5 = atom;
+                is_Chi2 = true;
+            }
         }
     }
-    chi2_ = {atom2, atom3, atom4, atom5};
-    */
+    if (is_Chi2)
+    {
+        chi2_ = {atom2, atom3, atom4, atom5};
     }
-    
+    else
+    {
+        std::cout << "Chi2 not set, program likely to crash" << std::endl;
+    }
 }
 
 double GlycosylationSite::Calculate_and_print_bead_overlaps()
@@ -494,7 +503,6 @@ void GlycosylationSite::SetResidueNumber(std::string residue_number)
 void GlycosylationSite::SetResidue(Residue* residue)
 {
     residue_ = residue;
-    this->SetChiAtoms(residue);
 }
 
 void GlycosylationSite::SetGlycan(Assembly glycan)

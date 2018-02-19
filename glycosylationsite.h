@@ -23,7 +23,7 @@ public:
 
     GlycosylationSite();
     GlycosylationSite(std::string glycan_name);
-    GlycosylationSite(std::string glycan_name, std::string residue_number_);
+    GlycosylationSite(std::string glycan_name, std::string residue_number);
     //GlycosylationSite(std::string glycan_name, std::string residue_number_, Assembly glycan, Residue* residue);
     ~GlycosylationSite();
     //////////////////////////////////////////////////////////
