@@ -1,12 +1,8 @@
 #ifndef GLYCOSYLATIONSITE_H
 #define GLYCOSYLATIONSITE_H
 
-//#include <iostream>
-//#include "/home/ubunter/software/gems/gmml/includes/gmml.hpp"
-#include "../../gems/gmml/includes/gmml.hpp"
-
-//#include "attachedglycan.h"
-
+#include "gmml.hpp"
+#include <iomanip> // For setting precision and formating in std::cout 
 
 
 class GlycosylationSite
@@ -15,7 +11,6 @@ public:
     //////////////////////////////////////////////////////////
     //                    TYPE DEFINITION                   //
     //////////////////////////////////////////////////////////
-    //typedef std::vector<Atom*> AtomVector;
 
     //////////////////////////////////////////////////////////
     //                       CONSTRUCTOR                    //

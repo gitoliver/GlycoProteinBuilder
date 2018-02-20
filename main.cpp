@@ -2,7 +2,6 @@
 #include <iostream>
 #include <cstdlib> // for exit()
 
-//#include <QApplication>
 // Includes for directory reading
 #include <string>
 #include <dirent.h>
@@ -12,31 +11,18 @@
 #include <stdlib.h>     /* getenv */
 #include <fstream>      // std::ifstream
 
-#include "glycosylationsite.h"
 #include "io.h"
 #include "resolve_overlaps.h"
-#include "bead_residues.h"
 
 constexpr auto PI = 3.14159265358979323846;
 
 using namespace MolecularModeling;
-typedef std::vector<Atom*> AtomVector;
-typedef std::vector<GeometryTopology::Coordinate*> CoordinateVector;
-typedef std::vector<Residue*> ResidueVector;
-typedef std::vector<Assembly*> AssemblyVector;
-typedef GeometryTopology::Coordinate Vector;
-typedef std::vector<GlycosylationSite> GlycosylationSiteVector;
-typedef std::vector<std::string> StringVector;
-//typedef std::vector<AttachedGlycan*> AttachedGlycanVector;
 
 /*******************************************/
 /* Function Declarations                   */
 /*******************************************/
-//void Find_and_Prepare_Protein_Residues_for_Glycosylation(GlycoSiteVector *glycosites, ResidueVector *protein_residues, const std::vector<std::string> *glycositeResidueList);
 void Read_Input_File(GlycosylationSiteVector *glycoSites, std::string *proteinPDB, std::string *glycanDirectory, const std::string working_Directory);
 void AttachGlycansToGlycosites(Assembly *glycoprotein, GlycosylationSiteVector *glycoSites, std::string glycanDirectory);
-
-
 
 int main()
 {
@@ -73,11 +59,15 @@ int main()
     // Add beads. They make the overlap calculation faster.
     Add_Beads(&glycoprotein, &glycoSites);
     // This is where the overlaps will be resolved.
-    resolve_overlaps::example_for_Gordon(glycoprotein, glycoSites);
+    resolve_overlaps::example_for_Gordon(&glycoprotein, &glycoSites);
 
     std::cout << "Program got to end ok" << std::endl;
     return 0;
 }
+
+/*******************************************/
+/* Functions                               */
+/*******************************************/
 
 void AttachGlycansToGlycosites(Assembly *glycoprotein, GlycosylationSiteVector *glycoSites, std::string glycanDirectory)
 {

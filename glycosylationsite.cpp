@@ -1,5 +1,6 @@
 #include "glycosylationsite.h"
-#include <iomanip> // For setting precision and formating in std::cout 
+
+constexpr auto PI = 3.14159265358979323846;
 
 //////////////////////////////////////////////////////////
 //                       CONSTRUCTOR                    //
@@ -483,7 +484,7 @@ double GlycosylationSite::CalculateTorsionAngle(AtomVector atoms)
 
     current_dihedral = atan2(b1_m_b2n->DotProduct(*b2xb3), b1xb2->DotProduct(*b2xb3));
     delete b1, b2, b3, b4, b2xb3, b1_m_b2n, b1xb2; 
-    return current_dihedral;
+    return (current_dihedral * (180 / PI ) ); // Convert to DEGREES
 }
 
 //////////////////////////////////////////////////////////
