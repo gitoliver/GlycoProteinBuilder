@@ -3,7 +3,7 @@
 
 #include "gmml.hpp"
 #include <iomanip> // For setting precision and formating in std::cout 
-
+#include <algorithm> //  std::erase, std::remove
 
 class GlycosylationSite
 {

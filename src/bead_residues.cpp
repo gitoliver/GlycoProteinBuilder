@@ -12,15 +12,40 @@ void Add_Beads(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVecto
         if (residue->CheckIfProtein()==1) // the current residue is an amino acid
         {
             //std::cout << residue->GetName() << "\tA\t" << residue->CheckIfProtein() << endl;
-            Atom *atomCA;
             AtomVector atoms = residue->GetAtoms();
             for (AtomVector::iterator it2 = atoms.begin(); it2 != atoms.end(); ++it2)
             {
                 Atom *atom = *it2;
+                // Okay so all CA atoms and then I've picked out others by hand in VMD that will cover the sidechains
                 if (atom->GetName().compare("CA")==0)
                 {
                 	//std::cout << "Adding bead to protein " << residue->GetId() << std::endl;
-                    Atom* bead_atom = new Atom(residue, "3fat", atom->GetCoordinates());
+                    Atom* bead_atom = new Atom(residue, "mfat", atom->GetCoordinates());
+                    residue->AddAtom(bead_atom);
+                    protein_beads.push_back(bead_atom);
+                }
+                else if ( (atom->GetName().compare("NZ")==0) || (atom->GetName().compare("CZ")==0) || (atom->GetName().compare("NE2")==0) ||
+                     (atom->GetName().compare("OD1")==0) || (atom->GetName().compare("SD")==0) )
+                {
+                    Atom* bead_atom = new Atom(residue, "sfat", atom->GetCoordinates());
+                    residue->AddAtom(bead_atom);
+                    protein_beads.push_back(bead_atom);
+                }
+                else if ( (atom->GetName().compare("CE2")==0) && residue->GetName().compare("TRP")==0 )
+                {
+                    Atom* bead_atom = new Atom(residue, "sfat", atom->GetCoordinates());
+                    residue->AddAtom(bead_atom);
+                    protein_beads.push_back(bead_atom);
+                }
+                else if ( (atom->GetName().compare("CD1")==0) && ( residue->GetName().compare("LEU")==0 || residue->GetName().compare("ILE")==0 ) )
+                {
+                    Atom* bead_atom = new Atom(residue, "sfat", atom->GetCoordinates());
+                    residue->AddAtom(bead_atom);
+                    protein_beads.push_back(bead_atom);
+                }
+                else if ( (atom->GetName().compare("CD")==0) && residue->GetName().compare("GLU")==0 )
+                {
+                    Atom* bead_atom = new Atom(residue, "sfat", atom->GetCoordinates());
                     residue->AddAtom(bead_atom);
                     protein_beads.push_back(bead_atom);
                 }
@@ -38,11 +63,11 @@ void Add_Beads(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVecto
         for (ResidueVector::iterator it2 = glycan_residues.begin(); it2 != glycan_residues.end(); ++it2)
         {
         	Residue *residue = *it2;
-        	if (residue->GetName().compare("SUP") !=0) // don't add one to the superimposition atoms
+            if ( (residue->GetName().compare("SUP") !=0) && ( residue->GetName().compare(1, 2, "SA") != 0) )// don't add one to the superimposition atoms or sialic acid (see below)
             {
                 // std::cout << (*resi_iter)->GetName() << "\tG\t" << (*resi_iter)->CheckIfProtein() << endl;
                // std::cout << "Adding bead to self glycan " << residue->GetId() << std::endl;
-                Atom* bead_atom = new Atom(residue, "4fat", residue->GetGeometricCenter());
+                Atom* bead_atom = new Atom(residue, "gfat", residue->GetGeometricCenter());
                 residue->AddAtom(bead_atom);
                 these_beads.push_back(bead_atom);
                 //Bond bead_atom to any other atom in residue so when glycan is moved, bead_atom moves too.
@@ -53,6 +78,41 @@ void Add_Beads(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVecto
                 AtomNode *node = new AtomNode(); // DELETE IS FOR LOSERS.
                 bead_atom->SetNode(node);
                 bead_atom->GetNode()->SetNodeNeighbors(temp);
+                AtomVector atoms = residue->GetAtoms();
+                for (AtomVector::iterator it3 = atoms.begin(); it3 != atoms.end(); ++it3)
+                {
+                    Atom *atom = *it3;
+                    if ( (atom->GetName().compare("C2N") == 0) || (atom->GetName().compare("C6") == 0) )
+                    {
+                        bead_atom = new Atom(residue, "gfat", atom->GetCoordinates().at(0));
+                        residue->AddAtom(bead_atom);
+                        these_beads.push_back(bead_atom);
+                        any_atom->GetNode()->AddNodeNeighbor(bead_atom);
+                        AtomNode *node1 = new AtomNode(); // DELETE IS FOR LOSERS.
+                        bead_atom->SetNode(node1);
+                        bead_atom->GetNode()->SetNodeNeighbors(temp);
+                    }
+                }
+            }
+            if( (residue->GetName().compare("SUP") !=0) && residue->GetName().compare(1, 2, "SA") == 0) // if it is sialic acid
+            {
+                AtomVector atoms = residue->GetAtoms();
+                for (AtomVector::iterator it3 = atoms.begin(); it3 != atoms.end(); ++it3)
+                {
+                    Atom *atom = *it3;
+                    if ( (atom->GetName().compare("C2") == 0) || (atom->GetName().compare("N5") == 0) || (atom->GetName().compare("C8") == 0) )
+                    {
+                        Atom* bead_atom = new Atom(residue, "gfat", atom->GetCoordinates().at(0));
+                        residue->AddAtom(bead_atom);
+                        these_beads.push_back(bead_atom);
+                        Atom *any_atom = residue->GetAtoms().at(0);
+                        any_atom->GetNode()->AddNodeNeighbor(bead_atom);
+                        AtomVector temp = {any_atom};
+                        AtomNode *node = new AtomNode(); // DELETE IS FOR LOSERS.
+                        bead_atom->SetNode(node);
+                        bead_atom->GetNode()->SetNodeNeighbors(temp);
+                    }
+                }
             }
         }
         glycosite->SetSelfGlycanBeads(&these_beads);

@@ -18,6 +18,8 @@ constexpr auto PI = 3.14159265358979323846;
 
 using namespace MolecularModeling;
 
+
+
 /*******************************************/
 /* Function Declarations                   */
 /*******************************************/
@@ -59,7 +61,9 @@ int main()
     // Add beads. They make the overlap calculation faster.
     Add_Beads(&glycoprotein, &glycoSites);
     // This is where the overlaps will be resolved.
-    resolve_overlaps::example_for_Gordon(&glycoprotein, &glycoSites);
+  //  resolve_overlaps::example_for_Gordon(&glycoprotein, &glycoSites);
+    resolve_overlaps::monte_carlo(&glycoprotein, &glycoSites);
+
 
     std::cout << "Program got to end ok" << std::endl;
     return 0;

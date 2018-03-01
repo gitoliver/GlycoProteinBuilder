@@ -416,7 +416,7 @@ void GlycosylationSite::Print_bead_overlaps()
 
 double GlycosylationSite::Calculate_bead_overlaps()
 {
-    double glycan_radius = 3.0, protein_radius = 4.0; // Should cover whole residue.
+    double glycan_radius = 3.0, protein_radius = 3.0; // Should cover whole residue.
     double distance = 0.0, total_overlap = 0.0, protein_overlap = 0.0, glycan_overlap = 0.0;
    // std::cout << "About to loop through beads" << std::endl;
     for(AtomVector::iterator it1 = self_glycan_beads_.begin(); it1 != self_glycan_beads_.end(); ++it1)
@@ -545,6 +545,20 @@ void GlycosylationSite::SetSelfGlycanBeads(AtomVector *beads)
 void GlycosylationSite::SetProteinBeads(AtomVector *beads)
 {
     protein_beads_ = *beads;
+    //Removing beads from attachment point residue.
+    for(AtomVector::iterator it1 = protein_beads_.begin(); it1 != protein_beads_.end(); /* Not incrementing here as erasing increments*/)
+    {
+        Atom *atom = *it1;
+        if (atom->GetResidue() == this->GetResidue())
+        {
+            protein_beads_.erase(std::remove(protein_beads_.begin(), protein_beads_.end(), *it1), protein_beads_.end());
+        }
+        else
+        {
+            ++it1;
+        }
+    }
+
 }
 void GlycosylationSite::SetOtherGlycanBeads(AtomVector *beads)
 {
