@@ -30,7 +30,7 @@ void write_pdb_file(Assembly *glycoprotein, int cycle, std::string summary_filen
     summary << score << "\t" << "pose_" << cycle << ".pdb\n";
     summary.close();
 }
-GlycosylationSitePointerVector DetermineSitesWithOverlap(GlycosylationSiteVector *glycosites)
+GlycosylationSitePointerVector DetermineSitesWithOverlap(GlycosylationSiteVector *glycosites, double tolerance)
 {
     GlycosylationSitePointerVector sites_with_overlaps;
     for (GlycosylationSiteVector::iterator current_glycosite = glycosites->begin(); current_glycosite != glycosites->end(); ++current_glycosite)
@@ -47,8 +47,7 @@ void resolve_overlaps::monte_carlo(Assembly *glycoprotein, GlycosylationSiteVect
 {
     double new_dihedral_value = 0.0, worst_site_overlap = 0.0, tolerance = 0.1;
     int cycle = 0, max_cycles = 1000;
-    GlycosylationSitePointerVector sites_with_overlaps =  DetermineSitesWithOverlap(glycosites);
-
+    GlycosylationSitePointerVector sites_with_overlaps = DetermineSitesWithOverlap(glycosites, tolerance);
     bool stop = false;
     while ( (cycle < max_cycles) && (stop == false) )
     {
@@ -86,6 +85,11 @@ void resolve_overlaps::monte_carlo(Assembly *glycoprotein, GlycosylationSiteVect
         {
             stop = true;
             std::cout << "We are like, totally STOPPING?" << std::endl;
+        }
+        if (cycle % 10 == 0)
+        {
+            std::cout << "Updating overlaping sites" << std::endl;
+            sites_with_overlaps = DetermineSitesWithOverlap(glycosites, tolerance); // Moved glycans may clash with other glycans. Need to check.
         }
         ++cycle;
     }

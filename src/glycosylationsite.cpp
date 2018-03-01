@@ -416,43 +416,46 @@ void GlycosylationSite::Print_bead_overlaps()
 
 double GlycosylationSite::Calculate_bead_overlaps()
 {
-    double glycan_radius = 3.0, protein_radius = 3.0; // Should cover whole residue.
-    double distance = 0.0, total_overlap = 0.0, protein_overlap = 0.0, glycan_overlap = 0.0;
-   // std::cout << "About to loop through beads" << std::endl;
-    for(AtomVector::iterator it1 = self_glycan_beads_.begin(); it1 != self_glycan_beads_.end(); ++it1)
+    return (this->Calculate_protein_bead_overlaps() + this->Calculate_other_glycan_bead_overlaps());
+}
+
+double GlycosylationSite::Calculate_protein_bead_overlaps()
+{
+   double overlap = this->Calculate_bead_overlaps(self_glycan_beads_, protein_beads_);
+   SetProteinOverlap( (overlap / gmml::CARBON_SURFACE_AREA) );
+   return overlap;
+}
+
+double GlycosylationSite::Calculate_other_glycan_bead_overlaps()
+{
+    double overlap = this->Calculate_bead_overlaps(self_glycan_beads_, other_glycan_beads_);
+    SetGlycanOverlap(overlap);
+    return overlap;
+}
+
+double GlycosylationSite::Calculate_bead_overlaps(AtomVector &atomsA, AtomVector &atomsB)
+{
+    double radius = 3.0; //Using same radius for all beads.
+    double distance = 0.0, overlap = 0.0;
+    for(AtomVector::iterator it1 = atomsA.begin(); it1 != atomsA.end(); ++it1)
     {
         Atom *atomA = *it1;
-        for(AtomVector::iterator it2 = protein_beads_.begin(); it2 != protein_beads_.end(); ++it2)
-        {  
-            Atom *atomB = *it2;
-            //std::cout << "Comparing: " << atomA->GetResidue()->GetId() << ", " << atomB->GetResidue()->GetId() << std::endl;
-            if ( (atomA->GetCoordinates().at(0)->GetX() - atomB->GetCoordinates().at(0)->GetX()) < (glycan_radius + protein_radius) ) // This is faster than calulating distance, and rules out tons of atom pairs.
-            {
-                distance = atomA->GetDistanceToAtom(atomB);
-                if ( ( distance < (glycan_radius + protein_radius) ) && ( distance > 0.0 ) ) //Close enough to overlap, but not the same atom
-                {
-                    protein_overlap += gmml::CalculateAtomicOverlaps(atomA, atomB, glycan_radius, protein_radius); // This calls the version with radius values
-                }
-            }
-        }
-        for(AtomVector::iterator it2 = other_glycan_beads_.begin(); it2 != other_glycan_beads_.end(); ++it2)
+        for(AtomVector::iterator it2 = atomsB.begin(); it2 != atomsB.end(); ++it2)
         {
             Atom *atomB = *it2;
             if ( (atomA->GetCoordinates().at(0)->GetX() - atomB->GetCoordinates().at(0)->GetX()) < 6.0 ) // This is faster than calulating distance, and rules out tons of atom pairs.
             {
                 distance = atomA->GetDistanceToAtom(atomB);
-                if ( ( distance < (glycan_radius + glycan_radius) ) && ( distance > 0.0 ) ) //Close enough to overlap, but not the same atom
+                if ( ( distance < (radius + radius) ) && ( distance > 0.0 ) ) //Close enough to overlap, but not the same atom
                 {
-                    glycan_overlap += gmml::CalculateAtomicOverlaps(atomA, atomB, glycan_radius, glycan_radius); // This calls the version with radius values
+                    overlap += gmml::CalculateAtomicOverlaps(atomA, atomB, radius, radius); // This calls the version with radius values
                 }
             }
         }
     }
-    SetGlycanOverlap( (glycan_overlap / gmml::CARBON_SURFACE_AREA) );
-    SetProteinOverlap( (protein_overlap / gmml::CARBON_SURFACE_AREA) ); 
-    total_overlap = (protein_overlap + glycan_overlap); // Perhaps will want these individual values, can split function into two.
-    return (total_overlap / gmml::CARBON_SURFACE_AREA); //Normalise to area of a buried carbon
+    return (overlap / gmml::CARBON_SURFACE_AREA); //Normalise to area of a buried carbon
 }
+
 
 // Copied this from gmml Assembly.
 double GlycosylationSite::CalculateTorsionAngle(AtomVector atoms)

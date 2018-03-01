@@ -42,12 +42,10 @@ public:
     //                       FUNCTIONS                      //
     //////////////////////////////////////////////////////////
     void AttachGlycan(Assembly glycan, Assembly *glycoprotein);
-
-    //double calculate_overlaps(Atomvector all_atoms);
-    //void calculate_protein_overlap(Atomvector );
     double Calculate_bead_overlaps();
+    double Calculate_protein_bead_overlaps();
+    double Calculate_other_glycan_bead_overlaps();
     double Calculate_and_print_bead_overlaps();
-    
     void SetChiAtoms(Residue* residue);
 
     //////////////////////////////////////////////////////////
@@ -84,6 +82,7 @@ private:
     void Prepare_Glycans_For_Superimposition_To_Particular_Residue(std::string amino_acid_name);
     void Superimpose_Glycan_To_Glycosite(Residue *glycosite_residue);
     double CalculateTorsionAngle(AtomVector atoms);
+    double Calculate_bead_overlaps(AtomVector &atomsA, AtomVector &atomsB);
 
     //////////////////////////////////////////////////////////
     //                       ATTRIBUTES                     //
