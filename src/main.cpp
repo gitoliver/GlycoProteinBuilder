@@ -64,6 +64,7 @@ int main()
   //  resolve_overlaps::example_for_Gordon(&glycoprotein, &glycoSites);
     resolve_overlaps::monte_carlo(&glycoprotein, &glycoSites);
 
+    //Remove beads and write a final PDB & PRMTOP
 
     std::cout << "Program got to end ok" << std::endl;
     return 0;

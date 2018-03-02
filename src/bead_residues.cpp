@@ -131,7 +131,6 @@ void Add_Beads(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVecto
     			AtomVector temp = glycosite2->GetSelfGlycanBeads();
     			other_glycan_beads.insert(std::end(other_glycan_beads), std::begin(temp), std::end(temp));
     			//std::cout << "Adding beads of glycosite " << glycosite2->GetResidue()->GetId() << " to " << glycosite1->GetResidue()->GetId() << std::endl;
-
     		}
 
     	}
