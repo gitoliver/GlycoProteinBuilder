@@ -57,7 +57,10 @@ void Add_Beads(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVecto
     for (GlycosylationSiteVector::iterator it1 = glycosites->begin(); it1 != glycosites->end(); ++it1)
     {
     	GlycosylationSite *glycosite = &(*it1);
-    	glycosite->SetProteinBeads(&protein_beads);
+        Atom *cb_atom = glycosite->GetResidue()->GetAtom("CB");
+        double distance = GetMaxDistanceBetweenAtoms(glycosite->GetAttachedGlycan()->GetAllAtomsOfAssembly());
+        AtomVector close_protein_beads = SelectAtomsWithinDistanceOf(cb_atom, distance, protein_beads);
+        glycosite->SetProteinBeads(&close_protein_beads);
     	AtomVector these_beads;
     	ResidueVector glycan_residues = glycosite->GetAttachedGlycan()->GetResidues();
         for (ResidueVector::iterator it2 = glycan_residues.begin(); it2 != glycan_residues.end(); ++it2)
@@ -138,6 +141,8 @@ void Add_Beads(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVecto
     }
 }
 
+
+
 void Remove_Beads(MolecularModeling::Assembly glycoprotein)
 {
     ResidueVector all_residues = glycoprotein.GetAllResiduesOfAssembly();
@@ -154,5 +159,37 @@ void Remove_Beads(MolecularModeling::Assembly glycoprotein)
             }
         }
     }
+}
+
+double GetMaxDistanceBetweenAtoms(AtomVector atoms)
+{
+    double max_distance = 0.0;
+    for(AtomVector::iterator it1 = atoms.begin(); it1 != atoms.end(); ++it1)
+    {
+        Atom *atom1 = (*it1);
+        for(AtomVector::iterator it2 = it1; it2 != atoms.end(); ++it2)
+        {
+            Atom *atom2 = (*it2);
+            if (atom1->GetDistanceToAtom(atom2) > max_distance)
+            {
+                max_distance = atom1->GetDistanceToAtom(atom2);
+            }
+        }
+    }
+    return max_distance;
+}
+
+AtomVector SelectAtomsWithinDistanceOf(Atom *query_atom, double distance, AtomVector atoms)
+{
+    AtomVector atoms_within_distance;
+    for(AtomVector::iterator it1 = atoms.begin(); it1 != atoms.end(); ++it1)
+    {
+        Atom *atom1 = (*it1);
+        if (atom1->GetDistanceToAtom(query_atom) < distance )
+        {
+            atoms_within_distance.push_back(atom1);
+        }
+    }
+    return atoms_within_distance;
 }
 

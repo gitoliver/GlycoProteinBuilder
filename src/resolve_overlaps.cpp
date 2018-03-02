@@ -69,7 +69,7 @@ GlycosylationSitePointerVector DetermineSitesWithOverlap(GlycosylationSiteVector
 void resolve_overlaps::monte_carlo(Assembly *glycoprotein, GlycosylationSiteVector *glycosites)
 {
     double new_dihedral_value = 0.0, worst_site_overlap = 0.0, tolerance = 0.1;
-    int cycle = 0, max_cycles = 10;
+    int cycle = 0, max_cycles = 5;
     GlycosylationSitePointerVector sites_with_overlaps = DetermineSitesWithOverlap(glycosites, tolerance);
     bool stop = false;
     while ( (cycle < max_cycles) && (stop == false) )
