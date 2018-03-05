@@ -64,6 +64,7 @@ GlycosylationSitePointerVector DetermineSitesWithOverlap(GlycosylationSiteVector
 
     c) Create a tree structure for sites that overlap with each other.
         Could use assembly index/id of bead atom? Can work on individual trees and report nice info to users.
+ 3)
 
 */
 void resolve_overlaps::monte_carlo(Assembly *glycoprotein, GlycosylationSiteVector *glycosites)
@@ -88,32 +89,32 @@ void resolve_overlaps::monte_carlo(Assembly *glycoprotein, GlycosylationSiteVect
             //new_dihedral_value = RandomAngle_PlusMinusX(current_glycosite->GetChi2Value(), (180 * percent_overlap));
             new_dihedral_value = RandomAngle_360range();
             current_glycosite->SetChi2Value(new_dihedral_value, glycoprotein);
-            current_glycosite->Calculate_and_print_bead_overlaps();
-            if (current_glycosite->GetTotalOverlap() > worst_site_overlap)
-            {
-                worst_site_overlap = current_glycosite->GetTotalOverlap();
-            }
-            if (current_glycosite->GetTotalOverlap() <= tolerance) // Remove site fromlist of sites with overlaps
-            {
+            //current_glycosite->Calculate_and_print_bead_overlaps();
+           // if (current_glycosite->GetTotalOverlap() > worst_site_overlap)
+          //  {
+         //       worst_site_overlap = current_glycosite->GetTotalOverlap();
+        //    }
+         //   if (current_glycosite->GetTotalOverlap() <= tolerance) // Remove site fromlist of sites with overlaps
+        //    {
                 //  std::cout << "segfaulting?" << std::endl;
-                sites_with_overlaps.erase(std::remove(sites_with_overlaps.begin(), sites_with_overlaps.end(), *it1), sites_with_overlaps.end());
-            }
-            else
-            {
+        //        sites_with_overlaps.erase(std::remove(sites_with_overlaps.begin(), sites_with_overlaps.end(), *it1), sites_with_overlaps.end());
+       //     }
+       //     else
+       //     {
                 ++it1;
-            }
+       //     }
         }
         //  std::cout << "Worst overlapping site has overlap of " << worst_site_overlap << std::endl;
-        if (worst_site_overlap <= tolerance)
-        {
-            stop = true;
-            std::cout << "We are STOPPING?" << std::endl;
-        }
-       // if (cycle % 10 == 0)
-     //   {
-     //       std::cout << "Updating" << std::endl;
+     //   if (worst_site_overlap <= tolerance)
+      //  {
+     //       stop = true;
+    //        std::cout << "We are STOPPING?" << std::endl;
+    //    }
+     //   if (cycle % 10 == 0)
+   //     {
+            std::cout << "Updating" << std::endl;
             sites_with_overlaps = DetermineSitesWithOverlap(glycosites, tolerance); // Moved glycans may clash with other glycans. Need to check.
-     //   }
+      //  }
         ++cycle;
     }
     write_pdb_file(glycoprotein, 1, "./outputs/summary", worst_site_overlap);

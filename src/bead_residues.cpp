@@ -58,9 +58,12 @@ void Add_Beads(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVecto
     {
     	GlycosylationSite *glycosite = &(*it1);
         Atom *cb_atom = glycosite->GetResidue()->GetAtom("CB");
-        double distance = GetMaxDistanceBetweenAtoms(glycosite->GetAttachedGlycan()->GetAllAtomsOfAssembly());
+        // This needs to be updated/scrapped if we start moving the glycan
+        double distance = ( GetMaxDistanceBetweenAtoms(glycosite->GetAttachedGlycan()->GetAllAtomsOfAssembly()) + 5); // added five to account for CB-C1(glycan) distance
         AtomVector close_protein_beads = SelectAtomsWithinDistanceOf(cb_atom, distance, protein_beads);
         glycosite->SetProteinBeads(&close_protein_beads);
+
+   //     glycosite->SetProteinBeads(&protein_beads);
     	AtomVector these_beads;
     	ResidueVector glycan_residues = glycosite->GetAttachedGlycan()->GetResidues();
         for (ResidueVector::iterator it2 = glycan_residues.begin(); it2 != glycan_residues.end(); ++it2)
