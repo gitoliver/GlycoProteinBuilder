@@ -398,8 +398,9 @@ void GlycosylationSite::SetChiAtoms(Residue* residue)
 
 double GlycosylationSite::Calculate_and_print_bead_overlaps()
 {
-    this->Calculate_bead_overlaps();
+    double overlap = this->Calculate_bead_overlaps();
     this->Print_bead_overlaps();
+    return overlap;
 }
 
 void GlycosylationSite::Print_bead_overlaps()
