@@ -62,7 +62,7 @@ int main()
     Add_Beads(&glycoprotein, &glycoSites);
     // This is where the overlaps will be resolved.
   //  resolve_overlaps::example_for_Gordon(&glycoprotein, &glycoSites);
-    resolve_overlaps::dumb_monte_carlo(&glycoprotein, &glycoSites);
+    resolve_overlaps::monte_carlo(&glycoprotein, &glycoSites);
 
     //Remove beads and write a final PDB & PRMTOP
 

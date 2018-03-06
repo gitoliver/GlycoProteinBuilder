@@ -29,7 +29,7 @@ public:
     std::string GetResidueNumber();
     Residue* GetResidue();
     Assembly* GetAttachedGlycan();
-    double GetTotalOverlap();
+    double GetOverlap();
     double GetGlycanOverlap();
     double GetProteinOverlap();
     double GetChi1Value();

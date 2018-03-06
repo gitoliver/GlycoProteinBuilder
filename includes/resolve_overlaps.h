@@ -11,6 +11,7 @@
 
 namespace resolve_overlaps
 {
+    void monte_carlo(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVector *glycosites);
     void dumb_monte_carlo(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVector *glycosites);
     void example_for_Gordon(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVector *glycosites);
     void genetic_algorithm(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVector *glycosites);

@@ -66,7 +66,7 @@ Assembly* GlycosylationSite::GetAttachedGlycan()
     return &glycan_;
 }
 
-double GlycosylationSite::GetTotalOverlap()
+double GlycosylationSite::GetOverlap()
 {
     return (glycan_overlap_ + protein_overlap_);
 }
@@ -409,7 +409,7 @@ void GlycosylationSite::Print_bead_overlaps()
     std::cout << std::setprecision(2); // Formating ouput
     std::cout 
         << std::setw(17) << this->GetResidue()->GetId() << " | " 
-        << std::setw(5)  << this->GetTotalOverlap()     << " |  " 
+        << std::setw(5)  << this->GetOverlap()     << " |  "
         << std::setw(5)  << this->GetProteinOverlap()   << "  | " 
         << std::setw(5)  << this->GetGlycanOverlap()    << 
     std::endl;
@@ -423,7 +423,7 @@ double GlycosylationSite::Calculate_bead_overlaps()
 double GlycosylationSite::Calculate_protein_bead_overlaps()
 {
    double overlap = this->Calculate_bead_overlaps(self_glycan_beads_, protein_beads_);
-   SetProteinOverlap( (overlap / gmml::CARBON_SURFACE_AREA) );
+   SetProteinOverlap(overlap);
    return overlap;
 }
 
@@ -444,7 +444,7 @@ double GlycosylationSite::Calculate_bead_overlaps(AtomVector &atomsA, AtomVector
         for(AtomVector::iterator it2 = atomsB.begin(); it2 != atomsB.end(); ++it2)
         {
             Atom *atomB = *it2;
-            if ( (atomA->GetCoordinates().at(0)->GetX() - atomB->GetCoordinates().at(0)->GetX()) < 6.0 ) // This is faster than calulating distance, and rules out tons of atom pairs.
+            if ( (atomA->GetCoordinates().at(0)->GetX() - atomB->GetCoordinates().at(0)->GetX()) < (radius * 2) ) // This is faster than calulating distance, and rules out tons of atom pairs.
             {
                 distance = atomA->GetDistanceToAtom(atomB);
                 if ( ( distance < (radius + radius) ) && ( distance > 0.0 ) ) //Close enough to overlap, but not the same atom
