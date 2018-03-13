@@ -345,13 +345,13 @@ void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_resid
     //Delete the atoms used to superimpose the glycan onto the protein. Remove the residue.
     Residue *super_residue = glycan_.GetAllResiduesOfAssembly().at(0);
     glycan_.RemoveResidue(super_residue);
-    std::cout << "glycan_ now contains: ";
-    ResidueVector residues = glycan_.GetResidues();
-    for (ResidueVector::iterator it = residues.begin(); it != residues.end(); ++it)
-    {
-        std::cout << (*it)->GetName() << ", ";
-    }
-    std::cout << std::endl;
+//    std::cout << "glycan_ now contains: ";
+//    ResidueVector residues = glycan_.GetResidues();
+//    for (ResidueVector::iterator it = residues.begin(); it != residues.end(); ++it)
+//    {
+//        std::cout << (*it)->GetName() << ", ";
+//    }
+//    std::cout << std::endl;
 }
 
 // This is a dumb way to do it. Need dihedral class but in a rush. Fix later.
