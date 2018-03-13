@@ -5,7 +5,9 @@
 #include "overlap_record.h"
 #include <iomanip> // For setting precision and formating in std::cout 
 #include <algorithm> //  std::erase, std::remove
+
 using namespace MolecularModeling;
+
 class GlycosylationSite
 {
 public:
