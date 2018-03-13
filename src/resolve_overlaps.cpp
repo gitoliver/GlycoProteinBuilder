@@ -206,7 +206,7 @@ void resolve_overlaps::dumb_monte_carlo(Assembly *glycoprotein, GlycosylationSit
      *        Randomly change all chi1 and chi2 values
      */
     double tolerance = 0.1;
-    int cycle = 0, max_cycles = 10;
+    int cycle = 0, max_cycles = 2;
     GlycosylationSitePointerVector sites_with_overlaps = DetermineSitesWithOverlap(glycosites, tolerance);
     bool stop = false;
 
@@ -217,7 +217,6 @@ void resolve_overlaps::dumb_monte_carlo(Assembly *glycoprotein, GlycosylationSit
         for(GlycosylationSitePointerVector::iterator it1 = sites_with_overlaps.begin(); it1 != sites_with_overlaps.end(); ++it1)
         {
             GlycosylationSite *current_glycosite = (*it1);
-            write_pdb_file(glycoprotein, cycle, "./outputs/summary", 0.0);
 
             current_glycosite->SetChi1Value(RandomAngle_360range(), glycoprotein);
 
@@ -226,6 +225,7 @@ void resolve_overlaps::dumb_monte_carlo(Assembly *glycoprotein, GlycosylationSit
             //  new_dihedral_value = RandomAngle_PlusMinusX(current_glycosite->GetChi1Value(), (180 * percent_overlap) ); // scaled to degree of overlap
             //        sites_with_overlaps.erase(std::remove(sites_with_overlaps.begin(), sites_with_overlaps.end(), *it1), sites_with_overlaps.end());
         }
+        write_pdb_file(glycoprotein, cycle, "./outputs/summary", 0.0);
         //std::cout << "Updating list of sites with overlaps." << std::endl;
         sites_with_overlaps = DetermineSitesWithOverlap(glycosites, tolerance); // Moved glycans may clash with other glycans. Need to check.
         if (sites_with_overlaps.size() == 0)
