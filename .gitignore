@@ -3,3 +3,5 @@ glycoproteinBuilder.pro
 glycoproteinBuilder.pro.user.3.2-pre1
 glycoproteinBuilder.pro.user
 outputs/
+*~
+genetic_algorithm_output.txt

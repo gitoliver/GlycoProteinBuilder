@@ -17,7 +17,7 @@
     #define GetCurrentDir getcwd
 #endif
 
-bool fileExists(std::__cxx11::string fileName);
+bool fileExists(std::string fileName);
 std::string SplitFilename (const std::string& str);
 std::string Find_Program_Installation_Directory();
 std::string Find_Program_Working_Directory();

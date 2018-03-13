@@ -14,6 +14,17 @@
 #include "io.h"
 #include "resolve_overlaps.h"
 
+# include <cstdlib>
+# include <fstream>
+# include <iomanip>
+# include <ostream>
+
+#include <string>
+#include <vector> 
+#include <stdio.h>
+#include <stdlib.h>
+#include <cstring>
+
 constexpr auto PI = 3.14159265358979323846;
 
 using namespace MolecularModeling;
@@ -28,6 +39,7 @@ void AttachGlycansToGlycosites(Assembly *glycoprotein, GlycosylationSiteVector *
 
 int main()
 {
+
     //************************************************//
     // Read input file                                //
     //************************************************//
@@ -61,8 +73,8 @@ int main()
     // Add beads. They make the overlap calculation faster.
     Add_Beads(&glycoprotein, &glycoSites);
     // This is where the overlaps will be resolved.
-  //  resolve_overlaps::example_for_Gordon(&glycoprotein, &glycoSites);
-    resolve_overlaps::dumb_monte_carlo(&glycoprotein, &glycoSites);
+    // resolve_overlaps::example_for_Gordon(&glycoprotein, &glycoSites);
+     resolve_overlaps::dumb_monte_carlo(&glycoprotein, &glycoSites);
 
     //Remove beads and write a final PDB & PRMTOP
 
