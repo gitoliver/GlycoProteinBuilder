@@ -11,8 +11,8 @@
 #include <stdlib.h>     /* getenv */
 #include <fstream>      // std::ifstream
 
-#include "io.h"
-#include "resolve_overlaps.h"
+#include "../includes/io.h"
+#include "../includes/resolve_overlaps.h"
 
 # include <cstdlib>
 # include <fstream>
@@ -67,16 +67,17 @@ int main()
     // Resolve Overlaps                               //
     //************************************************//
 
-    // Write initial glycoprotein structure
     PdbFileSpace::PdbFile *outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
     outputPdbFileGlycoProteinAll->Write(working_Directory + "/outputs/GlycoProtein.pdb");
     // Add beads. They make the overlap calculation faster.
     Add_Beads(&glycoprotein, &glycoSites);
     // This is where the overlaps will be resolved.
     // resolve_overlaps::example_for_Gordon(&glycoprotein, &glycoSites);
-     resolve_overlaps::dumb_monte_carlo(&glycoprotein, &glycoSites);
+    resolve_overlaps::dumb_monte_carlo(&glycoprotein, &glycoSites);
+    Remove_Beads(glycoprotein); //Remove beads and write a final PDB & PRMTOP
 
-    //Remove beads and write a final PDB & PRMTOP
+    outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
+    outputPdbFileGlycoProteinAll->Write(working_Directory + "/outputs/GlycoProtein_Resolved.pdb");
 
     std::cout << "Program got to end ok" << std::endl;
     return 0;

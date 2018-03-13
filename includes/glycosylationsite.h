@@ -2,6 +2,7 @@
 #define GLYCOSYLATIONSITE_H
 
 #include "gmml.hpp"
+#include "overlap_record.h"
 #include <iomanip> // For setting precision and formating in std::cout 
 #include <algorithm> //  std::erase, std::remove
 
@@ -31,7 +32,7 @@ public:
     std::string GetResidueNumber();
     Residue* GetResidue();
     Assembly* GetAttachedGlycan();
-    double GetTotalOverlap();
+    double GetOverlap();
     double GetGlycanOverlap();
     double GetProteinOverlap();
     double GetChi1Value();
@@ -39,6 +40,9 @@ public:
     AtomVector GetSelfGlycanBeads();
     AtomVector GetProteinBeads();
     AtomVector GetOtherGlycanBeads();
+    Overlap_record GetBestOverlapRecord();
+    Overlap_record GetBestProteinOverlapRecord();
+
 
     //////////////////////////////////////////////////////////
     //                       FUNCTIONS                      //
@@ -65,15 +69,14 @@ public:
     void SetSelfGlycanBeads(AtomVector *beads);
     void SetProteinBeads(AtomVector *beads);
     void SetOtherGlycanBeads(AtomVector *beads);
-
+    void SetBestOverlapRecord(double overlap, double chi1, double chi2);
+    void SetBestProteinOverlapRecord(double overlap, double chi1, double chi2);
 
     //////////////////////////////////////////////////////////
     //                       DISPLAY FUNCTION               //
     //////////////////////////////////////////////////////////
 
     void Print_bead_overlaps();
-
-    //void Print(std::ostream& out = std::cout);
 
 private:
 
@@ -102,9 +105,8 @@ private:
     AtomVector self_glycan_beads_;
     AtomVector other_glycan_beads_;
     AtomVector protein_beads_;
-
-    //Assembly alternate_sidechain_;
-
+    Overlap_record best_overlap_record_;
+    Overlap_record best_protein_overlap_record_;
 };
 
 #endif // GLYCOSYLATIONSITE_H

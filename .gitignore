@@ -5,3 +5,6 @@ glycoproteinBuilder.pro.user
 outputs/
 *~
 genetic_algorithm_output.txt
+log.log
+tmp
+*.swp

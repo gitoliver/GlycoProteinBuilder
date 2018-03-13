@@ -1,4 +1,4 @@
-#include "bead_residues.h"
+#include "../includes/bead_residues.h"
 
 void Add_Beads(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVector *glycosites)
 {
@@ -8,10 +8,8 @@ void Add_Beads(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVecto
     for (ResidueVector::iterator it1 = all_residues.begin(); it1 != all_residues.end(); ++it1)
     {
         Residue *residue = *it1;
-        // std::cout << (*resi_iter)->GetName() << "\t" << (*resi_iter)->CheckIfProtein() << endl;
         if (residue->CheckIfProtein()==1) // the current residue is an amino acid
         {
-            //std::cout << residue->GetName() << "\tA\t" << residue->CheckIfProtein() << endl;
             AtomVector atoms = residue->GetAtoms();
             for (AtomVector::iterator it2 = atoms.begin(); it2 != atoms.end(); ++it2)
             {
@@ -24,28 +22,22 @@ void Add_Beads(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVecto
                     residue->AddAtom(bead_atom);
                     protein_beads.push_back(bead_atom);
                 }
-                else if ( (atom->GetName().compare("NZ")==0) || (atom->GetName().compare("CZ")==0) || (atom->GetName().compare("NE2")==0) ||
-                     (atom->GetName().compare("OD1")==0) || (atom->GetName().compare("SD")==0) )
-                {
+                else if ( (atom->GetName().compare("NZ")==0) ||
+                          (atom->GetName().compare("CZ")==0) ||
+                          (atom->GetName().compare("NE2")==0) ||
+                          (atom->GetName().compare("OD1")==0) ||
+                          (atom->GetName().compare("SD")==0)  ||
+                          ( (atom->GetName().compare("CE2")==0) && residue->GetName().compare("TRP")==0 ) ||
+                          ( (atom->GetName().compare("CD1")==0) && ( residue->GetName().compare("LEU")==0 || residue->GetName().compare("ILE")==0 ) ) ||
+                          ( (atom->GetName().compare("CD")==0) && residue->GetName().compare("GLU")==0 )
+                          )
+                { // sfats should move when a chi1, chi2 is moved, so make sure they are connected to something for the SetDihedral function to move them.
                     Atom* bead_atom = new Atom(residue, "sfat", atom->GetCoordinates());
-                    residue->AddAtom(bead_atom);
-                    protein_beads.push_back(bead_atom);
-                }
-                else if ( (atom->GetName().compare("CE2")==0) && residue->GetName().compare("TRP")==0 )
-                {
-                    Atom* bead_atom = new Atom(residue, "sfat", atom->GetCoordinates());
-                    residue->AddAtom(bead_atom);
-                    protein_beads.push_back(bead_atom);
-                }
-                else if ( (atom->GetName().compare("CD1")==0) && ( residue->GetName().compare("LEU")==0 || residue->GetName().compare("ILE")==0 ) )
-                {
-                    Atom* bead_atom = new Atom(residue, "sfat", atom->GetCoordinates());
-                    residue->AddAtom(bead_atom);
-                    protein_beads.push_back(bead_atom);
-                }
-                else if ( (atom->GetName().compare("CD")==0) && residue->GetName().compare("GLU")==0 )
-                {
-                    Atom* bead_atom = new Atom(residue, "sfat", atom->GetCoordinates());
+//                    atom->GetNode()->AddNodeNeighbor(bead_atom);
+//                    AtomVector temp = {atom};
+//                    AtomNode *node = new AtomNode(); // DELETE IS FOR LOSERS.
+//                    bead_atom->SetNode(node);
+//                    bead_atom->GetNode()->SetNodeNeighbors(temp);
                     residue->AddAtom(bead_atom);
                     protein_beads.push_back(bead_atom);
                 }
@@ -62,14 +54,14 @@ void Add_Beads(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVecto
         double distance = ( GetMaxDistanceBetweenAtoms(glycosite->GetAttachedGlycan()->GetAllAtomsOfAssembly()) + 5); // added five to account for CB-C1(glycan) distance
         AtomVector close_protein_beads = SelectAtomsWithinDistanceOf(cb_atom, distance, protein_beads);
         glycosite->SetProteinBeads(&close_protein_beads);
-
    //     glycosite->SetProteinBeads(&protein_beads);
     	AtomVector these_beads;
     	ResidueVector glycan_residues = glycosite->GetAttachedGlycan()->GetResidues();
         for (ResidueVector::iterator it2 = glycan_residues.begin(); it2 != glycan_residues.end(); ++it2)
         {
         	Residue *residue = *it2;
-            if ( (residue->GetName().compare("SUP") !=0) && ( residue->GetName().compare(1, 2, "SA") != 0) )// don't add one to the superimposition atoms or sialic acid (see below)
+            if ( residue->GetName().at(1) == 'S' ) // don't add one to a sialic acid (see below). Middle character of resname is always S for sialic acid.
+           // if ( residue->GetName().compare(1, 2, "SA") != 0) // don't add one to a sialic acid (see below)
             {
                 // std::cout << (*resi_iter)->GetName() << "\tG\t" << (*resi_iter)->CheckIfProtein() << endl;
                // std::cout << "Adding bead to self glycan " << residue->GetId() << std::endl;
@@ -100,7 +92,7 @@ void Add_Beads(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVecto
                     }
                 }
             }
-            if( (residue->GetName().compare("SUP") !=0) && residue->GetName().compare(1, 2, "SA") == 0) // if it is sialic acid
+            else // if it is sialic acid
             {
                 AtomVector atoms = residue->GetAtoms();
                 for (AtomVector::iterator it3 = atoms.begin(); it3 != atoms.end(); ++it3)
@@ -146,7 +138,7 @@ void Add_Beads(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVecto
 
 
 
-void Remove_Beads(MolecularModeling::Assembly glycoprotein)
+void Remove_Beads(MolecularModeling::Assembly &glycoprotein)
 {
     ResidueVector all_residues = glycoprotein.GetAllResiduesOfAssembly();
     for (ResidueVector::iterator it1 = all_residues.begin(); it1 != all_residues.end(); ++it1)
