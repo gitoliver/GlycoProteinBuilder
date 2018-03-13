@@ -206,7 +206,7 @@ void resolve_overlaps::dumb_monte_carlo(Assembly *glycoprotein, GlycosylationSit
      *        Randomly change all chi1 and chi2 values
      */
     double tolerance = 0.1;
-    int cycle = 0, max_cycles = 2;
+    int cycle = 0, max_cycles = 5;
     GlycosylationSitePointerVector sites_with_overlaps = DetermineSitesWithOverlap(glycosites, tolerance);
     bool stop = false;
 
