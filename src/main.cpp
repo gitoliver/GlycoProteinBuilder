@@ -1,7 +1,6 @@
 #include <fstream>
 #include <iostream>
 #include <cstdlib> // for exit()
-
 // Includes for directory reading
 #include <string>
 #include <dirent.h>
@@ -10,21 +9,17 @@
 #include <sys/types.h>
 #include <stdlib.h>     /* getenv */
 #include <fstream>      // std::ifstream
+#include <cstdlib>
+#include <iomanip>
+#include <vector>
+#include <stdio.h>
+#include <cstring>
 
 #include "../includes/io.h"
 #include "../includes/resolve_overlaps.h"
 #include "../includes/bead_residues.h"
 
-# include <cstdlib>
-# include <fstream>
-# include <iomanip>
-# include <ostream>
 
-#include <string>
-#include <vector> 
-#include <stdio.h>
-#include <stdlib.h>
-#include <cstring>
 
 constexpr auto PI = 3.14159265358979323846;
 
@@ -73,8 +68,8 @@ int main()
     // Add beads. They make the overlap calculation faster.
     Add_Beads(&glycoprotein, &glycoSites);
     // This is where the overlaps will be resolved.
-    resolve_overlaps::example_for_Gordon(&glycoprotein, &glycoSites);
-    //resolve_overlaps::dumb_monte_carlo(&glycoprotein, &glycoSites);
+    //resolve_overlaps::example_for_Gordon(&glycoprotein, &glycoSites);
+    resolve_overlaps::monte_carlo(&glycoprotein, &glycoSites);
     Remove_Beads(glycoprotein); //Remove beads and write a final PDB & PRMTOP
 
     outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
