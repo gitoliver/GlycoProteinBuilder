@@ -25,16 +25,21 @@ constexpr auto PI = 3.14159265358979323846;
 
 using namespace MolecularModeling;
 
-
-
 /*******************************************/
 /* Function Declarations                   */
 /*******************************************/
 void Read_Input_File(GlycosylationSiteVector *glycoSites, std::string *proteinPDB, std::string *glycanDirectory, const std::string working_Directory);
 void AttachGlycansToGlycosites(Assembly *glycoprotein, GlycosylationSiteVector *glycoSites, std::string glycanDirectory);
 
-int main()
+int main(int argc, char* argv[])
 {
+    std::string working_Directory = Find_Program_Working_Directory(); // Default behaviour
+    if (argc == 2)
+    {
+        working_Directory = argv[1];
+    }
+    std::cout << "Working directory is " << working_Directory << "\n";
+
 
     //************************************************//
     // Read input file                                //
@@ -43,14 +48,13 @@ int main()
     //std::string installation_Directory = Find_Program_Installation_Directory();
     GlycosylationSiteVector glycoSites;
     std::string proteinPDB, glycanDirectory;
-    std::string working_Directory = Find_Program_Working_Directory();
     Read_Input_File(&glycoSites, &proteinPDB, &glycanDirectory, working_Directory);
 
     //************************************************//
     // Load Protein PDB file                          //
     //************************************************//
 
-    Assembly glycoprotein( (working_Directory + "/inputs/" + proteinPDB), gmml::InputFileType::PDB );
+    Assembly glycoprotein( (working_Directory + "/inputs/" + proteinPDB), gmml::InputFileType::PDB);
     glycoprotein.BuildStructureByDistance();
 
     //************************************************//
