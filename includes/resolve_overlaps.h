@@ -13,28 +13,21 @@
 # include <ctime>
 # include <cstring>
 
-using namespace std;
+typedef std::vector<GlycosylationSite*> GlycosylationSitePointerVector;
 
-//int main ( );
-void crossover ( int &seed );
-void elitist ( );
-void evaluate ( Assembly *glycoprotein, GlycosylationSiteVector *glycosites);
-int i4_uniform_ab ( int a, int b, int &seed );
-void initialize ( std::string filename, int &seed );
-void keep_the_best ( );
-void mutate ( int &seed );
-double r8_uniform_ab ( double a, double b, int &seed );
-void report ( int generation );
-void selector ( int &seed );
-void timestamp ( );
-void Xover ( int one, int two, int &seed );
+double RandomAngle_360range();
+double RandomAngle_PlusMinusX(double start_point, int max_step_size);
+double GetNewAngleScaledToDegreeOfOverlap(double current_angle, double overlap, int number_of_atoms);
+void write_pdb_file(Assembly *glycoprotein, int cycle, std::string summary_filename, double score);
+void PrintOverlaps(GlycosylationSiteVector *glycosites);
+void PrintOverlaps(GlycosylationSitePointerVector &glycosites);
+void SetBestProteinChi1Chi2(GlycosylationSitePointerVector &glycosites, Assembly *glycoprotein);
+GlycosylationSitePointerVector DetermineSitesWithOverlap(GlycosylationSiteVector *glycosites, double tolerance, std::string returning = "with", std::string type = "total");
 
 namespace resolve_overlaps
 {
     void monte_carlo(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVector *glycosites);
     void dumb_monte_carlo(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVector *glycosites);
-    void example_for_Gordon(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVector *glycosites);
-    void genetic_algorithm(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVector *glycosites);
 }
 
 #endif // RESOLVE_OVERLAPS_H

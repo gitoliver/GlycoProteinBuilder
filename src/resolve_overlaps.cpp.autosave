@@ -138,7 +138,7 @@ void resolve_overlaps::dumb_monte_carlo(Assembly *glycoprotein, GlycosylationSit
             //  new_dihedral_value = RandomAngle_PlusMinusX(current_glycosite->GetChi1Value(), (180 * percent_overlap) ); // scaled to degree of overlap
             //        sites_with_overlaps.erase(std::remove(sites_with_overlaps.begin(), sites_with_overlaps.end(), *it1), sites_with_overlaps.end());
         }
-        write_pdb_file(glycoprotein, cycle, "./outputs/summary", 0.0);
+        write_pdb_file(glycoprotein, cycle, "summary", 0.0);
         //std::cout << "Updating list of sites with overlaps." << std::endl;
         sites_with_overlaps = DetermineSitesWithOverlap(glycosites, tolerance); // Moved glycans may clash with other glycans. Need to check.
         if (sites_with_overlaps.size() == 0)
@@ -147,7 +147,7 @@ void resolve_overlaps::dumb_monte_carlo(Assembly *glycoprotein, GlycosylationSit
             stop = true;
         }
     }
-    write_pdb_file(glycoprotein, (cycle + 1), "./outputs/summary", 0.0);
+    write_pdb_file(glycoprotein, (cycle + 1), "summary", 0.0);
 }
 
 
@@ -171,7 +171,7 @@ double GetNewAngleScaledToDegreeOfOverlap(double current_angle, double overlap, 
 
 void write_pdb_file(Assembly *glycoprotein, int cycle, std::string summary_filename, double score)
 {
-    std::string pdb_filename = "outputs/pose_" + std::to_string(cycle) + ".pdb";
+    std::string pdb_filename = "pose_" + std::to_string(cycle) + ".pdb";
     PdbFileSpace::PdbFile *outputPdbFile = glycoprotein->BuildPdbFileStructureFromAssembly(-1,0);
     outputPdbFile->Write(pdb_filename);
     std::ofstream summary;   // write a file that describes the best conformations found

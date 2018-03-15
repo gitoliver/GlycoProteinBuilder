@@ -1,7 +1,6 @@
 #include <fstream>
 #include <iostream>
 #include <cstdlib> // for exit()
-
 // Includes for directory reading
 #include <string>
 #include <dirent.h>
@@ -10,27 +9,21 @@
 #include <sys/types.h>
 #include <stdlib.h>     /* getenv */
 #include <fstream>      // std::ifstream
+#include <cstdlib>
+#include <iomanip>
+#include <vector>
+#include <stdio.h>
+#include <cstring>
 
 #include "../includes/io.h"
 #include "../includes/resolve_overlaps.h"
 #include "../includes/bead_residues.h"
 
-# include <cstdlib>
-# include <fstream>
-# include <iomanip>
-# include <ostream>
 
-#include <string>
-#include <vector> 
-#include <stdio.h>
-#include <stdlib.h>
-#include <cstring>
 
 constexpr auto PI = 3.14159265358979323846;
 
 using namespace MolecularModeling;
-
-
 
 /*******************************************/
 /* Function Declarations                   */
@@ -38,8 +31,14 @@ using namespace MolecularModeling;
 void Read_Input_File(GlycosylationSiteVector *glycoSites, std::string *proteinPDB, std::string *glycanDirectory, const std::string working_Directory);
 void AttachGlycansToGlycosites(Assembly *glycoprotein, GlycosylationSiteVector *glycoSites, std::string glycanDirectory);
 
-int main()
+int main(int argc, char* argv[])
 {
+    std::string working_Directory = Find_Program_Working_Directory(); // Default behaviour.
+    if (argc == 2)
+    {
+        working_Directory = argv[1];
+    }
+    std::cout << "Working directory is " << working_Directory << "\n"; // Assumes folder with glycans inside is present.
 
     //************************************************//
     // Read input file                                //
@@ -48,14 +47,13 @@ int main()
     //std::string installation_Directory = Find_Program_Installation_Directory();
     GlycosylationSiteVector glycoSites;
     std::string proteinPDB, glycanDirectory;
-    std::string working_Directory = Find_Program_Working_Directory();
     Read_Input_File(&glycoSites, &proteinPDB, &glycanDirectory, working_Directory);
 
     //************************************************//
     // Load Protein PDB file                          //
     //************************************************//
 
-    Assembly glycoprotein( (working_Directory + "/inputs/" + proteinPDB), gmml::InputFileType::PDB );
+    Assembly glycoprotein( (working_Directory + "/" + proteinPDB), gmml::InputFileType::PDB);
     glycoprotein.BuildStructureByDistance();
 
     //************************************************//
@@ -69,7 +67,7 @@ int main()
     //************************************************//
 
     PdbFileSpace::PdbFile *outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
-    outputPdbFileGlycoProteinAll->Write(working_Directory + "/outputs/GlycoProtein.pdb");
+    outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Initial.pdb");
     // Add beads. They make the overlap calculation faster.
     Add_Beads(&glycoprotein, &glycoSites);
     // This is where the overlaps will be resolved.
@@ -78,7 +76,7 @@ int main()
     Remove_Beads(glycoprotein); //Remove beads and write a final PDB & PRMTOP
 
     outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
-    outputPdbFileGlycoProteinAll->Write(working_Directory + "/outputs/GlycoProtein_Resolved.pdb");
+    outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Resolved.pdb");
 
     std::cout << "Program got to end ok" << std::endl;
     return 0;
@@ -146,7 +144,7 @@ void AttachGlycansToGlycosites(Assembly *glycoprotein, GlycosylationSiteVector *
 void Read_Input_File(GlycosylationSiteVector *glycoSites, std::string *proteinPDB, std::string *glycanDirectory, const std::string working_Directory)
 {
     std::string buffer;
-    std::ifstream inf (working_Directory + "/inputs/" + "input.txt");
+    std::ifstream inf (working_Directory + "/input.txt");
     if (!inf)
     {
         std::cerr << "Uh oh, input file could not be opened for reading!" << std::endl;
@@ -161,7 +159,7 @@ void Read_Input_File(GlycosylationSiteVector *glycoSites, std::string *proteinPD
         if(strInput == "Glycans:")
         {
             getline(inf, *glycanDirectory);
-            *glycanDirectory = working_Directory + "/inputs/" + *glycanDirectory;
+            *glycanDirectory = working_Directory + "/" + *glycanDirectory;
         }
         if(strInput == "Protein Residue, Glycan Name:")
         {
