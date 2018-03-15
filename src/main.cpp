@@ -33,12 +33,12 @@ void AttachGlycansToGlycosites(Assembly *glycoprotein, GlycosylationSiteVector *
 
 int main(int argc, char* argv[])
 {
-    std::string working_Directory = Find_Program_Working_Directory(); // Default behaviour. Assumes folder called glycans/ is present.
+    std::string working_Directory = Find_Program_Working_Directory(); // Default behaviour.
     if (argc == 2)
     {
         working_Directory = argv[1];
     }
-    std::cout << "Working directory is " << working_Directory << "\n";
+    std::cout << "Working directory is " << working_Directory << "\n"; // Assumes folder with glycans inside is present.
 
     //************************************************//
     // Read input file                                //
