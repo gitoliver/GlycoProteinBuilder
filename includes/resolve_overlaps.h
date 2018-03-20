@@ -6,12 +6,14 @@
 #include <vector>
 #include <fstream>
 #include <string>
-#include "bead_residues.h"
+#include <algorithm> // For erase remove
+#include <iomanip>
+#include <cmath>
+#include <ctime>
+#include <cstring>
 
-# include <iomanip>
-# include <cmath>
-# include <ctime>
-# include <cstring>
+#include "bead_residues.h"
+#include "glycosylationsite.h"
 
 typedef std::vector<GlycosylationSite*> GlycosylationSitePointerVector;
 
@@ -23,6 +25,7 @@ void PrintOverlaps(GlycosylationSiteVector *glycosites);
 void PrintOverlaps(GlycosylationSitePointerVector &glycosites);
 void SetBestProteinChi1Chi2(GlycosylationSitePointerVector &glycosites, Assembly *glycoprotein);
 GlycosylationSitePointerVector DetermineSitesWithOverlap(GlycosylationSiteVector *glycosites, double tolerance, std::string returning = "with", std::string type = "total");
+GlycosylationSitePointerVector DeleteSitesWithOverlaps(GlycosylationSiteVector &glycosites, double tolerance, std::string type);
 
 namespace resolve_overlaps
 {
