@@ -30,7 +30,7 @@ void Add_Beads(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVecto
                           ( (atom->GetName().compare("CE2")==0) && residue->GetName().compare("TRP")==0 ) ||
                           ( (atom->GetName().compare("CD1")==0) && ( residue->GetName().compare("LEU")==0 || residue->GetName().compare("ILE")==0 ) ) ||
                           ( (atom->GetName().compare("CD")==0) && residue->GetName().compare("GLU")==0 )
-                          )
+                        )
                 { // sfats should move when a chi1, chi2 is moved, so make sure they are connected to something for the SetDihedral function to move them.
                     Atom* bead_atom = new Atom(residue, "sfat", atom->GetCoordinates());
                     residue->AddAtom(bead_atom);
