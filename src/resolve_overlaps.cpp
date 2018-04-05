@@ -58,11 +58,12 @@ void resolve_overlaps::monte_carlo(MolecularModeling::Assembly &glycoprotein, Gl
         }
     }
     //Remove sites that could not be resolved.
+    std::cout << "All sites with overlaps:\n";
     PrintOverlaps(&glycosites);
     write_pdb_file(&glycoprotein, 1, "./outputs/summary", 0.0);
     std::cout << "Setting best chi1 and chi2 found so far\n";
     SetBestProteinChi1Chi2(sites_with_protein_overlaps, &glycoprotein);
-    std::cout << "Could not resolve protein overlaps for these sites: \n";
+   // std::cout << "Could not resolve protein overlaps for these sites: \n";
     tolerance = 1; // Aimed for <0.1, but keep any less than 1.
     //GlycosylationSitePointerVector sites_without_protein_overlaps = DetermineSitesWithOverlap(&glycosites, tolerance, "without", "protein");
     GlycosylationSitePointerVector sites_without_protein_overlaps = DeleteSitesWithOverlaps(glycosites, tolerance, "protein");
@@ -247,7 +248,7 @@ GlycosylationSitePointerVector DeleteSitesWithOverlaps(GlycosylationSiteVector &
 {
     GlycosylationSitePointerVector sites_to_return;
     double overlap = 0.0;
-    for (GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end(); ++current_glycosite)
+    for (GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end();)
     {
         //First calculate the site's overlap value
         if(type.compare("total")==0)
@@ -263,13 +264,17 @@ GlycosylationSitePointerVector DeleteSitesWithOverlaps(GlycosylationSiteVector &
             overlap = current_glycosite->Calculate_other_glycan_bead_overlaps();
         }
         // Delete site from list if overlap is greater than the tolerance value
+        std::cout << "Site " << current_glycosite->GetResidueNumber() << ": " << overlap << " :";
         if ( overlap > tolerance)
         {
+            std::cout << "Removed\n";
             glycosites.erase(std::remove(glycosites.begin(), glycosites.end(), *current_glycosite), glycosites.end()); // Note need #include <algorithm>
         }
         else
         {
+            std::cout << "Retained\n";
             sites_to_return.push_back(&(*current_glycosite));
+            ++current_glycosite; // This will get you. Erase/Remove advances current_glycosite.
         }
     }
     return sites_to_return;
