@@ -420,7 +420,7 @@ double GlycosylationSite::Calculate_bead_overlaps()
 {
     double overlap = (this->Calculate_protein_bead_overlaps() + this->Calculate_other_glycan_bead_overlaps());
     // Keep a record of the chi1 and chi2 values that produce the lowest overlap value
-    if(this->GetBestOverlapRecord().GetOverlap() > (overlap + 0.01))
+    if(this->GetBestOverlapRecord().GetOverlap() >= (overlap + 0.01))
     {
         this->SetBestOverlapRecord(overlap, this->GetChi1Value(), this->GetChi2Value());
     }
@@ -432,7 +432,7 @@ double GlycosylationSite::Calculate_protein_bead_overlaps()
    double overlap = this->Calculate_bead_overlaps(self_glycan_beads_, protein_beads_);
    // Keep a record of the chi1 and chi2 values that produce the lowest overlap value
   // std::cout << "Best so far " << this->GetBestProteinOverlapRecord().GetOverlap() << std::endl;
-   if(this->GetBestProteinOverlapRecord().GetOverlap() > (overlap + 0.01) )
+   if(this->GetBestProteinOverlapRecord().GetOverlap() >= (overlap) )
    {
     //   std::cout << std::fixed; // Formating ouput
     //   std::cout << std::setprecision(10);
