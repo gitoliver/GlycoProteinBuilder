@@ -23,7 +23,7 @@ double GetNewAngleScaledToDegreeOfOverlap(double current_angle, double overlap, 
 void write_pdb_file(Assembly *glycoprotein, int cycle, std::string summary_filename, double score);
 void PrintOverlaps(GlycosylationSiteVector *glycosites);
 void PrintOverlaps(GlycosylationSitePointerVector &glycosites);
-void SetBestProteinChi1Chi2(GlycosylationSitePointerVector &glycosites, Assembly *glycoprotein);
+void SetBestChi1Chi2(GlycosylationSitePointerVector &glycosites, Assembly *glycoprotein, std::string type = "Total");
 GlycosylationSitePointerVector DetermineSitesWithOverlap(GlycosylationSiteVector *glycosites, double tolerance, std::string returning = "with", std::string type = "total");
 GlycosylationSitePointerVector DeleteSitesWithOverlaps(GlycosylationSiteVector &glycosites, double tolerance, std::string type);
 
