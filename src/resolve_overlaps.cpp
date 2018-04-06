@@ -63,16 +63,9 @@ void resolve_overlaps::monte_carlo(MolecularModeling::Assembly &glycoprotein, Gl
     write_pdb_file(&glycoprotein, 1, "./summary", 0.0);
     std::cout << "Setting best chi1 and chi2 found so far\n";
     SetBestChi1Chi2(sites_with_protein_overlaps, &glycoprotein, "Protein");
-   // std::cout << "Could not resolve protein overlaps for these sites: \n";
     tolerance = 1; // Aimed for <0.1, but keep any less than 1.
-    //GlycosylationSitePointerVector sites_without_protein_overlaps = DetermineSitesWithOverlap(&glycosites, tolerance, "without", "protein");
     GlycosylationSitePointerVector sites_without_protein_overlaps = DeleteSitesWithOverlaps(glycosites, tolerance, "protein");
- //   std::cout << "Moving forward with these sites: \n";
-//    for(GlycosylationSitePointerVector::iterator it1 = sites_without_protein_overlaps.begin(); it1 != sites_without_protein_overlaps.end(); ++it1)
-//    {
-//        GlycosylationSite *current_glycosite = (*it1);
-//        std::cout << current_glycosite->GetResidue()->GetId() << "\n";
-//    }
+
     cycle = 0, max_cycles = 50;
     while ( (cycle < max_cycles) && (stop == false) )
     {
@@ -206,14 +199,20 @@ void PrintOverlaps(GlycosylationSitePointerVector &glycosites)
 
 void SetBestChi1Chi2(GlycosylationSitePointerVector &glycosites, Assembly *glycoprotein, std::string type)
 {
+
     if (type.compare("Total")==0)
     {
         for (GlycosylationSitePointerVector::iterator it = glycosites.begin(); it != glycosites.end(); ++it)
         {
             GlycosylationSite *current_glycosite = (*it);
+            Overlap_record initial_settings(current_glycosite->GetOverlap(), current_glycosite->GetChi1Value(), current_glycosite->GetChi2Value());
          //   std::cout << current_glycosite->GetResidueNumber() << ": " << current_glycosite->GetBestOverlapRecord().GetOverlap() << std::endl;
-            current_glycosite->SetChi1Value(current_glycosite->GetBestOverlapRecord().GetChi1(), glycoprotein);
-            current_glycosite->SetChi2Value(current_glycosite->GetBestOverlapRecord().GetChi2(), glycoprotein);
+
+            current_glycosite->Calculate_bead_overlaps();
+            if (current_glycosite->GetOverlap() > initial_settings.GetOverlap() )
+            {
+
+            }
         }
     }
     if (type.compare("Protein")==0)

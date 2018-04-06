@@ -2,6 +2,9 @@
 
 constexpr auto PI = 3.14159265358979323846;
 
+typedef std::vector<Overlap_record> OverlapRecordVector;
+
+
 //////////////////////////////////////////////////////////
 //                       CONSTRUCTOR                    //
 //////////////////////////////////////////////////////////
@@ -10,6 +13,8 @@ GlycosylationSite::GlycosylationSite()
     SetGlycanName("");
     SetGlycanOverlap(0.0);
     SetProteinOverlap(0.0);
+    SetBestOverlapRecord(123456789.0, 0.0, 0.0);
+    SetBestProteinOverlapRecord(123456789.0, 0.0, 0.0);
 }
 
 GlycosylationSite::GlycosylationSite(std::string glycan_name)
@@ -17,6 +22,8 @@ GlycosylationSite::GlycosylationSite(std::string glycan_name)
     SetGlycanName(glycan_name);
     SetGlycanOverlap(0.0);
     SetProteinOverlap(0.0);
+    SetBestOverlapRecord(123456789.0, 0.0, 0.0);
+    SetBestProteinOverlapRecord(123456789.0, 0.0, 0.0);
 }
 
 GlycosylationSite::GlycosylationSite(std::string glycan_name, std::string residue_number)
@@ -25,6 +32,8 @@ GlycosylationSite::GlycosylationSite(std::string glycan_name, std::string residu
     SetResidueNumber(residue_number);
     SetGlycanOverlap(0.0);
     SetProteinOverlap(0.0);
+    SetBestOverlapRecord(123456789.0, 0.0, 0.0);
+    SetBestProteinOverlapRecord(123456789.0, 0.0, 0.0);
 }
 
 /*GlycosylationSite::GlycosylationSite(std::string glycan_name, Assembly glycan, Residue* residue)
@@ -108,12 +117,12 @@ AtomVector GlycosylationSite::GetOtherGlycanBeads()
 
 Overlap_record GlycosylationSite::GetBestOverlapRecord()
 {
-    return best_overlap_record_;
+    return best_overlap_records_.back(); // Return the last element of the vector. Only pushback progressively better overlap records.
 }
 
 Overlap_record GlycosylationSite::GetBestProteinOverlapRecord()
 {
-    return best_protein_overlap_record_;
+    return best_protein_overlap_records_.back();
 }
 
 //////////////////////////////////////////////////////////
@@ -601,16 +610,18 @@ void GlycosylationSite::SetOtherGlycanBeads(AtomVector *beads)
 
 void GlycosylationSite::SetBestOverlapRecord(double overlap, double chi1, double chi2)
 {
-    best_overlap_record_.SetOverlap(overlap);
-    best_overlap_record_.SetChi1(chi1);
-    best_overlap_record_.SetChi2(chi2);
+    best_overlap_records_.emplace_back(overlap, chi1, chi2);
+//    best_overlap_record_.SetOverlap(overlap);
+//    best_overlap_record_.SetChi1(chi1);
+//    best_overlap_record_.SetChi2(chi2);
 }
 
 void GlycosylationSite::SetBestProteinOverlapRecord(double overlap, double chi1, double chi2)
 {
-    best_protein_overlap_record_.SetOverlap(overlap);
-    best_protein_overlap_record_.SetChi1(chi1);
-    best_protein_overlap_record_.SetChi2(chi2);
+    best_protein_overlap_records_.emplace_back(overlap, chi1, chi2);
+//    best_protein_overlap_record_.SetOverlap(overlap);
+//    best_protein_overlap_record_.SetChi1(chi1);
+//    best_protein_overlap_record_.SetChi2(chi2);
 }
 
 //////////////////////////////////////////////////////////

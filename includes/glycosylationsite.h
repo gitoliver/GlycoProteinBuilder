@@ -15,6 +15,9 @@ public:
     //                    TYPE DEFINITION                   //
     //////////////////////////////////////////////////////////
 
+    typedef std::vector<GlycosylationSite*> GlycosylationSitePointerVector;
+    typedef std::vector<Overlap_record> OverlapRecordVector;
+
     //////////////////////////////////////////////////////////
     //                       CONSTRUCTOR                    //
     //////////////////////////////////////////////////////////
@@ -78,11 +81,14 @@ public:
 
     void Print_bead_overlaps();
 
+    //////////////////////////////////////////////////////////
+    //                       OPERATORS                      //
+    //////////////////////////////////////////////////////////
+
     inline bool operator==(const GlycosylationSite &rhs) const
     {
         return rhs.residue_number_ == residue_number_;
     }
-
 
 private:
 
@@ -111,8 +117,8 @@ private:
     AtomVector self_glycan_beads_;
     AtomVector other_glycan_beads_;
     AtomVector protein_beads_;
-    Overlap_record best_overlap_record_;
-    Overlap_record best_protein_overlap_record_;
+    OverlapRecordVector best_overlap_records_;
+    OverlapRecordVector best_protein_overlap_records_;
 };
 
 #endif // GLYCOSYLATIONSITE_H
