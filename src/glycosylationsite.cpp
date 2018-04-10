@@ -138,7 +138,6 @@ void GlycosylationSite::AttachGlycan(Assembly glycan, Assembly *glycoprotein)
     this->Superimpose_Glycan_To_Glycosite(residue_);
     glycoprotein->MergeAssembly(&glycan_); // Add glycan to glycoprotein assembly, allows SetDihedral later.
     this->SetChiAtoms(residue_);
-
 }
 
 void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residue(std::string amino_acid_name)

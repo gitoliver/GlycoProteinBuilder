@@ -36,7 +36,6 @@ void resolve_overlaps::monte_carlo(MolecularModeling::Assembly &glycoprotein, Gl
     int cycle = 0, max_cycles = 30;
     GlycosylationSitePointerVector sites_with_protein_overlaps = DetermineSitesWithOverlap(&glycosites, tolerance, "with", "protein");
     bool stop = false;
-
     while ( (cycle < max_cycles) && (stop == false) )
     {
         ++cycle;
@@ -64,7 +63,7 @@ void resolve_overlaps::monte_carlo(MolecularModeling::Assembly &glycoprotein, Gl
     std::cout << "Setting best chi1 and chi2 found so far\n";
     SetBestChi1Chi2(sites_with_protein_overlaps, &glycoprotein, "Protein");
     tolerance = 1; // Aimed for <0.1, but keep any less than 1.
-    GlycosylationSitePointerVector sites_without_protein_overlaps = DeleteSitesWithOverlaps(glycosites, tolerance, "protein");
+    GlycosylationSitePointerVector sites_without_protein_overlaps = DeleteSitesWithOverlaps(glycoprotein, glycosites, tolerance, "protein");
 
     cycle = 0, max_cycles = 50;
     while ( (cycle < max_cycles) && (stop == false) )
@@ -89,7 +88,7 @@ void resolve_overlaps::monte_carlo(MolecularModeling::Assembly &glycoprotein, Gl
     }
     SetBestChi1Chi2(sites_without_protein_overlaps, &glycoprotein);
     std::cout << "All sites with overlaps:\n";
-    GlycosylationSitePointerVector sites_without_overlaps = DeleteSitesWithOverlaps(glycosites, tolerance, "total");
+    GlycosylationSitePointerVector sites_without_overlaps = DeleteSitesWithOverlaps(glycoprotein, glycosites, tolerance, "total");
     PrintOverlaps(&glycosites);
 }
 
@@ -267,7 +266,7 @@ GlycosylationSitePointerVector DetermineSitesWithOverlap(GlycosylationSiteVector
 }
 
 
-GlycosylationSitePointerVector DeleteSitesWithOverlaps(GlycosylationSiteVector &glycosites, double tolerance, std::string type)
+GlycosylationSitePointerVector DeleteSitesWithOverlaps(Assembly &glycoprotein, GlycosylationSiteVector &glycosites, double tolerance, std::string type)
 {
     GlycosylationSitePointerVector sites_to_return;
     double overlap = 0.0;
@@ -291,6 +290,11 @@ GlycosylationSitePointerVector DeleteSitesWithOverlaps(GlycosylationSiteVector &
         if ( overlap > tolerance)
         {
             std::cout << "Removed\n";
+            ResidueVector glycan_residues = current_glycosite->GetAttachedGlycan()->GetResidues();
+            for(ResidueVector::iterator it = glycan_residues.begin(); it != glycan_residues.end(); ++it)
+            {
+                glycoprotein.RemoveResidue(*it);
+            }
             glycosites.erase(std::remove(glycosites.begin(), glycosites.end(), *current_glycosite), glycosites.end()); // Note need #include <algorithm>
         }
         else

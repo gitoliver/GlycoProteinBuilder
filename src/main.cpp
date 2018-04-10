@@ -75,6 +75,12 @@ int main(int argc, char* argv[])
     resolve_overlaps::monte_carlo(glycoprotein, glycoSites);
     Remove_Beads(glycoprotein); //Remove beads and write a final PDB & PRMTOP
 
+    std::cout << "In main, the following sites are in the glycoSite vector:\n";
+    for(GlycosylationSiteVector::iterator current_glycosite = glycoSites.begin(); current_glycosite != glycoSites.end(); ++current_glycosite)
+    {
+        std::cout << current_glycosite->GetResidueNumber() << "\n";
+    }
+
     outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
     outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Resolved.pdb");
 
