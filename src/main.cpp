@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
     // Add beads. They make the overlap calculation faster.
     Add_Beads(glycoprotein, glycoSites);
     //resolve_overlaps::example_for_Gordon(&glycoprotein, &glycoSites);
-    resolve_overlaps::monte_carlo(glycoprotein, glycoSites);
+    resolve_overlaps::protein_first_monte_carlo(glycoprotein, glycoSites);
     Remove_Beads(glycoprotein); //Remove beads and write a final PDB & PRMTOP
 
 //    std::cout << "In main, the following sites are in the glycoSite vector:\n";
