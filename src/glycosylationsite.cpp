@@ -131,12 +131,12 @@ Overlap_record GlycosylationSite::GetBestProteinOverlapRecord()
 
 // Only need glycoprotein so can merge assemblies and set bonding for the connecting atom
 // Bond by distance wouldn't work as may have overlaps after superimposition.
-void GlycosylationSite::AttachGlycan(Assembly glycan, Assembly *glycoprotein)
+void GlycosylationSite::AttachGlycan(Assembly glycan, Assembly &glycoprotein)
 {
     this->SetGlycan(glycan);
     this->Prepare_Glycans_For_Superimposition_To_Particular_Residue(residue_->GetName());
     this->Superimpose_Glycan_To_Glycosite(residue_);
-    glycoprotein->MergeAssembly(&glycan_); // Add glycan to glycoprotein assembly, allows SetDihedral later.
+    glycoprotein.MergeAssembly(&glycan_); // Add glycan to glycoprotein assembly, allows SetDihedral later.
     this->SetChiAtoms(residue_);
 }
 
@@ -551,7 +551,7 @@ void GlycosylationSite::SetProteinOverlap(double overlap)
     protein_overlap_ = overlap;
 }
 
-void GlycosylationSite::SetChi1Value(double angle, Assembly *glycoprotein)
+void GlycosylationSite::SetChi1Value(double angle, Assembly &glycoprotein)
 {
     Atom *atom1 = chi1_.at(0); // horrific, fix later.
     Atom *atom2 = chi1_.at(1);
@@ -562,11 +562,11 @@ void GlycosylationSite::SetChi1Value(double angle, Assembly *glycoprotein)
 //    std::cout << std::setprecision(10);
 //    std::cout << angle << std::endl;
  //   std::cout << "Setting dihedral for " << atom1->GetName() << ", " << atom2->GetName() << ", " << atom3->GetName() << ", " << atom4->GetName() << "\n";
-    glycoprotein->SetDihedral(atom1, atom2, atom3, atom4, angle);
+    glycoprotein.SetDihedral(atom1, atom2, atom3, atom4, angle);
 //    std::cout << this->GetChi1Value() << std::endl;
 
 }
-void GlycosylationSite::SetChi2Value(double angle, Assembly *glycoprotein)
+void GlycosylationSite::SetChi2Value(double angle, Assembly &glycoprotein)
 {
     Atom *atom1 = chi2_.at(0); // horrific, fix later.
     Atom *atom2 = chi2_.at(1);
@@ -575,7 +575,7 @@ void GlycosylationSite::SetChi2Value(double angle, Assembly *glycoprotein)
 //    std::cout << std::fixed;
 //    std::cout << std::setprecision(10);
 //    std::cout << angle << std::endl;
-    glycoprotein->SetDihedral(atom1, atom2, atom3, atom4, angle);
+    glycoprotein.SetDihedral(atom1, atom2, atom3, atom4, angle);
    // std::cout << this->GetChi2Value() << std::endl;
 }
 

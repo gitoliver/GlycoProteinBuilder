@@ -20,17 +20,18 @@ typedef std::vector<GlycosylationSite*> GlycosylationSitePointerVector;
 double RandomAngle_360range();
 double RandomAngle_PlusMinusX(double start_point, int max_step_size);
 double GetNewAngleScaledToDegreeOfOverlap(double current_angle, double overlap, int number_of_atoms);
-void write_pdb_file(Assembly *glycoprotein, int cycle, std::string summary_filename, double score);
-void PrintOverlaps(GlycosylationSiteVector *glycosites);
+void write_pdb_file(Assembly &glycoprotein, int cycle, std::string summary_filename, double score);
+void PrintOverlaps(GlycosylationSiteVector &glycosites);
 void PrintOverlaps(GlycosylationSitePointerVector &glycosites);
-void SetBestChi1Chi2(GlycosylationSitePointerVector &glycosites, Assembly *glycoprotein, std::string type = "Total");
-GlycosylationSitePointerVector DetermineSitesWithOverlap(GlycosylationSiteVector *glycosites, double tolerance, std::string returning = "with", std::string type = "total");
+void SetBestChi1Chi2(GlycosylationSitePointerVector &glycosites, Assembly &glycoprotein, std::string type = "Total");
+GlycosylationSitePointerVector DetermineSitesWithOverlap(GlycosylationSiteVector &glycosites, double tolerance, std::string returning = "with", std::string type = "total");
 GlycosylationSitePointerVector DeleteSitesWithOverlaps(Assembly &glycoprotein, GlycosylationSiteVector &glycosites, double tolerance, std::string type);
+void RandomizeTorsions(GlycosylationSitePointerVector &sites, Assembly &assembly);
 
 namespace resolve_overlaps
 {
     void monte_carlo(MolecularModeling::Assembly &glycoprotein, GlycosylationSiteVector &glycosites);
-    void dumb_monte_carlo(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVector *glycosites);
+    void dumb_monte_carlo(Assembly &glycoprotein, GlycosylationSiteVector &glycosites);
 }
 
 #endif // RESOLVE_OVERLAPS_H

@@ -7,7 +7,7 @@ using namespace MolecularModeling;
 
 typedef std::vector<GlycosylationSite> GlycosylationSiteVector;
 
-void Add_Beads(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVector *glycosites);
+void Add_Beads(MolecularModeling::Assembly &glycoprotein, GlycosylationSiteVector &glycosites);
 void Remove_Beads(MolecularModeling::Assembly &glycoprotein);
 
 double GetMaxDistanceBetweenAtoms(AtomVector atoms);

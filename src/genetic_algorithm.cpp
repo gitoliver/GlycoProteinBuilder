@@ -58,7 +58,7 @@ using namespace gmml;
 //  cfitness: the cumulative fitness.
 //
 
-void resolve_overlaps::genetic_algorithm(Assembly *glycoprotein, GlycosylationSiteVector *glycosites)
+void resolve_overlaps::genetic_algorithm(Assembly &glycoprotein, GlycosylationSiteVector &glycosites)
 {
     double site_total_overlap = 0.0, site_glycan_overlap = 0.0, site_protein_overlap = 0.0, new_dihedral_value = 0.0, total_system_overlap = 0.0;
     std::cout << "      Site        |  Total | Protein | Glycan " << std::endl;
@@ -358,7 +358,7 @@ void elitist ( )
 
 
 
-void evaluate (Assembly *glycoprotein, GlycosylationSiteVector *glycosites)
+void evaluate (Assembly &glycoprotein, GlycosylationSiteVector &glycosites)
 
 //
 //    EVALUATE implements the user-defined valuation function
@@ -386,7 +386,7 @@ void evaluate (Assembly *glycoprotein, GlycosylationSiteVector *glycosites)
 	
 	total=0;
 	
-    for (GlycosylationSiteVector::iterator current_glycosite = glycosites->begin(); current_glycosite != glycosites->end(); ++current_glycosite)
+    for (GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end(); ++current_glycosite)
 
     {
 	

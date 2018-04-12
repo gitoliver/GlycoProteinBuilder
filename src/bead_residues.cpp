@@ -1,9 +1,9 @@
 #include "../includes/bead_residues.h"
 
-void Add_Beads(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVector *glycosites)
+void Add_Beads(MolecularModeling::Assembly &glycoprotein, GlycosylationSiteVector &glycosites)
 {
 	AtomVector protein_beads; 
-    ResidueVector all_residues = glycoprotein->GetAllResiduesOfAssembly();
+    ResidueVector all_residues = glycoprotein.GetAllResiduesOfAssembly();
     // Go through, find all protein residues, add bead on CA atom.
     for (ResidueVector::iterator it1 = all_residues.begin(); it1 != all_residues.end(); ++it1)
     {
@@ -41,7 +41,7 @@ void Add_Beads(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVecto
     }
     // Go through all glycosite glycans, add bead in center of each residue, attach it to one other atom in residue.
     // Then set protein_beads
-    for (GlycosylationSiteVector::iterator it1 = glycosites->begin(); it1 != glycosites->end(); ++it1)
+    for (GlycosylationSiteVector::iterator it1 = glycosites.begin(); it1 != glycosites.end(); ++it1)
     {
     	GlycosylationSite *glycosite = &(*it1);
         Atom *cb_atom = glycosite->GetResidue()->GetAtom("CB");
@@ -111,11 +111,11 @@ void Add_Beads(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVecto
         glycosite->SetSelfGlycanBeads(&these_beads);
     }
     // Now find beads from other glycans and add them to list of other_glycan_beads for each glycosite
-    for (GlycosylationSiteVector::iterator it1 = glycosites->begin(); it1 != glycosites->end(); ++it1)
+    for (GlycosylationSiteVector::iterator it1 = glycosites.begin(); it1 != glycosites.end(); ++it1)
     {
     	GlycosylationSite *glycosite1 = &(*it1);
     	AtomVector other_glycan_beads;
-    	for (GlycosylationSiteVector::iterator it2 = glycosites->begin(); it2 != glycosites->end(); ++it2)
+        for (GlycosylationSiteVector::iterator it2 = glycosites.begin(); it2 != glycosites.end(); ++it2)
     	{
     		GlycosylationSite *glycosite2 = &(*it2);
     		if(glycosite1 != glycosite2) // Check if same site

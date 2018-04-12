@@ -50,7 +50,7 @@ public:
     //////////////////////////////////////////////////////////
     //                       FUNCTIONS                      //
     //////////////////////////////////////////////////////////
-    void AttachGlycan(Assembly glycan, Assembly *glycoprotein);
+    void AttachGlycan(Assembly glycan, Assembly &glycoprotein);
     double Calculate_bead_overlaps();
     double Calculate_protein_bead_overlaps();
     double Calculate_other_glycan_bead_overlaps();
@@ -67,8 +67,8 @@ public:
     void SetGlycan(Assembly glycan);
     void SetGlycanOverlap(double overlap);
     void SetProteinOverlap(double overlap);
-    void SetChi1Value(double angle, Assembly *glycoprotein);
-    void SetChi2Value(double angle, Assembly *glycoprotein);
+    void SetChi1Value(double angle, Assembly &glycoprotein);
+    void SetChi2Value(double angle, Assembly &glycoprotein);
     void SetSelfGlycanBeads(AtomVector *beads);
     void SetProteinBeads(AtomVector *beads);
     void SetOtherGlycanBeads(AtomVector *beads);
