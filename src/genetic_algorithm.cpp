@@ -250,7 +250,7 @@ void crossover ( int &seed )
 void elitist ( )
 
 //****************************************************************************80
-// 
+//  *(glycosites.at(0).GetGlycoprotein())
 //  Purpose:
 //
 //    ELITIST stores the best member of the previous generation.
@@ -392,9 +392,9 @@ void evaluate (Assembly &glycoprotein, GlycosylationSiteVector &glycosites)
 	
 // NVARS = number of glycosites	
 	
-        current_glycosite->SetChi1Value(population[member].gene[total],glycoprotein);
+        current_glycosite->SetChi1Value(population[member].gene[total]);
 		
-        current_glycosite->SetChi2Value(population[member].gene[total+1],glycoprotein);
+        current_glycosite->SetChi2Value(population[member].gene[total+1]);
 		 
 		total=total+2;
 		 
