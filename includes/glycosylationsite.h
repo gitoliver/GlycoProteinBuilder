@@ -44,17 +44,14 @@ public:
     AtomVector GetSelfGlycanBeads();
     AtomVector GetProteinBeads();
     AtomVector GetOtherGlycanBeads();
-    Overlap_record GetBestOverlapRecord();
-    Overlap_record GetBestProteinOverlapRecord();
+    Overlap_record GetBestOverlapRecord(std::string overlap_type = "total");
 
 
     //////////////////////////////////////////////////////////
     //                       FUNCTIONS                      //
     //////////////////////////////////////////////////////////
     void AttachGlycan(Assembly glycan, Assembly &glycoprotein);
-    double Calculate_bead_overlaps();
-    double Calculate_protein_bead_overlaps();
-    double Calculate_other_glycan_bead_overlaps();
+    double Calculate_bead_overlaps(std::string overlap_type = "total");
     double Calculate_and_print_bead_overlaps();
     void SetChiAtoms(Residue* residue);
 
@@ -73,8 +70,7 @@ public:
     void SetSelfGlycanBeads(AtomVector *beads);
     void SetProteinBeads(AtomVector *beads);
     void SetOtherGlycanBeads(AtomVector *beads);
-    void SetBestOverlapRecord(double overlap, double chi1, double chi2);
-    void SetBestProteinOverlapRecord(double overlap, double chi1, double chi2);
+    void SetBestOverlapRecord(double overlap, double chi1, double chi2, std::string overlap_type = "total");
 
     //////////////////////////////////////////////////////////
     //                       DISPLAY FUNCTION               //

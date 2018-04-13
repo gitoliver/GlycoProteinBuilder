@@ -124,53 +124,30 @@ void PrintOverlaps(GlycosylationSitePointerVector &glycosites)
     }
 }
 
-void SetBestChi1Chi2(GlycosylationSitePointerVector &glycosites, std::string type)
+void SetBestChi1Chi2(GlycosylationSitePointerVector &glycosites, std::string overlap_type)
 {
-    if (type.compare("total")==0)
-    {
-        for (GlycosylationSitePointerVector::iterator it = glycosites.begin(); it != glycosites.end(); ++it)
-        {
-            GlycosylationSite *current_glycosite = (*it);
-            Overlap_record initial_settings(current_glycosite->GetOverlap(), current_glycosite->GetChi1Value(), current_glycosite->GetChi2Value());
-         //   std::cout << current_glycosite->GetResidueNumber() << ": " << current_glycosite->GetBestOverlapRecord().GetOverlap() << std::endl;
+    /****
+     * Ok, the problem here is that two sites that are close may independantly find a best set that when set together causes them to overlap. This can happen
+     * when just looking at protein overlaps, as the sfat atom on the NLN is moving around. It's worse when you consider glycan overlaps
+     */
 
-            current_glycosite->Calculate_bead_overlaps();
-            if (current_glycosite->GetOverlap() > initial_settings.GetOverlap() )
-            {
-
-            }
-        }
-    }
-    if (type.compare("protein")==0)
+    for (GlycosylationSitePointerVector::iterator it = glycosites.begin(); it != glycosites.end(); ++it)
     {
-        for (GlycosylationSitePointerVector::iterator it = glycosites.begin(); it != glycosites.end(); ++it)
-        {
-            GlycosylationSite *current_glycosite = (*it);
-            current_glycosite->SetChi1Value(current_glycosite->GetBestProteinOverlapRecord().GetChi1());
-            current_glycosite->SetChi2Value(current_glycosite->GetBestProteinOverlapRecord().GetChi2());
-        }
+        GlycosylationSite *current_glycosite = (*it);
+        current_glycosite->SetChi1Value(current_glycosite->GetBestOverlapRecord(overlap_type).GetChi1());
+        current_glycosite->SetChi2Value(current_glycosite->GetBestOverlapRecord(overlap_type).GetChi2());
+        current_glycosite->Calculate_bead_overlaps();
     }
 }
 
-GlycosylationSitePointerVector DetermineSitesWithOverlap(GlycosylationSiteVector &glycosites, double tolerance, std::string type)
+GlycosylationSitePointerVector DetermineSitesWithOverlap(GlycosylationSiteVector &glycosites, double tolerance, std::string overlap_type)
 {
     GlycosylationSitePointerVector sites_to_return;
     double overlap = 0.0;
     std::cout << "      Site        |  Total | Protein | Glycan " << std::endl;
     for (GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end(); ++current_glycosite)
     {
-        if(type.compare("total")==0)
-        {
-            overlap = current_glycosite->Calculate_bead_overlaps();
-        }
-        else if (type.compare("protein")==0)
-        {
-            overlap = current_glycosite->Calculate_protein_bead_overlaps();
-        }
-        else if (type.compare("glycan")==0)
-        {
-            overlap = current_glycosite->Calculate_other_glycan_bead_overlaps();
-        }
+        overlap = current_glycosite->Calculate_bead_overlaps(overlap_type);
         if ( overlap > tolerance)
         {
             current_glycosite->Print_bead_overlaps();
@@ -181,25 +158,13 @@ GlycosylationSitePointerVector DetermineSitesWithOverlap(GlycosylationSiteVector
 }
 
 
-GlycosylationSitePointerVector DeleteSitesWithOverlaps(GlycosylationSiteVector &glycosites, double tolerance, std::string type)
+GlycosylationSitePointerVector DeleteSitesWithOverlaps(GlycosylationSiteVector &glycosites, double tolerance, std::string overlap_type)
 {
     GlycosylationSitePointerVector sites_to_return;
     double overlap = 0.0;
     for (GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end();)
     {
-        //First calculate the site's overlap value
-        if(type.compare("total")==0)
-        {
-            overlap = current_glycosite->Calculate_bead_overlaps();
-        }
-        else if (type.compare("protein")==0)
-        {
-            overlap = current_glycosite->Calculate_protein_bead_overlaps();
-        }
-        else if (type.compare("glycan")==0)
-        {
-            overlap = current_glycosite->Calculate_other_glycan_bead_overlaps();
-        }
+        overlap = current_glycosite->Calculate_bead_overlaps(overlap_type);
         // Delete site from list if overlap is greater than the tolerance value
         std::cout << "Site " << current_glycosite->GetResidueNumber() << ": " << overlap << " :";
         if ( overlap > tolerance)
