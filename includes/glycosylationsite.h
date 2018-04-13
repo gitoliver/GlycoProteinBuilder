@@ -35,6 +35,7 @@ public:
     std::string GetResidueNumber();
     Residue* GetResidue();
     Assembly* GetAttachedGlycan();
+    Assembly* GetGlycoprotein();
     double GetOverlap();
     double GetGlycanOverlap();
     double GetProteinOverlap();

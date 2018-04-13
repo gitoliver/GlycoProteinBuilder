@@ -75,6 +75,11 @@ Assembly* GlycosylationSite::GetAttachedGlycan()
     return &glycan_;
 }
 
+Assembly* GlycosylationSite::GetGlycoprotein()
+{
+    return this->GetResidue()->GetAssembly();
+}
+
 double GlycosylationSite::GetOverlap()
 {
     return (glycan_overlap_ + protein_overlap_);
