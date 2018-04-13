@@ -23,9 +23,10 @@ double GetNewAngleScaledToDegreeOfOverlap(double current_angle, double overlap, 
 void write_pdb_file(Assembly &glycoprotein, int cycle, std::string summary_filename, double score);
 void PrintOverlaps(GlycosylationSiteVector &glycosites);
 void PrintOverlaps(GlycosylationSitePointerVector &glycosites);
-void SetBestChi1Chi2(GlycosylationSitePointerVector &glycosites, std::string type = "total");
-GlycosylationSitePointerVector DetermineSitesWithOverlap(GlycosylationSiteVector &glycosites, double tolerance, std::string type = "total");
-GlycosylationSitePointerVector DeleteSitesWithOverlaps(GlycosylationSiteVector &glycosites, double tolerance, std::string type);
+void SetBestChi1Chi2(GlycosylationSitePointerVector &glycosites, std::string overlap_type = "total");
+GlycosylationSitePointerVector DetermineSitesWithOverlap(GlycosylationSiteVector &glycosites, double tolerance, std::string overlap_type = "total");
+GlycosylationSitePointerVector DeleteSitesWithOverlaps(GlycosylationSiteVector &glycosites, double tolerance, std::string overlap_type = "total");
+void DeleteSitesWithOverlapRecordsAboveTolerance(GlycosylationSiteVector &glycosites, double tolerance, std::string overlap_type = "total");
 void Monte_Carlo_Torsions(GlycosylationSitePointerVector &sites, GlycosylationSiteVector &glycosites, int max_cycles, double tolerance, std::string overlap_type);
 void RandomizeTorsions(GlycosylationSitePointerVector &sites);
 
