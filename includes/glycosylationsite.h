@@ -15,6 +15,9 @@ public:
     //                    TYPE DEFINITION                   //
     //////////////////////////////////////////////////////////
 
+    typedef std::vector<GlycosylationSite*> GlycosylationSitePointerVector;
+    typedef std::vector<Overlap_record> OverlapRecordVector;
+
     //////////////////////////////////////////////////////////
     //                       CONSTRUCTOR                    //
     //////////////////////////////////////////////////////////
@@ -32,6 +35,7 @@ public:
     std::string GetResidueNumber();
     Residue* GetResidue();
     Assembly* GetAttachedGlycan();
+    Assembly* GetGlycoprotein();
     double GetOverlap();
     double GetGlycanOverlap();
     double GetProteinOverlap();
@@ -40,17 +44,14 @@ public:
     AtomVector GetSelfGlycanBeads();
     AtomVector GetProteinBeads();
     AtomVector GetOtherGlycanBeads();
-    Overlap_record GetBestOverlapRecord();
-    Overlap_record GetBestProteinOverlapRecord();
+    Overlap_record GetBestOverlapRecord(std::string overlap_type = "total");
 
 
     //////////////////////////////////////////////////////////
     //                       FUNCTIONS                      //
     //////////////////////////////////////////////////////////
-    void AttachGlycan(Assembly glycan, Assembly *glycoprotein);
-    double Calculate_bead_overlaps();
-    double Calculate_protein_bead_overlaps();
-    double Calculate_other_glycan_bead_overlaps();
+    void AttachGlycan(Assembly glycan, Assembly &glycoprotein);
+    double Calculate_bead_overlaps(std::string overlap_type = "total");
     double Calculate_and_print_bead_overlaps();
     void SetChiAtoms(Residue* residue);
 
@@ -64,19 +65,27 @@ public:
     void SetGlycan(Assembly glycan);
     void SetGlycanOverlap(double overlap);
     void SetProteinOverlap(double overlap);
-    void SetChi1Value(double angle, Assembly *glycoprotein);
-    void SetChi2Value(double angle, Assembly *glycoprotein);
+    void SetChi1Value(double angle);
+    void SetChi2Value(double angle);
     void SetSelfGlycanBeads(AtomVector *beads);
     void SetProteinBeads(AtomVector *beads);
     void SetOtherGlycanBeads(AtomVector *beads);
-    void SetBestOverlapRecord(double overlap, double chi1, double chi2);
-    void SetBestProteinOverlapRecord(double overlap, double chi1, double chi2);
+    void SetBestOverlapRecord(double overlap, double chi1, double chi2, std::string overlap_type = "total");
 
     //////////////////////////////////////////////////////////
     //                       DISPLAY FUNCTION               //
     //////////////////////////////////////////////////////////
 
     void Print_bead_overlaps();
+
+    //////////////////////////////////////////////////////////
+    //                       OPERATORS                      //
+    //////////////////////////////////////////////////////////
+
+    inline bool operator==(const GlycosylationSite &rhs) const
+    {
+        return rhs.residue_number_ == residue_number_;
+    }
 
 private:
 
@@ -105,8 +114,8 @@ private:
     AtomVector self_glycan_beads_;
     AtomVector other_glycan_beads_;
     AtomVector protein_beads_;
-    Overlap_record best_overlap_record_;
-    Overlap_record best_protein_overlap_record_;
+    OverlapRecordVector best_overlap_records_;
+    OverlapRecordVector best_protein_overlap_records_;
 };
 
 #endif // GLYCOSYLATIONSITE_H

@@ -1,27 +1,4 @@
 #include "../includes/resolve_overlaps.h"
-#include "../includes/glycosylationsite.h"
-
-// genetic algorithm 
-
-# include <cstdlib>
-# include <iostream>
-# include <iomanip>
-# include <fstream>
-# include <iomanip>
-# include <cmath>
-# include <ctime>
-# include <cstring>
-# include <ostream>
-
-#include <string>
-#include <vector>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sstream>
-#include <math.h>
-#include <ctime>
-#include <cstring>
-#include <time.h>
 
 typedef std::vector<GlycosylationSite*> GlycosylationSitePointerVector;
 
@@ -39,12 +16,12 @@ using namespace gmml;
 
 Note: Chi1 is 180,-60,60 +/- 30 degrees. Want a function that keeps the values within these states.
 Note: Need to save best structure.
-Note: Remember to delete the SUP atoms at some stage.
 */
 
-void resolve_overlaps::monte_carlo(Assembly *glycoprotein, GlycosylationSiteVector *glycosites)
+
+void resolve_overlaps::protein_first_monte_carlo(GlycosylationSiteVector &glycosites)
 {
-    /* Algorithm:
+    /* Algorithm plan:
      *  Resolve all protein overlap first, reject sites that cannot be resolved. Record cycles to resolve?
      *  Calculate protein overlaps, for each site with overlaps
      *        Randomly change all chi1 and chi2 values
@@ -52,66 +29,22 @@ void resolve_overlaps::monte_carlo(Assembly *glycoprotein, GlycosylationSiteVect
      *  Calculate glycan overlaps, for each site with overlaps
      *        Change chi1 and chi2, scaled by degree of overlap
      *        Reject changes causing protein overlaps
-     *
      */
-    double tolerance = 0.1;
-    double new_dihedral_angle = 0.0;
-    int cycle = 0, max_cycles = 5;
-
-//    while (cycle < max_cycles)
-//    {
-//        ++cycle;
-//        for(GlycosylationSiteVector::iterator current_glycosite = glycosites->begin(); current_glycosite != glycosites->end(); ++current_glycosite)
-//        {
-//            current_glycosite->Calculate_protein_bead_overlaps();
-//            new_dihedral_angle = GetNewAngleScaledToDegreeOfOverlap(current_glycosite->GetChi1Value(), current_glycosite->GetProteinOverlap(), current_glycosite->GetAttachedGlycan()->GetAllAtomsOfAssembly().size());
-//            current_glycosite->SetChi1Value(new_dihedral_angle, glycoprotein);
-//            new_dihedral_angle = GetNewAngleScaledToDegreeOfOverlap(current_glycosite->GetChi2Value(), current_glycosite->GetProteinOverlap(), current_glycosite->GetAttachedGlycan()->GetAllAtomsOfAssembly().size());
-//            current_glycosite->SetChi2Value(new_dihedral_angle, glycoprotein);
-//            current_glycosite->Calculate_protein_bead_overlaps();
-
-//        }
-//    }
-
-    GlycosylationSitePointerVector sites_with_protein_overlaps = DetermineSitesWithOverlap(glycosites, tolerance, "with", "protein");
-    bool stop = false;
-
-    while ( (cycle < max_cycles) && (stop == false) )
-    {
-        ++cycle;
-        std::cout << "Cycle " << cycle << " of " << max_cycles << ".\n";
-        for(GlycosylationSitePointerVector::iterator it1 = sites_with_protein_overlaps.begin(); it1 != sites_with_protein_overlaps.end(); ++it1)
-        {
-            GlycosylationSite *current_glycosite = (*it1);
-            new_dihedral_angle = GetNewAngleScaledToDegreeOfOverlap(current_glycosite->GetChi1Value(), current_glycosite->GetProteinOverlap(), current_glycosite->GetAttachedGlycan()->GetAllAtomsOfAssembly().size());
-            current_glycosite->SetChi1Value(new_dihedral_angle, glycoprotein);
-            new_dihedral_angle = GetNewAngleScaledToDegreeOfOverlap(current_glycosite->GetChi2Value(), current_glycosite->GetProteinOverlap(), current_glycosite->GetAttachedGlycan()->GetAllAtomsOfAssembly().size());
-            current_glycosite->SetChi2Value(new_dihedral_angle, glycoprotein);
-        }
-        std::cout << "Updating list of sites with protein overlaps.\n";
-        sites_with_protein_overlaps = DetermineSitesWithOverlap(glycosites, tolerance, "with", "protein"); // Moved glycans may clash with other glycans. Need to check.
-        if (sites_with_protein_overlaps.size() == 0)
-        {
-            std::cout << "No more protein overlaps\n";
-            stop = true;
-        }
-    } //Remove sites that could not be resolved.
-    PrintOverlaps(glycosites);
-    write_pdb_file(glycoprotein, 1, "./outputs/summary", 0.0);
-    std::cout << "Setting best chi1 and chi2 found so far\n";
-    SetBestProteinChi1Chi2(sites_with_protein_overlaps, glycoprotein);
-    std::cout << "Could not resolve protein overlaps for these sites: \n";
-    tolerance = 1; // Aimed for <0.1, but keep any less than 1.
-    GlycosylationSitePointerVector sites_without_protein_overlaps = DetermineSitesWithOverlap(glycosites, tolerance, "without", "protein");
-    std::cout << "Moving forward with these sites: \n";
-    for(GlycosylationSitePointerVector::iterator it1 = sites_without_protein_overlaps.begin(); it1 != sites_without_protein_overlaps.end(); ++it1)
-    {
-        GlycosylationSite *current_glycosite = (*it1);
-        std::cout << current_glycosite->GetResidue()->GetId() << "\n";
-    }
+    double strict_tolerance = 0.1, loose_tolerance = 1.0; // Aim for <0.1 when resolving, but keep any less than 1 when culling.
+    int max_cycles = 500;
+    GlycosylationSitePointerVector sites_with_protein_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance, "protein");
+    Monte_Carlo_Torsions(sites_with_protein_overlaps, glycosites, max_cycles, strict_tolerance, "protein");
+    DeleteSitesWithOverlapRecordsAboveTolerance(glycosites, loose_tolerance, "protein");
+    sites_with_protein_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance, "protein");
+    SetBestChi1Chi2(sites_with_protein_overlaps, "protein");
+    GlycosylationSitePointerVector remaining_sites = DetermineSitesWithOverlap(glycosites, strict_tolerance, "total");
+    Monte_Carlo_Torsions(remaining_sites, glycosites, max_cycles, strict_tolerance, "total");
+    SetBestChi1Chi2(remaining_sites);
+    GlycosylationSitePointerVector resolved_sites = DeleteSitesWithOverlaps(glycosites, loose_tolerance, "total");
+    //PrintOverlaps(glycosites);
 }
 
-void resolve_overlaps::dumb_monte_carlo(Assembly *glycoprotein, GlycosylationSiteVector *glycosites)
+void resolve_overlaps::dumb_monte_carlo(GlycosylationSiteVector &glycosites)
 {
     /* Algorithm:
      * Determine which sites have overlaps greater than tolerance. Stop if zero sites.
@@ -130,15 +63,12 @@ void resolve_overlaps::dumb_monte_carlo(Assembly *glycoprotein, GlycosylationSit
         for(GlycosylationSitePointerVector::iterator it1 = sites_with_overlaps.begin(); it1 != sites_with_overlaps.end(); ++it1)
         {
             GlycosylationSite *current_glycosite = (*it1);
-
-            current_glycosite->SetChi1Value(RandomAngle_360range(), glycoprotein);
-
-           // current_glycosite->SetChi2Value(RandomAngle_360range(), glycoprotein);
+            current_glycosite->SetChi1Value(RandomAngle_360range());
+            current_glycosite->SetChi2Value(RandomAngle_360range());
             //double percent_overlap = ((current_glycosite->GetTotalOverlap() / (current_glycosite->GetAttachedGlycan()->GetAllAtomsOfAssembly().size()) ) + 0.01);
             //  new_dihedral_value = RandomAngle_PlusMinusX(current_glycosite->GetChi1Value(), (180 * percent_overlap) ); // scaled to degree of overlap
             //        sites_with_overlaps.erase(std::remove(sites_with_overlaps.begin(), sites_with_overlaps.end(), *it1), sites_with_overlaps.end());
         }
-        write_pdb_file(glycoprotein, cycle, "./outputs/summary", 0.0);
         //std::cout << "Updating list of sites with overlaps." << std::endl;
         sites_with_overlaps = DetermineSitesWithOverlap(glycosites, tolerance); // Moved glycans may clash with other glycans. Need to check.
         if (sites_with_overlaps.size() == 0)
@@ -147,7 +77,6 @@ void resolve_overlaps::dumb_monte_carlo(Assembly *glycoprotein, GlycosylationSit
             stop = true;
         }
     }
-    write_pdb_file(glycoprotein, (cycle + 1), "./outputs/summary", 0.0);
 }
 
 
@@ -169,10 +98,10 @@ double GetNewAngleScaledToDegreeOfOverlap(double current_angle, double overlap, 
     return RandomAngle_PlusMinusX(current_angle, max_step_size);
 }
 
-void write_pdb_file(Assembly *glycoprotein, int cycle, std::string summary_filename, double score)
+void write_pdb_file(Assembly &glycoprotein, int cycle, std::string summary_filename, double score)
 {
     std::string pdb_filename = "outputs/pose_" + std::to_string(cycle) + ".pdb";
-    PdbFileSpace::PdbFile *outputPdbFile = glycoprotein->BuildPdbFileStructureFromAssembly(-1,0);
+    PdbFileSpace::PdbFile *outputPdbFile = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
     outputPdbFile->Write(pdb_filename);
     std::ofstream summary;   // write a file that describes the best conformations found
     summary.open(summary_filename, std::ios::out | std::ios::app);
@@ -180,9 +109,9 @@ void write_pdb_file(Assembly *glycoprotein, int cycle, std::string summary_filen
     summary.close();
 }
 
-void PrintOverlaps(GlycosylationSiteVector *glycosites)
+void PrintOverlaps(GlycosylationSiteVector &glycosites)
 {
-    for (GlycosylationSiteVector::iterator current_glycosite = glycosites->begin(); current_glycosite != glycosites->end(); ++current_glycosite)
+    for (GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end(); ++current_glycosite)
     {
         current_glycosite->Print_bead_overlaps();
     }
@@ -197,52 +126,127 @@ void PrintOverlaps(GlycosylationSitePointerVector &glycosites)
     }
 }
 
-void SetBestProteinChi1Chi2(GlycosylationSitePointerVector &glycosites, Assembly *glycoprotein)
+void SetBestChi1Chi2(GlycosylationSitePointerVector &glycosites, std::string overlap_type)
 {
+    /****
+     * Ok, the problem here is that two sites that are close may independantly find a best set that when set together causes them to overlap. This can happen
+     * when just looking at protein overlaps, as the sfat atom on the NLN is moving around. It's worse when you consider glycan overlaps.
+     * When searching for the best overlaps, the monte_carlo function must always treat new low/equal overlaps as better. If it found zero for a site,
+     * overlaps are reintroduced by another site moving, then when it finds a new zero for this site, the new one should take precedence. Going to check
+     * that now.
+     */
     for (GlycosylationSitePointerVector::iterator it = glycosites.begin(); it != glycosites.end(); ++it)
     {
         GlycosylationSite *current_glycosite = (*it);
-        current_glycosite->SetChi1Value(current_glycosite->GetBestProteinOverlapRecord().GetChi1(), glycoprotein);
-        current_glycosite->SetChi2Value(current_glycosite->GetBestProteinOverlapRecord().GetChi2(), glycoprotein);
+        current_glycosite->SetChi1Value(current_glycosite->GetBestOverlapRecord(overlap_type).GetChi1());
+        current_glycosite->SetChi2Value(current_glycosite->GetBestOverlapRecord(overlap_type).GetChi2());
+        current_glycosite->Calculate_bead_overlaps();
     }
+
 }
 
-GlycosylationSitePointerVector DetermineSitesWithOverlap(GlycosylationSiteVector *glycosites, double tolerance, std::string returning, std::string type)
+GlycosylationSitePointerVector DetermineSitesWithOverlap(GlycosylationSiteVector &glycosites, double tolerance, std::string overlap_type)
 {
     GlycosylationSitePointerVector sites_to_return;
     double overlap = 0.0;
     std::cout << "      Site        |  Total | Protein | Glycan " << std::endl;
-    for (GlycosylationSiteVector::iterator current_glycosite = glycosites->begin(); current_glycosite != glycosites->end(); ++current_glycosite)
+    for (GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end(); ++current_glycosite)
     {
-        if(type.compare("total")==0)
-        {
-            overlap = current_glycosite->Calculate_bead_overlaps();
-        }
-        else if (type.compare("protein")==0)
-        {
-            overlap = current_glycosite->Calculate_protein_bead_overlaps();
-        }
-        else if (type.compare("glycan")==0)
-        {
-            overlap = current_glycosite->Calculate_other_glycan_bead_overlaps();
-        }
-
-        //Figure out which sites  to return (overlapping or not) but always print those with overlaps.
+        overlap = current_glycosite->Calculate_bead_overlaps(overlap_type);
         if ( overlap > tolerance)
         {
             current_glycosite->Print_bead_overlaps();
-            if (returning.compare("with")==0)
-            {
-                sites_to_return.push_back(&(*current_glycosite));
-            }
-        }
-        else
-        {
-            if (returning.compare("with")!=0) // If site does not have overlaps and they want to return sites without overlap
-            {
-                sites_to_return.push_back(&(*current_glycosite));
-            }
+            sites_to_return.push_back(&(*current_glycosite));
         }
     }
     return sites_to_return;
+}
+
+
+GlycosylationSitePointerVector DeleteSitesWithOverlaps(GlycosylationSiteVector &glycosites, double tolerance, std::string overlap_type)
+{
+    GlycosylationSitePointerVector sites_to_return;
+    double overlap = 0.0;
+    for (GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end();)
+    {
+        overlap = current_glycosite->Calculate_bead_overlaps(overlap_type);
+        // Delete site from list if overlap is greater than the tolerance value
+        std::cout << "Site " << current_glycosite->GetResidueNumber() << ": " << overlap << " :";
+        if ( overlap > tolerance)
+        {
+            std::cout << "Removed\n";
+            ResidueVector glycan_residues = current_glycosite->GetAttachedGlycan()->GetResidues();
+            for(ResidueVector::iterator it = glycan_residues.begin(); it != glycan_residues.end(); ++it)
+            {
+                current_glycosite->GetGlycoprotein()->RemoveResidue(*it);
+                //glycoprotein.RemoveResidue(*it);
+            }
+            glycosites.erase(std::remove(glycosites.begin(), glycosites.end(), *current_glycosite), glycosites.end()); // Note need #include <algorithm>
+        }
+        else
+        {
+            std::cout << "Retained\n";
+            sites_to_return.push_back(&(*current_glycosite));
+            ++current_glycosite; // This will get you. Erase/Remove advances current_glycosite.
+        }
+    }
+    return sites_to_return;
+}
+
+void DeleteSitesWithOverlapRecordsAboveTolerance(GlycosylationSiteVector &glycosites, double tolerance, std::string overlap_type)
+{
+    for (GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end();)
+    {
+        double overlap = current_glycosite->GetBestOverlapRecord(overlap_type).GetOverlap();
+        std::cout << "Site " << current_glycosite->GetResidueNumber() << ": " << overlap << " :";
+        if ( overlap > tolerance)
+        {
+            std::cout << "Removed\n";
+            ResidueVector glycan_residues = current_glycosite->GetAttachedGlycan()->GetResidues();
+            for(ResidueVector::iterator it = glycan_residues.begin(); it != glycan_residues.end(); ++it)
+            {
+                current_glycosite->GetGlycoprotein()->RemoveResidue(*it);
+            }
+            glycosites.erase(std::remove(glycosites.begin(), glycosites.end(), *current_glycosite), glycosites.end()); // Note need #include <algorithm>
+        }
+        else
+        {
+            std::cout << "Retained\n";
+            ++current_glycosite; // This will get you. Erase/Remove advances current_glycosite.
+        }
+    }
+}
+
+void Monte_Carlo_Torsions(GlycosylationSitePointerVector &sites, GlycosylationSiteVector &glycosites, int max_cycles, double tolerance, std::string overlap_type)
+{
+    int cycle = 0;
+    bool stop = false;
+    while ( (cycle < max_cycles) && (stop == false) )
+    {
+        ++cycle;
+        std::cout << "Cycle " << cycle << " of " << max_cycles << ".\n";
+        RandomizeTorsions(sites);
+        std::cout << "Updating list of sites with protein overlaps.\n";
+        sites = DetermineSitesWithOverlap(glycosites, tolerance, overlap_type);
+        if (sites.size() == 0)
+        {
+            std::cout << "No more protein overlaps\n";
+            stop = true;
+        }
+    }
+    return;
+}
+
+void RandomizeTorsions(GlycosylationSitePointerVector &sites)
+{
+    double new_dihedral_angle = 0.0;
+    for(GlycosylationSitePointerVector::iterator it1 = sites.begin(); it1 != sites.end(); ++it1)
+    {
+        GlycosylationSite *current_glycosite = (*it1);
+        new_dihedral_angle = GetNewAngleScaledToDegreeOfOverlap(current_glycosite->GetChi1Value(), current_glycosite->GetProteinOverlap(), current_glycosite->GetAttachedGlycan()->GetAllAtomsOfAssembly().size());
+        current_glycosite->SetChi1Value(new_dihedral_angle);
+        new_dihedral_angle = GetNewAngleScaledToDegreeOfOverlap(current_glycosite->GetChi2Value(), current_glycosite->GetProteinOverlap(), current_glycosite->GetAttachedGlycan()->GetAllAtomsOfAssembly().size());
+        current_glycosite->SetChi2Value(new_dihedral_angle);
+    }
+    return;
 }
