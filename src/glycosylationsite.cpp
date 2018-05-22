@@ -160,7 +160,7 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
     Atom* atomC1;
 
     // Want: residue.FindAtom(string Name);
-    for(AtomVector::iterator it = reducing_Atoms.begin(); it != reducing_Atoms.end(); it++)
+    for(AtomVector::iterator it = reducing_Atoms.begin(); it != reducing_Atoms.end(); ++it)
     {
        Atom* atom = *it;
        if(atom->GetName().compare("C5")==0)
@@ -173,7 +173,7 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
     // Delete aglycon atoms from glycan.
     Residue * aglycon = glycan_.GetAllResiduesOfAssembly().at(0); // Oh jeez these assumptions are really building up.
     AtomVector aglycon_Atoms = aglycon->GetAtoms();
-    for(AtomVector::iterator it = aglycon_Atoms.begin(); it != aglycon_Atoms.end(); it++)
+    for(AtomVector::iterator it = aglycon_Atoms.begin(); it != aglycon_Atoms.end(); ++it)
     {
        Atom* atom = *it;
        aglycon->RemoveAtom(atom);

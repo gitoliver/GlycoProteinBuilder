@@ -14,6 +14,7 @@
 #include <vector>
 #include <stdio.h>
 #include <cstring>
+#include <algorithm> //erase
 
 #include "../includes/io.h"
 #include "../includes/resolve_overlaps.h"
@@ -52,7 +53,7 @@ int main(int argc, char* argv[])
     //************************************************//
 
     Assembly glycoprotein( (working_Directory + "/" + proteinPDB), gmml::InputFileType::PDB);
-    glycoprotein.BuildStructureByDistance();
+    glycoprotein.BuildStructureByDistance(4, 1.91); // 4 threads, 1.91 cutoff to allow C-S in Cys and Met to be bonded.
 
     //************************************************//
     // Load Glycans and Attach to glycosites          //
@@ -92,23 +93,51 @@ int main(int argc, char* argv[])
 void AttachGlycansToGlycosites(Assembly &glycoprotein, GlycosylationSiteVector &glycoSites, const std::string glycanDirectory)
 {
     // Find protein residues in Glycoprotein that will get a glycan added. Set Residue in Glycosite.
+    // Often there are multiple chains with the same residue number. If the input file repeats a residue number, it will go on the next instance (next chain)
+    // of that residue number. This is not a good long term solution, as users will want to select chains.
     ResidueVector protein_residues = glycoprotein.GetResidues();
     for(GlycosylationSiteVector::iterator glycosite = glycoSites.begin(); glycosite != glycoSites.end(); ++glycosite)
     {
+        bool stop = false;
         std::string glycosite_number = glycosite->GetResidueNumber();
-        for (ResidueVector::iterator it2 = protein_residues.begin(); it2 != protein_residues.end(); ++it2)
-        {
-            Residue *protein_residue = *it2;
-            std::string id = protein_residue->GetId();
-            std::string formatted_glycosite_number = "_" + glycosite_number + "_";
-            if( id.compare(5, formatted_glycosite_number.size(), formatted_glycosite_number) == 0)
+        ResidueVector::iterator it2 = protein_residues.begin();
+        while ( (!stop) && (it2 != protein_residues.end()) ) {
+           // for (ResidueVector::iterator it2 = protein_residues.begin(); it2 != protein_residues.end(); ++it2)
             {
-                //std::cout << "glycosite: " << glycosite_number << std::endl;
-                //std::cout << "glycosite id:" << id << std::endl;
-                glycosite->SetResidue(protein_residue);
+                Residue *protein_residue = *it2;
+                std::string id = protein_residue->GetId();
+                std::string formatted_glycosite_number = "_" + glycosite_number + "_";
+                if( id.compare(5, formatted_glycosite_number.size(), formatted_glycosite_number) == 0)
+                {
+                    //std::cout << "glycosite: " << glycosite_number << std::endl;
+                    std::cout << "glycosite id:" << id << std::endl;
+                    glycosite->SetResidue(protein_residue);
+                    stop = true;
+                    // Remove residue from list, so if user has listed same residue name twice, it will go on next instance (i.e. on next chain) of residue number
+                    protein_residues.erase(std::remove(protein_residues.begin(), protein_residues.end(), *it2), protein_residues.end()); // Note need #include <algorithm>
+                }
+                ++it2;
             }
         }
     }
+//    // Find protein residues in Glycoprotein that will get a glycan added. Set Residue in Glycosite.
+//    ResidueVector protein_residues = glycoprotein.GetResidues();
+//    for (ResidueVector::iterator it2 = protein_residues.begin(); it2 != protein_residues.end(); ++it2)
+//    {
+//        Residue *protein_residue = *it2;
+//        std::string id = protein_residue->GetId();
+//        for(GlycosylationSiteVector::iterator glycosite = glycoSites.begin(); glycosite != glycoSites.end(); ++glycosite)
+//        {
+//            std::string glycosite_number = glycosite->GetResidueNumber();
+//            std::string formatted_glycosite_number = "_" + glycosite_number + "_";
+//            if( id.compare(5, formatted_glycosite_number.size(), formatted_glycosite_number) == 0)
+//            {
+//                //std::cout << "glycosite: " << glycosite_number << std::endl;
+//                std::cout << "glycosite id:" << id << std::endl;
+//                glycosite->SetResidue(protein_residue);
+//            }
+//        }
+//    }
     // Load glycan files from directory             
     //std::cout << "Glycan directory: " << glycanDirectory << std::endl;
     std::string filepath;
