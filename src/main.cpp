@@ -19,6 +19,7 @@
 #include "../includes/io.h"
 #include "../includes/resolve_overlaps.h"
 #include "../includes/bead_residues.h"
+#include "../includes/genetic_algorithm.h"
 
 constexpr auto PI = 3.14159265358979323846;
 
@@ -69,8 +70,8 @@ int main(int argc, char* argv[])
     outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Initial.pdb");
     // Add beads. They make the overlap calculation faster.
     Add_Beads(glycoprotein, glycoSites);
-    //resolve_overlaps::example_for_Gordon(&glycoprotein, &glycoSites);
     resolve_overlaps::protein_first_monte_carlo(glycoSites);
+    //resolve_overlaps::genetic_algorithm(&glycoprotein, &glycoSites);
     Remove_Beads(glycoprotein); //Remove beads and write a final PDB & PRMTOP
 
 //    std::cout << "In main, the following sites are in the glycoSite vector:\n";
