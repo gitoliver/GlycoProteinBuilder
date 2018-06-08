@@ -5,7 +5,6 @@ Uses GEMS/GMML to add and adapt 3D structures of N-glycans and O-glycans onto gl
 ![schematic](schematic/schematic.png)
 
 ### Notes
-2017-10-27 
 Project is under development, contact olivercgrant "at" uga.edu with queries. 
 This code will replace the glycoprotein builder currently available on glycam.org/gp.
 Has been tested on linux, but should install on both Mac and Windows with appropriate C++ complilers.
@@ -17,10 +16,10 @@ You'll need GMML. See here for installation instructions: http://glycam.org/docs
 ### Installation of GlycoProteinBuilder
 export GEMSHOME=<Your Path To Gems > # eg: export GEMSHOME=/home/oliver/Programs/gems
 
-g++ -std=c++0x -I$GEMSHOME/gmml/includes/* -L$GEMSHOME/gmml//bin/ *.cpp -lgmml -o gp_builder
+g++ -std=c++0x -I $GEMSHOME/gmml/includes/ -I includes/ -L$GEMSHOME/gmml/bin/ -Wl,-rpath,$GEMSHOME/gmml/bin/ src/*.cpp -lgmml -o gp_builder
 
 ### Setup
-Edit or create an input.txt file and place in a folder called inputs. See inputs/input.txt for an example.
+Edit or create an input.txt file and place in a folder called tests/. See tests/input.txt for an example.
 
 If running outside of the program directory, create a directory called outputs/
 
@@ -31,8 +30,6 @@ You must provide:
     glycan 3D structure(s)
 
     input.txt, which contains:
-
-        parameter files (optional, defaults available)
 
         protein file name
 
@@ -46,3 +43,7 @@ You must provide:
 
         Note that for each protein residue number provided a glycan must be detailed. Allowing you to add different glycans to different sites
 
+### Bead based overlap calculation
+In order to speed up the overlap calculation, certain atoms in the glycan and protein are replaced with large spheres that encompass the neighbouring atoms. The overlap calculation only looks at the beads, and as there are much fewer of them, it will be faster. The downside is that it is not as accurate and may be unncessarily optimizing. However, as the beads will encompass all atoms in the protein/glycan, if the bead overlap reaches zero, the per atom overlap will be zero.
+Here is a figure showing the atoms being replaced by beads:
+![bead replacment](schematic/beads.png)
