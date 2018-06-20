@@ -31,13 +31,14 @@ void resolve_overlaps::protein_first_monte_carlo(GlycosylationSiteVector &glycos
      *        Reject changes causing protein overlaps
      */
     double strict_tolerance = 0.1, loose_tolerance = 1.0; // Aim for <0.1 when resolving, but keep any less than 1 when culling.
-    int max_cycles = 500;
+    int max_cycles = 1000;
     GlycosylationSitePointerVector sites_with_protein_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance, "protein");
     Monte_Carlo_Torsions(sites_with_protein_overlaps, glycosites, max_cycles, strict_tolerance, "protein");
     DeleteSitesWithOverlapRecordsAboveTolerance(glycosites, loose_tolerance, "protein");
     sites_with_protein_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance, "protein");
     SetBestChi1Chi2(sites_with_protein_overlaps, "protein");
     GlycosylationSitePointerVector remaining_sites = DetermineSitesWithOverlap(glycosites, strict_tolerance, "total");
+    max_cycles = 1000;
     Monte_Carlo_Torsions(remaining_sites, glycosites, max_cycles, strict_tolerance, "total");
     SetBestChi1Chi2(remaining_sites);
     GlycosylationSitePointerVector resolved_sites = DeleteSitesWithOverlaps(glycosites, loose_tolerance, "total");
