@@ -1,5 +1,46 @@
 #include "../includes/bead_residues.h"
 
+
+
+
+
+void Add_Beads(MolecularModeling::Assembly &glycoprotein, GlycosylationSiteVector &glycosites)
+{
+    AtomVector protein_beads = Add_Beads_To_Protein(glycoprotein);
+    // Go through all glycosite glycans, add bead in center of each residue, attach it to one other atom in residue.
+    // Then set protein_beads
+    for (GlycosylationSiteVector::iterator it1 = glycosites.begin(); it1 != glycosites.end(); ++it1)
+    {
+    	GlycosylationSite *glycosite = &(*it1);
+        Atom *cb_atom = glycosite->GetResidue()->GetAtom("CB");
+        // This needs to be updated/scrapped if we start adjusting the glycosidic angles after this step, as that can change max distance
+        double distance = ( GetMaxDistanceBetweenAtoms(glycosite->GetAttachedGlycan()->GetAllAtomsOfAssembly()) + 5); // added 5 to account for CB-C1(glycan) distance
+        AtomVector close_protein_beads = selection::AtomsWithinDistanceOf(cb_atom, distance, protein_beads);
+        glycosite->SetProteinBeads(&close_protein_beads);
+        AtomVector these_beads = Add_Beads_To_Glycan(glycosite->GetAttachedGlycan());
+        glycosite->SetSelfGlycanBeads(&these_beads);
+    }
+    // Now find beads from other glycans and add them to list of other_glycan_beads for each glycosite
+    for (GlycosylationSiteVector::iterator it1 = glycosites.begin(); it1 != glycosites.end(); ++it1)
+    {
+    	GlycosylationSite *glycosite1 = &(*it1);
+    	AtomVector other_glycan_beads;
+        for (GlycosylationSiteVector::iterator it2 = glycosites.begin(); it2 != glycosites.end(); ++it2)
+    	{
+    		GlycosylationSite *glycosite2 = &(*it2);
+    		if(glycosite1 != glycosite2) // Check if same site
+    		{
+    			// append each other glycosite's beads to list of other_glycan_beads: a.insert(std::end(a), std::begin(b), std::end(b));
+    			AtomVector temp = glycosite2->GetSelfGlycanBeads();
+    			other_glycan_beads.insert(std::end(other_glycan_beads), std::begin(temp), std::end(temp));
+    			//std::cout << "Adding beads of glycosite " << glycosite2->GetResidue()->GetId() << " to " << glycosite1->GetResidue()->GetId() << std::endl;
+    		}
+
+    	}
+    	glycosite1->SetOtherGlycanBeads(&other_glycan_beads);
+    }
+}
+
 AtomVector Add_Beads_To_Protein(MolecularModeling::Assembly &assembly)
 {
     AtomVector protein_beads;
@@ -38,99 +79,67 @@ AtomVector Add_Beads_To_Protein(MolecularModeling::Assembly &assembly)
     return protein_beads;
 }
 
-void Add_Beads(MolecularModeling::Assembly &glycoprotein, GlycosylationSiteVector &glycosites)
+AtomVector Add_Beads_To_Glycan(MolecularModeling::Assembly *assembly)
 {
-    AtomVector protein_beads = Add_Beads_To_Protein(glycoprotein);
-    // Go through all glycosite glycans, add bead in center of each residue, attach it to one other atom in residue.
-    // Then set protein_beads
-    for (GlycosylationSiteVector::iterator it1 = glycosites.begin(); it1 != glycosites.end(); ++it1)
+    AtomVector glycan_beads;
+    ResidueVector glycan_residues = assembly->GetResidues();
+    for (ResidueVector::iterator it2 = glycan_residues.begin(); it2 != glycan_residues.end(); ++it2)
     {
-    	GlycosylationSite *glycosite = &(*it1);
-        Atom *cb_atom = glycosite->GetResidue()->GetAtom("CB");
-        // This needs to be updated/scrapped if we start moving the glycan
-        double distance = ( GetMaxDistanceBetweenAtoms(glycosite->GetAttachedGlycan()->GetAllAtomsOfAssembly()) + 5); // added five to account for CB-C1(glycan) distance
-        AtomVector close_protein_beads = selection::AtomsWithinDistanceOf(cb_atom, distance, protein_beads);
-        glycosite->SetProteinBeads(&close_protein_beads);
-   //     glycosite->SetProteinBeads(&protein_beads);
-    	AtomVector these_beads;
-    	ResidueVector glycan_residues = glycosite->GetAttachedGlycan()->GetResidues();
-        for (ResidueVector::iterator it2 = glycan_residues.begin(); it2 != glycan_residues.end(); ++it2)
+        Residue *residue = *it2;
+        if ( residue->GetName().at(1) != 'S' ) // don't add a bead to a sialic acid in this section (see "else" below). Middle character of resname is always S for sialic acid.
+       // if ( residue->GetName().compare(1, 2, "SA") != 0) // don't add one to a sialic acid (see below)
         {
-        	Residue *residue = *it2;
-            if ( residue->GetName().at(1) != 'S' ) // don't add a bead to a sialic acid in this section (see "else" below). Middle character of resname is always S for sialic acid.
-           // if ( residue->GetName().compare(1, 2, "SA") != 0) // don't add one to a sialic acid (see below)
+            // std::cout << (*resi_iter)->GetName() << "\tG\t" << (*resi_iter)->CheckIfProtein() << endl;
+           // std::cout << "Adding bead to self glycan " << residue->GetId() << std::endl;
+            Atom* bead_atom = new Atom(residue, "gfat", residue->GetGeometricCenter());
+            residue->AddAtom(bead_atom);
+            glycan_beads.push_back(bead_atom);
+            //Bond bead_atom to any other atom in residue so when glycan is moved, bead_atom moves too.
+            Atom *any_atom = residue->GetAtoms().at(0); // 0 is arbitrary, any atom would do.
+            //std::cout << "Blow here?" << any_atom->GetId() << std::endl;
+            any_atom->GetNode()->AddNodeNeighbor(bead_atom);
+            AtomVector temp = {any_atom};
+            AtomNode *node = new AtomNode(); // DELETE IS FOR LOSERS.
+            bead_atom->SetNode(node);
+            bead_atom->GetNode()->SetNodeNeighbors(temp);
+            AtomVector atoms = residue->GetAtoms();
+            for (AtomVector::iterator it3 = atoms.begin(); it3 != atoms.end(); ++it3)
             {
-                // std::cout << (*resi_iter)->GetName() << "\tG\t" << (*resi_iter)->CheckIfProtein() << endl;
-               // std::cout << "Adding bead to self glycan " << residue->GetId() << std::endl;
-                Atom* bead_atom = new Atom(residue, "gfat", residue->GetGeometricCenter());
-                residue->AddAtom(bead_atom);
-                these_beads.push_back(bead_atom);
-                //Bond bead_atom to any other atom in residue so when glycan is moved, bead_atom moves too.
-                Atom *any_atom = residue->GetAtoms().at(0); // 0 is arbitrary, any atom would do.
-                //std::cout << "Blow here?" << any_atom->GetId() << std::endl;
-                any_atom->GetNode()->AddNodeNeighbor(bead_atom);
-                AtomVector temp = {any_atom};
-                AtomNode *node = new AtomNode(); // DELETE IS FOR LOSERS.
-                bead_atom->SetNode(node);
-                bead_atom->GetNode()->SetNodeNeighbors(temp);
-                AtomVector atoms = residue->GetAtoms();
-                for (AtomVector::iterator it3 = atoms.begin(); it3 != atoms.end(); ++it3)
+                Atom *atom = *it3;
+                if ( (atom->GetName().compare("C2N") == 0) || (atom->GetName().compare("C6") == 0) )
                 {
-                    Atom *atom = *it3;
-                    if ( (atom->GetName().compare("C2N") == 0) || (atom->GetName().compare("C6") == 0) )
-                    {
-                        bead_atom = new Atom(residue, "gfat", atom->GetCoordinates().at(0));
-                        residue->AddAtom(bead_atom);
-                        these_beads.push_back(bead_atom);
-                        any_atom->GetNode()->AddNodeNeighbor(bead_atom);
-                        AtomNode *node1 = new AtomNode(); // DELETE IS FOR LOSERS.
-                        bead_atom->SetNode(node1);
-                        bead_atom->GetNode()->SetNodeNeighbors(temp);
-                    }
-                }
-            }
-            else // if it is sialic acid
-            {
-                AtomVector atoms = residue->GetAtoms();
-                for (AtomVector::iterator it3 = atoms.begin(); it3 != atoms.end(); ++it3)
-                {
-                    Atom *atom = *it3;
-                    if ( (atom->GetName().compare("C2") == 0) || (atom->GetName().compare("N5") == 0) || (atom->GetName().compare("C8") == 0) )
-                    {
-                        Atom* bead_atom = new Atom(residue, "gfat", atom->GetCoordinates().at(0));
-                        residue->AddAtom(bead_atom);
-                        these_beads.push_back(bead_atom);
-                        Atom *any_atom = residue->GetAtoms().at(0);
-                        any_atom->GetNode()->AddNodeNeighbor(bead_atom);
-                        AtomVector temp = {any_atom};
-                        AtomNode *node = new AtomNode(); // DELETE IS FOR LOSERS.
-                        bead_atom->SetNode(node);
-                        bead_atom->GetNode()->SetNodeNeighbors(temp);
-                    }
+                    bead_atom = new Atom(residue, "gfat", atom->GetCoordinates().at(0));
+                    residue->AddAtom(bead_atom);
+                    glycan_beads.push_back(bead_atom);
+                    any_atom->GetNode()->AddNodeNeighbor(bead_atom);
+                    AtomNode *node1 = new AtomNode(); // DELETE IS FOR LOSERS.
+                    bead_atom->SetNode(node1);
+                    bead_atom->GetNode()->SetNodeNeighbors(temp);
                 }
             }
         }
-        glycosite->SetSelfGlycanBeads(&these_beads);
+        else // if it is sialic acid
+        {
+            AtomVector atoms = residue->GetAtoms();
+            for (AtomVector::iterator it3 = atoms.begin(); it3 != atoms.end(); ++it3)
+            {
+                Atom *atom = *it3;
+                if ( (atom->GetName().compare("C2") == 0) || (atom->GetName().compare("N5") == 0) || (atom->GetName().compare("C8") == 0) )
+                {
+                    Atom* bead_atom = new Atom(residue, "gfat", atom->GetCoordinates().at(0));
+                    residue->AddAtom(bead_atom);
+                    glycan_beads.push_back(bead_atom);
+                    Atom *any_atom = residue->GetAtoms().at(0);
+                    any_atom->GetNode()->AddNodeNeighbor(bead_atom);
+                    AtomVector temp = {any_atom};
+                    AtomNode *node = new AtomNode(); // DELETE IS FOR LOSERS.
+                    bead_atom->SetNode(node);
+                    bead_atom->GetNode()->SetNodeNeighbors(temp);
+                }
+            }
+        }
     }
-    // Now find beads from other glycans and add them to list of other_glycan_beads for each glycosite
-    for (GlycosylationSiteVector::iterator it1 = glycosites.begin(); it1 != glycosites.end(); ++it1)
-    {
-    	GlycosylationSite *glycosite1 = &(*it1);
-    	AtomVector other_glycan_beads;
-        for (GlycosylationSiteVector::iterator it2 = glycosites.begin(); it2 != glycosites.end(); ++it2)
-    	{
-    		GlycosylationSite *glycosite2 = &(*it2);
-    		if(glycosite1 != glycosite2) // Check if same site
-    		{
-    			// append each other glycosite's beads to list of other_glycan_beads: a.insert(std::end(a), std::begin(b), std::end(b));
-    			AtomVector temp = glycosite2->GetSelfGlycanBeads();
-    			other_glycan_beads.insert(std::end(other_glycan_beads), std::begin(temp), std::end(temp));
-    			//std::cout << "Adding beads of glycosite " << glycosite2->GetResidue()->GetId() << " to " << glycosite1->GetResidue()->GetId() << std::endl;
-    		}
-
-    	}
-    	glycosite1->SetOtherGlycanBeads(&other_glycan_beads);
-    }
+    return glycan_beads;
 }
 
 void Remove_Beads(MolecularModeling::Assembly &glycoprotein)
