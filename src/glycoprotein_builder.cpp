@@ -89,31 +89,33 @@ void glycoprotein_builder::AttachGlycansToGlycosites(MolecularModeling::Assembly
 void glycoprotein_builder::Read_Input_File(GlycosylationSiteVector &glycoSites, std::string &proteinPDB, std::string &glycanDirectory, const std::string working_Directory)
 {
     std::string buffer;
-    std::ifstream inf (working_Directory + "/input.txt");
-    if (!inf)
+    std::ifstream infile (working_Directory + "/input.txt");
+    if (!infile)
     {
         std::cerr << "Uh oh, input file could not be opened for reading!" << std::endl;
         std::exit(1);
     }
-    while (inf) // While there's still stuff left to read
+    while (infile) // While there's still stuff left to read
     {
         std::string strInput;
-        getline(inf, strInput);
+        getline(infile, strInput);
         if(strInput == "Protein:")
-            getline(inf, proteinPDB);
+        {
+            getline(infile, proteinPDB);
+        }
         if(strInput == "Glycans:")
         {
-            getline(inf, glycanDirectory);
+            getline(infile, glycanDirectory);
             glycanDirectory = working_Directory + "/" + glycanDirectory;
         }
         if(strInput == "Protein Residue, Glycan Name:")
         {
-            getline(inf, buffer);
+            getline(infile, buffer);
             while(buffer != "END")
             {
                 StringVector splitLine = split(buffer, ',');
                 glycoSites.emplace_back(splitLine.at(1), splitLine.at(0)); // Creates GlycosylationSite instance on the vector. Love it.
-                getline(inf, buffer);
+                getline(infile, buffer);
             }
         }
     }

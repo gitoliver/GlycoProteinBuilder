@@ -88,33 +88,4 @@ int main(int argc, char* argv[])
 
 
 
-/*void FindConnectedAtoms(Atom *atom, Assembly::AtomVector &visitedAtoms){
-
-    visitedAtoms.push_back(atom);
-
-    //std::cout << "AtomNodes must be set by an e.g. Assembly::BuildStructureByDistance() call or a SegFault will happen now" << std::endl;
-    Assembly::AtomVector neighbors = atom->GetNode()->GetNodeNeighbors();
-    //std::cout << "Okay, AtomNodes were set" << std::endl;
-    bool alreadyVisited = false;
-
-
-   // std::cout << "Current atom is " << atom->GetName() << "." << atom->GetId() << std::endl;
-
-    for (auto &neighbor : neighbors){
-        alreadyVisited = false; // reset for each neighbor
-        for (auto &visitedAtom : visitedAtoms) { // check against each visited atom
-            if ( neighbor->GetId() == visitedAtom->GetId() )
-                alreadyVisited = true;
-        }
-        if (!alreadyVisited) {
-            std::cout << "Found unvisited neighbor, Going to " << neighbor->GetId() << " from " << atom->GetId() << std::endl;
-            FindConnectedAtoms(neighbor, visitedAtoms); // recursive function call
-        }
-    }
-    return;
-}
-*/
-
-
-
 
