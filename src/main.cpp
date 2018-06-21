@@ -77,7 +77,6 @@ int main(int argc, char* argv[])
     Add_Beads(glycoprotein, glycoSites);
     std::cout << "protein_first_monte_carlo" << std::endl ;
     resolve_overlaps::protein_first_monte_carlo(glycoSites);
-    //resolve_overlaps::genetic_algorithm(&glycoprotein, &glycoSites);
     Remove_Beads(glycoprotein); //Remove beads and write a final PDB & PRMTOP
 
 //    std::cout << "In main, the following sites are in the glycoSite vector:\n";

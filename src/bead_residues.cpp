@@ -4,7 +4,7 @@ void Add_Beads(MolecularModeling::Assembly &glycoprotein, GlycosylationSiteVecto
 {
 	AtomVector protein_beads; 
     ResidueVector all_residues = glycoprotein.GetAllResiduesOfAssembly();
-    // Go through, find all protein residues, add bead on CA atom.
+    // Go through, find all protein residues, add bead on CA atom and certain sidechain atoms.
     for (ResidueVector::iterator it1 = all_residues.begin(); it1 != all_residues.end(); ++it1)
     {
         Residue *residue = *it1;
@@ -55,7 +55,7 @@ void Add_Beads(MolecularModeling::Assembly &glycoprotein, GlycosylationSiteVecto
         for (ResidueVector::iterator it2 = glycan_residues.begin(); it2 != glycan_residues.end(); ++it2)
         {
         	Residue *residue = *it2;
-            if ( residue->GetName().at(1) == 'S' ) // don't add one to a sialic acid (see below). Middle character of resname is always S for sialic acid.
+            if ( residue->GetName().at(1) != 'S' ) // don't add a bead to a sialic acid in this section (see "else" below). Middle character of resname is always S for sialic acid.
            // if ( residue->GetName().compare(1, 2, "SA") != 0) // don't add one to a sialic acid (see below)
             {
                 // std::cout << (*resi_iter)->GetName() << "\tG\t" << (*resi_iter)->CheckIfProtein() << endl;
@@ -130,8 +130,6 @@ void Add_Beads(MolecularModeling::Assembly &glycoprotein, GlycosylationSiteVecto
     	glycosite1->SetOtherGlycanBeads(&other_glycan_beads);
     }
 }
-
-
 
 void Remove_Beads(MolecularModeling::Assembly &glycoprotein)
 {
