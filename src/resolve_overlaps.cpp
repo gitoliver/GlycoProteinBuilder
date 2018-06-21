@@ -21,14 +21,14 @@ Note: Need to save best structure.
 
 void resolve_overlaps::protein_first_monte_carlo(GlycosylationSiteVector &glycosites)
 {
-    /* Algorithm plan:
-     *  Resolve all protein overlap first, reject sites that cannot be resolved. Record cycles to resolve?
+    /* Algorithm overview:
+     *  Resolve all protein overlap first, reject sites that cannot be resolved.
      *  Calculate protein overlaps, for each site with overlaps
-     *        Randomly change all chi1 and chi2 values
-     *  Once finished;
-     *  Calculate glycan overlaps, for each site with overlaps
-     *        Change chi1 and chi2, scaled by degree of overlap
-     *        Reject changes causing protein overlaps
+     *        Change chi1 and chi2 values, record values that reduce overlaps
+     *  Once finished delete any sites that could not be resolved
+     *  Calculate total (protein+glycan) overlaps, for each site with overlaps
+     *        Change chi1 and chi2 values, record values that reduce overlaps
+     *  Once finished delete any sites that could not be resolved
      */
     double strict_tolerance = 0.1, loose_tolerance = 1.0; // Aim for <0.1 when resolving, but keep any less than 1 when culling.
     int max_cycles = 100;

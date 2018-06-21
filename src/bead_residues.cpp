@@ -1,44 +1,46 @@
 #include "../includes/bead_residues.h"
 
-void Add_Beads(MolecularModeling::Assembly &glycoprotein, GlycosylationSiteVector &glycosites)
+AtomVector Add_Beads_To_Protein(MolecularModeling::Assembly &assembly)
 {
-	AtomVector protein_beads; 
-    ResidueVector all_residues = glycoprotein.GetAllResiduesOfAssembly();
-    // Go through, find all protein residues, add bead on CA atom and certain sidechain atoms.
-    for (ResidueVector::iterator it1 = all_residues.begin(); it1 != all_residues.end(); ++it1)
+    AtomVector protein_beads;
+    ResidueVector protein_residues = assembly.GetAllProteinResiduesOfAssembly();
+    for (ResidueVector::iterator it1 = protein_residues.begin(); it1 != protein_residues.end(); ++it1)
     {
         Residue *residue = *it1;
-        if (residue->CheckIfProtein()==1) // the current residue is an amino acid
+        AtomVector atoms = residue->GetAtoms();
+        for (AtomVector::iterator it2 = atoms.begin(); it2 != atoms.end(); ++it2)
         {
-            AtomVector atoms = residue->GetAtoms();
-            for (AtomVector::iterator it2 = atoms.begin(); it2 != atoms.end(); ++it2)
+            Atom *atom = *it2;
+            // Okay so all CA atoms and then I've picked out others by hand in VMD that will cover the sidechains
+            if (atom->GetName().compare("CA")==0)
             {
-                Atom *atom = *it2;
-                // Okay so all CA atoms and then I've picked out others by hand in VMD that will cover the sidechains
-                if (atom->GetName().compare("CA")==0)
-                {
-                	//std::cout << "Adding bead to protein " << residue->GetId() << std::endl;
-                    Atom* bead_atom = new Atom(residue, "mfat", atom->GetCoordinates());
-                    residue->AddAtom(bead_atom);
-                    protein_beads.push_back(bead_atom);
-                }
-                else if ( (atom->GetName().compare("NZ")==0) ||
-                          (atom->GetName().compare("CZ")==0) ||
-                          (atom->GetName().compare("NE2")==0) ||
-                          (atom->GetName().compare("OD1")==0) ||
-                          (atom->GetName().compare("SD")==0)  ||
-                          ( (atom->GetName().compare("CE2")==0) && residue->GetName().compare("TRP")==0 ) ||
-                          ( (atom->GetName().compare("CD1")==0) && ( residue->GetName().compare("LEU")==0 || residue->GetName().compare("ILE")==0 ) ) ||
-                          ( (atom->GetName().compare("CD")==0) && residue->GetName().compare("GLU")==0 )
-                        )
-                { // sfats should move when a chi1, chi2 is moved, so make sure they are connected to something for the SetDihedral function to move them.
-                    Atom* bead_atom = new Atom(residue, "sfat", atom->GetCoordinates());
-                    residue->AddAtom(bead_atom);
-                    protein_beads.push_back(bead_atom);
-                }
+                //std::cout << "Adding bead to protein " << residue->GetId() << std::endl;
+                Atom* bead_atom = new Atom(residue, "mfat", atom->GetCoordinates());
+                residue->AddAtom(bead_atom);
+                protein_beads.push_back(bead_atom);
+            }
+            else if ( (atom->GetName().compare("NZ")==0) ||
+                      (atom->GetName().compare("CZ")==0) ||
+                      (atom->GetName().compare("NE2")==0) ||
+                      (atom->GetName().compare("OD1")==0) ||
+                      (atom->GetName().compare("SD")==0)  ||
+                      ( (atom->GetName().compare("CE2")==0) && residue->GetName().compare("TRP")==0 ) ||
+                      ( (atom->GetName().compare("CD1")==0) && ( residue->GetName().compare("LEU")==0 || residue->GetName().compare("ILE")==0 ) ) ||
+                      ( (atom->GetName().compare("CD")==0) && residue->GetName().compare("GLU")==0 )
+                    )
+            { // sfats should move when a chi1, chi2 is moved, so make sure they are connected to something for the SetDihedral function to move them.
+                Atom* bead_atom = new Atom(residue, "sfat", atom->GetCoordinates());
+                residue->AddAtom(bead_atom);
+                protein_beads.push_back(bead_atom);
             }
         }
     }
+    return protein_beads;
+}
+
+void Add_Beads(MolecularModeling::Assembly &glycoprotein, GlycosylationSiteVector &glycosites)
+{
+    AtomVector protein_beads = Add_Beads_To_Protein(glycoprotein);
     // Go through all glycosite glycans, add bead in center of each residue, attach it to one other atom in residue.
     // Then set protein_beads
     for (GlycosylationSiteVector::iterator it1 = glycosites.begin(); it1 != glycosites.end(); ++it1)
