@@ -2,6 +2,7 @@
 #define BEAD_RESIDUES_H
 
 #include "glycosylationsite.h"
+#include "selections.h"
 
 using namespace MolecularModeling;
 
@@ -11,7 +12,6 @@ void Add_Beads(MolecularModeling::Assembly &glycoprotein, GlycosylationSiteVecto
 void Remove_Beads(MolecularModeling::Assembly &glycoprotein);
 
 double GetMaxDistanceBetweenAtoms(AtomVector atoms);
-AtomVector SelectAtomsWithinDistanceOf(MolecularModeling::Atom *query_atom, double distance, AtomVector atoms);
 
 #endif // BEAD_RESIDUES_H
 
