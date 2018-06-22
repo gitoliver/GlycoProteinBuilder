@@ -22,16 +22,19 @@ void crossover ( Assembly *glycoprotein, GlycosylationSiteVector *glycosites);
 void elitist ( );
 void evaluate ( Assembly *glycoprotein, GlycosylationSiteVector *glycosites);
 int i4_uniform_ab ( int a, int b, int &seed );
-void initialize ( std::string filename, int &seed );
+void initialize ( Assembly *glycoprotein, GlycosylationSiteVector *glycosites,std::string filename, int &seed );
 void keep_the_best ( );
 void mutate (Assembly *glycoprotein, GlycosylationSiteVector *glycosites );
 double r8_uniform_ab ( double a, double b, int &seed );
-void report (  int generation, Assembly *glycoprotein, GlycosylationSiteVector *glycosites );
+void report ( int generation,  Assembly *glycoprotein, GlycosylationSiteVector *glycosites );
 void selector ( int &seed );
 void timestamp ( );
 void Xover ( int one, int two, int &seed, Assembly *glycoprotein, GlycosylationSiteVector *glycosites );
+void CalculateOverlaps(Assembly *glycoprotein,GlycosylationSiteVector *glycosites,int threads,int thread_number);
 
-namespace resolve_overlaps
+//void overlap_thread(void *threadarg, Assembly *glycoprotein, GlycosylationSiteVector *glycosites);
+
+namespace genetic_algorithm
 {
     void genetic_algorithm(MolecularModeling::Assembly *glycoprotein, GlycosylationSiteVector *glycosites);
 }
