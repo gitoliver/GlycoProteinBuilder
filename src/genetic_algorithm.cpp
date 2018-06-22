@@ -76,7 +76,7 @@
 
 
 
-      void initialize ( Assembly *glycoprotein, GlycosylationSiteVector *glycosites, std::string filename, int &seed ){
+      void initialize ( GlycosylationSiteVector *glycosites, std::string filename, int &seed ){
 
         //
         //  Purpose:
@@ -231,7 +231,7 @@
 
         seed = 123456789;
 
-        initialize (glycoprotein, glycosites, filename, seed );
+        initialize (glycosites, filename, seed );
 
         cout << "population size " << POPSIZE << endl;
         cout << "max iterations " << MAXGENS << endl;
@@ -245,17 +245,17 @@
           selector ( seed );
 
           cout << "crossover " << endl;
-          crossover (glycoprotein,glycosites);
+          crossover (glycosites);
 
           cout << "done with crossover" << endl;
 
           cout << "mutate " << endl;
-          mutate (glycoprotein, glycosites );
+          mutate ( glycosites );
 
           cout << "done with mutate" << endl;
 
           cout << "evaluate " << endl << endl;
-          evaluate(glycoprotein,glycosites);
+          evaluate(glycosites);
 
           cout << "done with evaluate" << endl;
 
@@ -267,7 +267,7 @@
 
           cout << "report " << endl;
 
-          report(generation,glycoprotein,glycosites);
+          report(generation,glycoprotein);
 
           //    cout << population[POPSIZE-1].fitness << endl;
 
@@ -304,7 +304,7 @@
 
       //******************************************************************
 
-      void crossover (Assembly *glycoprotein, GlycosylationSiteVector *glycosites){
+      void crossover (GlycosylationSiteVector *glycosites){
 
         //  Purpose:
 
@@ -451,7 +451,7 @@
       //
       // evaluate the population
 
-      void evaluate (Assembly *glycoprotein, GlycosylationSiteVector *glycosites){
+      void evaluate (GlycosylationSiteVector *glycosites){
 
         //    EVALUATE implements the user-defined valuation function
         //
@@ -634,7 +634,7 @@
       //********************************************************************
       // mutation function
 
-      void mutate (Assembly *glycoprotein, GlycosylationSiteVector *glycosites ){
+      void mutate (GlycosylationSiteVector *glycosites ){
 
         //  Purpose:
         //
@@ -726,7 +726,7 @@
 
       //**********************************************************
 
-      void report ( int generation, Assembly *glycoprotein, GlycosylationSiteVector *glycosites ){
+      void report ( int generation, Assembly *glycoprotein){
 
         //
         //  Purpose:
