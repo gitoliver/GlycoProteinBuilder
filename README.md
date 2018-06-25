@@ -47,3 +47,23 @@ You must provide:
 In order to speed up the overlap calculation, certain atoms in the glycan and protein are replaced with large spheres that encompass the neighbouring atoms. The overlap calculation only looks at the beads, and as there are much fewer of them, it will be faster. The downside is that it is not as accurate and may be unncessarily optimizing. However, as the beads will encompass all atoms in the protein/glycan, if the bead overlap reaches zero, the per atom overlap will be zero.
 Here is a figure showing the atoms being replaced by beads:
 ![bead replacment](schematic/beads.png)
+
+### Monte Carlo - Protein First Algorithm
+Only chi1 and chi2 angles are manipulated (for now).
+A strict tolerance of 0.1 and a loose tolerance of 1.0 (square angstrom) are used for overlap cutoffs.
+Starting with sites that have protein overlaps, chi1 and chi2 are adjusted (see below) until the overlap gets below the strict tolerance.
+At the end of max_cycles, any sites with overlap greater than the loose tolerance are deleted. A glycan cannot be placed there.
+Continuting with sites that have overlaps, chi1 and chi2 are adjusted until the overlap gets below the strict tolerance. A site can get below the tolerance and drop off
+the list of sites that are being considered, but another glycan can move and overlap with that site, and it must now be moved again. The set of chi1 and chi2 that produce the lowest overlaps score for a site are recorded.
+At the end of max_cycles, the best chi1 and chi2 are set for each site. Sites where overlap did not get below the loose tolerance are deleted.
+##Angle adjustment
+The amount to change the torsion angle by is scaled to the degree of overlap. i.e. small overlap = small adjustment, large overlap = large adjustment.
+
+##Known problems
+At the end, should delete the highest overlapping site, and then reassess all sites before deleting another.
+Setting the best chi1 and chi2 for two sites may cause them to overlap with each other, as the other can be in different orientations when the lowest overlap was found for each one. I need to track the overlap of local groups of sites. Looking at global won't work.
+
+
+
+
+
