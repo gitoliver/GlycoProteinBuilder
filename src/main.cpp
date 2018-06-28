@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
     glycoprotein_builder::AttachGlycansToGlycosites(glycoprotein, glycosites, glycanDirectory);
     glycoprotein_builder::SetReasonableChi1Chi2Values(glycosites);
     //************************************************//
-    // Resolve Overlaps                               //
+    // Prep for Resolve Overlaps                      //
     //************************************************//
 
     std::cout << "BuildGlycoproteinStructure"  << std::endl;
@@ -68,16 +68,20 @@ int main(int argc, char* argv[])
     // Add beads. They make the overlap calculation faster.
     std::cout << "Add_Beads"  << std::endl;
     Add_Beads(glycoprotein, glycosites);
-    std::cout << "protein_first_monte_carlo" << std::endl ;
-    resolve_overlaps::weighted_protein_global_overlap_monte_carlo(glycosites);
-    std::cout << "Global overlap after deleting sites is " << glycoprotein_builder::GetGlobalOverlap(glycosites) << "\n";
-    Remove_Beads(glycoprotein); //Remove beads and write a final PDB & PRMTOP
 
-//    std::cout << "In main, the following sites are in the glycoSite vector:\n";
-//    for(GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end(); ++current_glycosite)
-//    {
-//        std::cout << current_glycosite->GetResidueNumber() << "\n";
-//    }
+    //************************************************//
+    // Resolve Overlaps                               //
+    //************************************************//
+
+    // Fast and stupid:
+    if (!resolve_overlaps::dumb_random_walk(glycosites))
+    {
+        std::cout << "Could not resolve quickly" << std::endl;
+        glycoprotein_builder::SetReasonableChi1Chi2Values(glycosites); // Reset to reasonable starting points
+        resolve_overlaps::weighted_protein_global_overlap_monte_carlo(glycosites);
+    }
+    std::cout << "Global overlap is " << glycoprotein_builder::GetGlobalOverlap(glycosites) << "\n";
+    Remove_Beads(glycoprotein); //Remove beads and write a final PDB & PRMTOP
 
     //glycoprotein_builder::PrintDihedralAnglesOfGlycosites(glycosites);
     outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);

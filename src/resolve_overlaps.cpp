@@ -148,19 +148,8 @@ void resolve_overlaps::protein_first_random_walk_scaled_to_overlap(Glycosylation
     //PrintOverlaps(glycosites);
 }
 
-void resolve_overlaps::test_metro()
-{
-    double test_value = 2;
-    monte_carlo::accept_via_metropolis_criterion(test_value);
-    monte_carlo::accept_via_metropolis_criterion(test_value-10);
-    monte_carlo::accept_via_metropolis_criterion(test_value+10);
-    monte_carlo::accept_via_metropolis_criterion(test_value+20);
-    monte_carlo::accept_via_metropolis_criterion(test_value+30);
-    monte_carlo::accept_via_metropolis_criterion(test_value+40);
-    monte_carlo::accept_via_metropolis_criterion(test_value*100);
-}
 
-void resolve_overlaps::dumb_random_walk(GlycosylationSiteVector &glycosites)
+bool resolve_overlaps::dumb_random_walk(GlycosylationSiteVector &glycosites)
 {
     /* Algorithm:
      * Determine which sites have overlaps greater than tolerance. Stop if zero sites.
@@ -168,18 +157,18 @@ void resolve_overlaps::dumb_random_walk(GlycosylationSiteVector &glycosites)
      *        Randomly change all chi1 and chi2 values
      */
     double tolerance = 0.1;
-    int cycle = 0, max_cycles = 5;
+    int cycle = 0, max_cycles = 10;
     GlycosylationSitePointerVector sites_with_overlaps = DetermineSitesWithOverlap(glycosites, tolerance);
-    bool stop = false;
+    bool resolved = false;
 
-    while ( (cycle < max_cycles) && (stop == false) )
+    while ( (cycle < max_cycles) && (resolved == false) )
     {
         ++cycle;
         std::cout << "Cycle " << cycle << " of " << max_cycles << std::endl;
         for(GlycosylationSitePointerVector::iterator it1 = sites_with_overlaps.begin(); it1 != sites_with_overlaps.end(); ++it1)
         {
             GlycosylationSite *current_glycosite = (*it1);
-            current_glycosite->SetChi1Value(RandomAngle_range(130,330));
+            current_glycosite->SetChi1Value(RandomAngle_360range());
             current_glycosite->SetChi2Value(RandomAngle_360range());
             //double percent_overlap = ((current_glycosite->GetTotalOverlap() / (current_glycosite->GetAttachedGlycan()->GetAllAtomsOfAssembly().size()) ) + 0.01);
             //  new_dihedral_value = Angle_PlusMinusX(current_glycosite->GetChi1Value(), (180 * percent_overlap) ); // scaled to degree of overlap
@@ -190,9 +179,10 @@ void resolve_overlaps::dumb_random_walk(GlycosylationSiteVector &glycosites)
         if (sites_with_overlaps.size() == 0)
         {
             std::cout << "Stopping with all overlaps resolved.\n";
-            stop = true;
+            resolved = true;
         }
     }
+    return resolved;
 }
 
 // random number generator; allows full range rotation
