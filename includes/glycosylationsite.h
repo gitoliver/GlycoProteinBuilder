@@ -37,6 +37,7 @@ public:
     Assembly* GetAttachedGlycan();
     Assembly* GetGlycoprotein();
     double GetOverlap();
+    double GetWeightedOverlap(double glycan_weight, double protein_weight);
     double GetGlycanOverlap();
     double GetProteinOverlap();
     double GetChi1Value();
@@ -52,6 +53,7 @@ public:
     //////////////////////////////////////////////////////////
     void AttachGlycan(Assembly glycan, Assembly &glycoprotein);
     double Calculate_bead_overlaps(std::string overlap_type = "total");
+    double Calculate_bead_overlaps_noRecord_noSet(std::string overlap_type = "total");
     double Calculate_and_print_bead_overlaps();
     void SetChiAtoms(Residue* residue);
 

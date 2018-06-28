@@ -39,10 +39,10 @@ int main(int argc, char* argv[])
     //************************************************//
 
     //std::string installation_Directory = Find_Program_Installation_Directory();
-    GlycosylationSiteVector glycoSites;
+    GlycosylationSiteVector glycosites;
     std::string proteinPDB, glycanDirectory;
     std::cout << "Read_Input_File\n";
-    glycoprotein_builder::Read_Input_File(glycoSites, proteinPDB, glycanDirectory, working_Directory);
+    glycoprotein_builder::Read_Input_File(glycosites, proteinPDB, glycanDirectory, working_Directory);
 
     //************************************************//
     // Load Protein PDB file                          //
@@ -56,8 +56,8 @@ int main(int argc, char* argv[])
     //************************************************//
 
     std::cout << "AttachGlycansToGlycosites"  << std::endl;
-    glycoprotein_builder::AttachGlycansToGlycosites(glycoprotein, glycoSites, glycanDirectory);
-
+    glycoprotein_builder::AttachGlycansToGlycosites(glycoprotein, glycosites, glycanDirectory);
+    glycoprotein_builder::SetReasonableChi1Chi2Values(glycosites);
     //************************************************//
     // Resolve Overlaps                               //
     //************************************************//
@@ -67,18 +67,19 @@ int main(int argc, char* argv[])
     outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Initial.pdb");
     // Add beads. They make the overlap calculation faster.
     std::cout << "Add_Beads"  << std::endl;
-
-    Add_Beads(glycoprotein, glycoSites);
+    Add_Beads(glycoprotein, glycosites);
     std::cout << "protein_first_monte_carlo" << std::endl ;
-    resolve_overlaps::protein_first_monte_carlo(glycoSites);
+    resolve_overlaps::weighted_protein_global_overlap_monte_carlo(glycosites);
+    std::cout << "Global overlap after deleting sites is " << glycoprotein_builder::GetGlobalOverlap(glycosites) << "\n";
     Remove_Beads(glycoprotein); //Remove beads and write a final PDB & PRMTOP
 
 //    std::cout << "In main, the following sites are in the glycoSite vector:\n";
-//    for(GlycosylationSiteVector::iterator current_glycosite = glycoSites.begin(); current_glycosite != glycoSites.end(); ++current_glycosite)
+//    for(GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end(); ++current_glycosite)
 //    {
 //        std::cout << current_glycosite->GetResidueNumber() << "\n";
 //    }
 
+    //glycoprotein_builder::PrintDihedralAnglesOfGlycosites(glycosites);
     outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
     outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Resolved.pdb");
 

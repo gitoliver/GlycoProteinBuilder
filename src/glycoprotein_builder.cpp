@@ -4,13 +4,13 @@
 /* Functions                               */
 /*******************************************/
 
-void glycoprotein_builder::AttachGlycansToGlycosites(MolecularModeling::Assembly &glycoprotein, GlycosylationSiteVector &glycoSites, const std::string glycanDirectory)
+void glycoprotein_builder::AttachGlycansToGlycosites(MolecularModeling::Assembly &glycoprotein, GlycosylationSiteVector &glycosites, const std::string glycanDirectory)
 {
     // Find protein residues in Glycoprotein that will get a glycan added. Set Residue in Glycosite.
     // Often there are multiple chains with the same residue number. If the input file repeats a residue number, it will go on the next instance (next chain)
     // of that residue number. This is not a good long term solution, as users will want to select chains.
     ResidueVector protein_residues = glycoprotein.GetResidues();
-    for(GlycosylationSiteVector::iterator glycosite = glycoSites.begin(); glycosite != glycoSites.end(); ++glycosite)
+    for(GlycosylationSiteVector::iterator glycosite = glycosites.begin(); glycosite != glycosites.end(); ++glycosite)
     {
         bool stop = false;
         std::string glycosite_number = glycosite->GetResidueNumber();
@@ -40,7 +40,7 @@ void glycoprotein_builder::AttachGlycansToGlycosites(MolecularModeling::Assembly
 //    {
 //        Residue *protein_residue = *it2;
 //        std::string id = protein_residue->GetId();
-//        for(GlycosylationSiteVector::iterator glycosite = glycoSites.begin(); glycosite != glycoSites.end(); ++glycosite)
+//        for(GlycosylationSiteVector::iterator glycosite = glycosites.begin(); glycosite != glycosites.end(); ++glycosite)
 //        {
 //            std::string glycosite_number = glycosite->GetResidueNumber();
 //            std::string formatted_glycosite_number = "_" + glycosite_number + "_";
@@ -71,7 +71,7 @@ void glycoprotein_builder::AttachGlycansToGlycosites(MolecularModeling::Assembly
         // If the file is a directory (or is in some way invalid) we'll skip it
         if (stat( filepath.c_str(), &filestat )) continue; // Is it a valid file?
         if (S_ISDIR( filestat.st_mode ))         continue; // Is it a directory?
-        for (GlycosylationSiteVector::iterator glycosite = glycoSites.begin(); glycosite != glycoSites.end(); ++glycosite)
+        for (GlycosylationSiteVector::iterator glycosite = glycosites.begin(); glycosite != glycosites.end(); ++glycosite)
         {
             //std::cout << "Glycan is " << glycosite->GetGlycanName() << ". d_name is " << dirp->d_name << std::endl;
             if (glycosite->GetGlycanName().compare(0, glycosite->GetGlycanName().size(), dirp->d_name, 0, glycosite->GetGlycanName().size()) == 0 )
@@ -86,7 +86,7 @@ void glycoprotein_builder::AttachGlycansToGlycosites(MolecularModeling::Assembly
     closedir( dp );
 }
 
-void glycoprotein_builder::Read_Input_File(GlycosylationSiteVector &glycoSites, std::string &proteinPDB, std::string &glycanDirectory, const std::string working_Directory)
+void glycoprotein_builder::Read_Input_File(GlycosylationSiteVector &glycosites, std::string &proteinPDB, std::string &glycanDirectory, const std::string working_Directory)
 {
     std::string buffer;
     std::ifstream infile (working_Directory + "/input.txt");
@@ -114,9 +114,52 @@ void glycoprotein_builder::Read_Input_File(GlycosylationSiteVector &glycoSites, 
             while(buffer != "END")
             {
                 StringVector splitLine = split(buffer, ',');
-                glycoSites.emplace_back(splitLine.at(1), splitLine.at(0)); // Creates GlycosylationSite instance on the vector. Love it.
+                glycosites.emplace_back(splitLine.at(1), splitLine.at(0)); // Creates GlycosylationSite instance on the vector. Love it.
                 getline(infile, buffer);
             }
         }
     }
+}
+
+void glycoprotein_builder::PrintDihedralAnglesAndOverlapOfGlycosites(GlycosylationSiteVector &glycosites)
+{
+    for(GlycosylationSiteVector::iterator glycosite = glycosites.begin(); glycosite != glycosites.end(); ++glycosite)
+    {
+        std::cout << "site: " << glycosite->GetResidueNumber() << " chi1: " << glycosite->GetChi1Value() << ", chi2: " << glycosite->GetChi2Value() << ", overlap: " <<  glycosite->GetOverlap() << "\n";
+    }
+    return;
+}
+
+void glycoprotein_builder::SetReasonableChi1Chi2Values(GlycosylationSiteVector &glycosites)
+{
+    for(GlycosylationSiteVector::iterator glycosite = glycosites.begin(); glycosite != glycosites.end(); ++glycosite)
+    {
+        glycosite->SetChi1Value(180);
+        glycosite->SetChi2Value(180);
+    }
+//    Statistical analysis of the protein environment of N-glycosylation sites: implications for occupancy, structure, and folding
+//    Andrei-J. Petrescu  Adina-L. Milac  Stefana M. Petrescu  Raymond A. Dwek Mark R. Wormald
+//    Glycobiology, Volume 14, Issue 2, 1 February 2004, Pages 103–114,
+    return;
+}
+
+void glycoprotein_builder::CalculateOverlaps(GlycosylationSiteVector &glycosites)
+{
+    for(GlycosylationSiteVector::iterator glycosite = glycosites.begin(); glycosite != glycosites.end(); ++glycosite)
+    {
+        glycosite->Calculate_bead_overlaps();
+    }
+    return;
+}
+
+double glycoprotein_builder::GetGlobalOverlap(GlycosylationSiteVector &glycosites)
+{
+    //std::cout << "Calculating global overlap\n";
+    double global_overlap = 0.0;
+    for (GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end(); ++current_glycosite)
+    {
+        global_overlap += current_glycosite->GetOverlap();
+        //std::cout << "Current site is " << current_glycosite->GetResidueNumber() << ", overlap: " << current_glycosite->GetOverlap() << ", making global: " << global_overlap << "\n";
+    }
+    return global_overlap;
 }

@@ -1,9 +1,5 @@
 #include "../includes/bead_residues.h"
 
-
-
-
-
 void Add_Beads(MolecularModeling::Assembly &glycoprotein, GlycosylationSiteVector &glycosites)
 {
     AtomVector protein_beads = Add_Beads_To_Protein(glycoprotein);
@@ -21,23 +17,27 @@ void Add_Beads(MolecularModeling::Assembly &glycoprotein, GlycosylationSiteVecto
         glycosite->SetSelfGlycanBeads(&these_beads);
     }
     // Now find beads from other glycans and add them to list of other_glycan_beads for each glycosite
+   Set_Other_Glycan_Beads(glycosites);
+}
+
+void Set_Other_Glycan_Beads(GlycosylationSiteVector &glycosites)
+{
     for (GlycosylationSiteVector::iterator it1 = glycosites.begin(); it1 != glycosites.end(); ++it1)
     {
-    	GlycosylationSite *glycosite1 = &(*it1);
-    	AtomVector other_glycan_beads;
+        GlycosylationSite *glycosite1 = &(*it1);
+        AtomVector other_glycan_beads;
         for (GlycosylationSiteVector::iterator it2 = glycosites.begin(); it2 != glycosites.end(); ++it2)
-    	{
-    		GlycosylationSite *glycosite2 = &(*it2);
-    		if(glycosite1 != glycosite2) // Check if same site
-    		{
-    			// append each other glycosite's beads to list of other_glycan_beads: a.insert(std::end(a), std::begin(b), std::end(b));
-    			AtomVector temp = glycosite2->GetSelfGlycanBeads();
-    			other_glycan_beads.insert(std::end(other_glycan_beads), std::begin(temp), std::end(temp));
-    			//std::cout << "Adding beads of glycosite " << glycosite2->GetResidue()->GetId() << " to " << glycosite1->GetResidue()->GetId() << std::endl;
-    		}
-
-    	}
-    	glycosite1->SetOtherGlycanBeads(&other_glycan_beads);
+        {
+            GlycosylationSite *glycosite2 = &(*it2);
+            if(glycosite1 != glycosite2) // Check if same site
+            {
+                // append each other glycosite's beads to list of other_glycan_beads: a.insert(std::end(a), std::begin(b), std::end(b));
+                AtomVector temp = glycosite2->GetSelfGlycanBeads();
+                other_glycan_beads.insert(std::end(other_glycan_beads), std::begin(temp), std::end(temp));
+                //std::cout << "Adding beads of glycosite " << glycosite2->GetResidue()->GetId() << " to " << glycosite1->GetResidue()->GetId() << std::endl;
+            }
+        }
+        glycosite1->SetOtherGlycanBeads(&other_glycan_beads);
     }
 }
 

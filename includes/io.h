@@ -7,7 +7,6 @@
 #include <fstream>      // std::ifstream
 #include <stdio.h>  /* defines FILENAME_MAX */
 #include <sys/param.h> // for MIN function
-#include <stdio.h>  /* defines FILENAME_MAX */
 
 #ifdef WINDOWS
     #include <direct.h>

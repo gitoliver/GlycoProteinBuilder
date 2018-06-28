@@ -573,7 +573,7 @@
 
       //***********************************************************************************
 
-      void write_pdb_file(Assembly *glycoprotein, int cycle, std::string summary_filename, double score)
+      void write_pdb_file_GA(Assembly *glycoprotein, int cycle, std::string summary_filename, double score)
       {
         std::string pdb_filename = "outputs/pose_" + std::to_string(cycle) + ".pdb";
         PdbFileSpace::PdbFile *outputPdbFile = glycoprotein->BuildPdbFileStructureFromAssembly(-1,0);
@@ -583,6 +583,7 @@
         summary << score << "\t" << "pose_" << cycle << ".pdb\n";
         summary.close();
       }
+
       GlycosylationSitePointerVector DetermineSitesWithOverlap(GlycosylationSiteVector *glycosites, double tolerance)
       {
         GlycosylationSitePointerVector sites_with_overlaps;
@@ -833,7 +834,7 @@
         cout << previous_population[0].fitness << endl;
         cout << endl;
 
-        write_pdb_file(glycoprotein, 1, "./outputs/summary", total_system_overlap);
+        write_pdb_file_GA(glycoprotein, 1, "./outputs/summary", total_system_overlap);
 
         return;
       }

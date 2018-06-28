@@ -85,6 +85,12 @@ double GlycosylationSite::GetOverlap()
     return (glycan_overlap_ + protein_overlap_);
 }
 
+double GlycosylationSite::GetWeightedOverlap(double glycan_weight, double protein_weight)
+{
+    return ( (glycan_overlap_ * glycan_weight) + (protein_overlap_ * protein_weight) );
+}
+
+
 double GlycosylationSite::GetGlycanOverlap()
 {
     return glycan_overlap_;
@@ -458,6 +464,24 @@ double GlycosylationSite::Calculate_bead_overlaps(std::string overlap_type)
     {
         overlap = this->Calculate_bead_overlaps(self_glycan_beads_, other_glycan_beads_);
         SetGlycanOverlap(overlap);
+    }
+    return overlap;
+}
+
+double GlycosylationSite::Calculate_bead_overlaps_noRecord_noSet(std::string overlap_type)
+{
+    double overlap = 0.0;
+    if(overlap_type.compare("total")==0)
+    {
+        overlap = (this->Calculate_bead_overlaps("protein") + this->Calculate_bead_overlaps("glycan"));
+    }
+    if(overlap_type.compare("protein")==0)
+    {
+        overlap = this->Calculate_bead_overlaps(self_glycan_beads_, protein_beads_);
+    }
+    if(overlap_type.compare("glycan")==0)
+    {
+        overlap = this->Calculate_bead_overlaps(self_glycan_beads_, other_glycan_beads_);
     }
     return overlap;
 }
