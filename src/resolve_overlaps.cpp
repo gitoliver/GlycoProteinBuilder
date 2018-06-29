@@ -37,7 +37,7 @@ void resolve_overlaps::weighted_protein_global_overlap_monte_carlo(Glycosylation
     glycoprotein_builder::PrintDihedralAnglesAndOverlapOfGlycosites(glycosites);
 
     int cycle = 0;
-    int max_cycles = 500;
+    int max_cycles = 50;
     bool stop = false;
     double previous_chi1;
     double previous_chi2;
@@ -45,12 +45,13 @@ void resolve_overlaps::weighted_protein_global_overlap_monte_carlo(Glycosylation
     double previous_glycan_overlap, new_glycan_overlap, previous_protein_overlap, new_protein_overlap;
 //    double lowest_global_overlap = glycoprotein_builder::GetGlobalOverlap(glycosites);
 //    double new_global_overlap;
-   // bool accept_change;
+    bool accept_change;
 
     while ( (cycle < max_cycles) && (stop == false) )
     {
         ++cycle;
         std::cout << "Cycle " << cycle << " of " << max_cycles << std::endl;
+        std::random_shuffle (sites_with_overlaps.begin(), sites_with_overlap.end());
         for(GlycosylationSitePointerVector::iterator it1 = sites_with_overlaps.begin(); it1 != sites_with_overlaps.end(); ++it1)
         {
             GlycosylationSite *current_glycosite = (*it1);
@@ -73,7 +74,7 @@ void resolve_overlaps::weighted_protein_global_overlap_monte_carlo(Glycosylation
 //            new_overlap = current_glycosite->Calculate_bead_overlaps_noRecord_noSet("total");
 
             //new_overlap = current_glycosite->GetWeightedOverlap(1.0, 5.0);
-//            accept_change = monte_carlo::accept_via_metropolis_criterion(new_overlap - previous_overlap);
+//            accept_change = monte_carlo::accept_via_metropolis_criterion((new_glycan_overlap + (new_protein_overlap*2)) - (previous_glycan_overlap + (previous_protein_overlap*2)));
 //            if (!accept_change)
 //            if (new_overlap >= previous_overlap)
             // Added weights to emphasis protein overlap as more important to relieve

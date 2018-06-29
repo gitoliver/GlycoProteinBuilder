@@ -29,6 +29,7 @@ inline bool accept_via_metropolis_criterion(double change_in_overlap)
         double p = exp(-change_in_overlap / 10);
         if (p > r)
         {
+            std::cout << "ACCEPTED: " << change_in_overlap << " p: " << p << " r: " << r << "\n";
             return_value = true;
         }
         else

@@ -7,7 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <algorithm> // For erase remove
+#include <algorithm> // For erase remove and shuffle
 #include <iomanip>
 #include <cmath>
 #include <ctime>
