@@ -589,7 +589,7 @@ void GlycosylationSite::SetChi1Value(double angle)
 //    std::cout << std::fixed;
 //    std::cout << std::setprecision(10);
 //    std::cout << angle << std::endl;
- //   std::cout << "Setting dihedral for " << atom1->GetName() << ", " << atom2->GetName() << ", " << atom3->GetName() << ", " << atom4->GetName() << "\n";
+//    std::cout << "Setting dihedral for " << atom1->GetName() << ", " << atom2->GetName() << ", " << atom3->GetName() << ", " << atom4->GetName() << "\n";
     this->GetGlycoprotein()->SetDihedral(atom1, atom2, atom3, atom4, angle);
 //    std::cout << this->GetChi1Value() << std::endl;
 
@@ -603,8 +603,9 @@ void GlycosylationSite::SetChi2Value(double angle)
 //    std::cout << std::fixed;
 //    std::cout << std::setprecision(10);
 //    std::cout << angle << std::endl;
+//    std::cout << "Setting dihedral for " << atom1->GetName() << ", " << atom2->GetName() << ", " << atom3->GetName() << ", " << atom4->GetName() << "\n";
     this->GetGlycoprotein()->SetDihedral(atom1, atom2, atom3, atom4, angle);
-   // std::cout << this->GetChi2Value() << std::endl;
+//    std::cout << this->GetChi2Value() << std::endl;
 }
 
 void GlycosylationSite::SetSelfGlycanBeads(AtomVector *beads)

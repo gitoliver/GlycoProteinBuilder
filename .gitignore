@@ -1,3 +1,4 @@
+test1eer/
 gp_builder
 glycoproteinBuilder.pro
 glycoproteinBuilder.pro.user.3.2-pre1
@@ -7,6 +8,7 @@ genetic_algorithm_output.txt
 log.log
 tmp
 *.swp
+tests/GlycoProtein_Resolved.pdb
 test1/
 test2/
 plot.pdf

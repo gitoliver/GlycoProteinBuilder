@@ -136,6 +136,7 @@ void glycoprotein_builder::SetReasonableChi1Chi2Values(GlycosylationSiteVector &
     {
         glycosite->SetChi1Value(180);
         glycosite->SetChi2Value(180);
+        std::cout << "Setup for " << glycosite->GetResidue()->GetId() << " chi1: " << glycosite->GetChi1Value() << " chi2: " << glycosite->GetChi2Value() << "\n";
     }
 //    Statistical analysis of the protein environment of N-glycosylation sites: implications for occupancy, structure, and folding
 //    Andrei-J. Petrescu  Adina-L. Milac  Stefana M. Petrescu  Raymond A. Dwek Mark R. Wormald

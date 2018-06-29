@@ -33,6 +33,7 @@ void resolve_overlaps::weighted_protein_global_overlap_monte_carlo(Glycosylation
     GlycosylationSitePointerVector sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance, "total");
 
     std::cout << "Initial torsions and overlaps:\n";
+    //glycoprotein_builder::CalculateOverlaps(glycosites);
     glycoprotein_builder::PrintDihedralAnglesAndOverlapOfGlycosites(glycosites);
 
     int cycle = 0;
@@ -40,10 +41,12 @@ void resolve_overlaps::weighted_protein_global_overlap_monte_carlo(Glycosylation
     bool stop = false;
     double previous_chi1;
     double previous_chi2;
-    double previous_glycan_overlap, new_glycan_overlap, previous_protein_overlap, new_protein_overlap;
+    double previous_overlap, new_overlap;
+//    double previous_glycan_overlap, new_glycan_overlap, previous_protein_overlap, new_protein_overlap;
 //    double lowest_global_overlap = glycoprotein_builder::GetGlobalOverlap(glycosites);
 //    double new_global_overlap;
    // bool accept_change;
+
     while ( (cycle < max_cycles) && (stop == false) )
     {
         ++cycle;
@@ -51,31 +54,40 @@ void resolve_overlaps::weighted_protein_global_overlap_monte_carlo(Glycosylation
         for(GlycosylationSitePointerVector::iterator it1 = sites_with_overlaps.begin(); it1 != sites_with_overlaps.end(); ++it1)
         {
             GlycosylationSite *current_glycosite = (*it1);
+           // std::cout << "Checking " << current_glycosite->GetResidue()->GetId() << "\n";
             //previous_overlap = current_glycosite->GetWeightedOverlap(1.0, 5.0);
-            previous_glycan_overlap = current_glycosite->Calculate_bead_overlaps("glycan");
-            previous_protein_overlap = current_glycosite->Calculate_bead_overlaps("protein");
+//            previous_glycan_overlap = current_glycosite->GetGlycanOverlap();
+//            previous_protein_overlap = current_glycosite->GetProteinOverlap();
+//            //std::cout << "gly and pro are " << previous_glycan_overlap << ", " << previous_protein_overlap << "\n";
+//            previous_chi1 = current_glycosite->GetChi1Value();
+//            current_glycosite->SetChi1Value(RandomAngle_360range());
+//            previous_chi2 = current_glycosite->GetChi2Value();
+//            current_glycosite->SetChi2Value(RandomAngle_360range());
+//            new_glycan_overlap = current_glycosite->Calculate_bead_overlaps_noRecord_noSet("glycan");
+//            new_protein_overlap = current_glycosite->Calculate_bead_overlaps_noRecord_noSet("protein");
+
+            previous_overlap = current_glycosite->GetOverlap();
             previous_chi1 = current_glycosite->GetChi1Value();
-            current_glycosite->SetChi1Value(RandomAngle_360range());
             previous_chi2 = current_glycosite->GetChi2Value();
+            current_glycosite->SetChi1Value(RandomAngle_360range());
             current_glycosite->SetChi2Value(RandomAngle_360range());
-            new_glycan_overlap = current_glycosite->Calculate_bead_overlaps_noRecord_noSet("glycan");
-            new_protein_overlap = current_glycosite->Calculate_bead_overlaps_noRecord_noSet("protein");
+            new_overlap = current_glycosite->Calculate_bead_overlaps_noRecord_noSet("total");
 
             //new_overlap = current_glycosite->GetWeightedOverlap(1.0, 5.0);
 //            accept_change = monte_carlo::accept_via_metropolis_criterion(new_overlap - previous_overlap);
 //            if (!accept_change)
-            if ( (new_protein_overlap + new_glycan_overlap) > previous_glycan_overlap + previous_protein_overlap)
+            if (new_overlap >= previous_overlap)
             {
-                //std::cout << "Rejected a change of " << (new_overlap - previous_overlap) << "\n";
                 current_glycosite->SetChi1Value(previous_chi1);
                 current_glycosite->SetChi2Value(previous_chi2);
             }
-            else
-            {
-                current_glycosite->SetGlycanOverlap(new_glycan_overlap);
-                current_glycosite->SetProteinOverlap(new_protein_overlap);
-            }
+//            else
+//            {
+//                std::cout << "Accepted a change of " << ((new_overlap) - (previous_overlap)) << "\n";
+//                current_glycosite->Calculate_bead_overlaps();
+//            }
         }
+        //write_pdb_file(glycosites.at(0).GetGlycoprotein(), cycle, "test", 5.0);
         // Only need to write out when at lowest when doing metropolis where I might end up higher in overlap.
         //CalculateOverlaps(glycosites);
 //        new_global_overlap = glycoprotein_builder::GetGlobalOverlap(glycosites);
@@ -288,6 +300,25 @@ GlycosylationSitePointerVector DetermineSitesWithOverlap(GlycosylationSiteVector
         overlap = current_glycosite->Calculate_bead_overlaps(overlap_type);
         if ( overlap > tolerance)
         {
+//            std::cout << "Site " << current_glycosite->GetResidue()->GetId() << " is over tolerance with " << overlap << "\n";
+            current_glycosite->Print_bead_overlaps();
+            sites_to_return.push_back(&(*current_glycosite));
+        }
+    }
+    return sites_to_return;
+}
+
+GlycosylationSitePointerVector GetSitesWithOverlap(GlycosylationSiteVector &glycosites, double tolerance)
+{
+    GlycosylationSitePointerVector sites_to_return;
+    double overlap = 0.0;
+    std::cout << "      Site        |  Total | Protein | Glycan " << std::endl;
+    for (GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end(); ++current_glycosite)
+    {
+        overlap = current_glycosite->GetOverlap();
+        if ( overlap > tolerance)
+        {
+//            std::cout << "Site " << current_glycosite->GetResidue()->GetId() << " is over tolerance with " << overlap << "\n";
             current_glycosite->Print_bead_overlaps();
             sites_to_return.push_back(&(*current_glycosite));
         }
