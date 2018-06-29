@@ -41,8 +41,8 @@ void resolve_overlaps::weighted_protein_global_overlap_monte_carlo(Glycosylation
     bool stop = false;
     double previous_chi1;
     double previous_chi2;
-    double previous_overlap, new_overlap;
-//    double previous_glycan_overlap, new_glycan_overlap, previous_protein_overlap, new_protein_overlap;
+//    double previous_overlap, new_overlap;
+    double previous_glycan_overlap, new_glycan_overlap, previous_protein_overlap, new_protein_overlap;
 //    double lowest_global_overlap = glycoprotein_builder::GetGlobalOverlap(glycosites);
 //    double new_global_overlap;
    // bool accept_change;
@@ -56,27 +56,28 @@ void resolve_overlaps::weighted_protein_global_overlap_monte_carlo(Glycosylation
             GlycosylationSite *current_glycosite = (*it1);
            // std::cout << "Checking " << current_glycosite->GetResidue()->GetId() << "\n";
             //previous_overlap = current_glycosite->GetWeightedOverlap(1.0, 5.0);
-//            previous_glycan_overlap = current_glycosite->GetGlycanOverlap();
-//            previous_protein_overlap = current_glycosite->GetProteinOverlap();
-//            //std::cout << "gly and pro are " << previous_glycan_overlap << ", " << previous_protein_overlap << "\n";
-//            previous_chi1 = current_glycosite->GetChi1Value();
-//            current_glycosite->SetChi1Value(RandomAngle_360range());
-//            previous_chi2 = current_glycosite->GetChi2Value();
-//            current_glycosite->SetChi2Value(RandomAngle_360range());
-//            new_glycan_overlap = current_glycosite->Calculate_bead_overlaps_noRecord_noSet("glycan");
-//            new_protein_overlap = current_glycosite->Calculate_bead_overlaps_noRecord_noSet("protein");
-
-            previous_overlap = current_glycosite->GetOverlap();
+            previous_glycan_overlap = current_glycosite->GetGlycanOverlap();
+            previous_protein_overlap = current_glycosite->GetProteinOverlap();
             previous_chi1 = current_glycosite->GetChi1Value();
-            previous_chi2 = current_glycosite->GetChi2Value();
             current_glycosite->SetChi1Value(RandomAngle_360range());
+            previous_chi2 = current_glycosite->GetChi2Value();
             current_glycosite->SetChi2Value(RandomAngle_360range());
-            new_overlap = current_glycosite->Calculate_bead_overlaps_noRecord_noSet("total");
+            new_glycan_overlap = current_glycosite->Calculate_bead_overlaps_noRecord_noSet("glycan");
+            new_protein_overlap = current_glycosite->Calculate_bead_overlaps_noRecord_noSet("protein");
+
+//            previous_overlap = current_glycosite->GetOverlap();
+//            previous_chi1 = current_glycosite->GetChi1Value();
+//            previous_chi2 = current_glycosite->GetChi2Value();
+//            current_glycosite->SetChi1Value(RandomAngle_360range());
+//            current_glycosite->SetChi2Value(RandomAngle_360range());
+//            new_overlap = current_glycosite->Calculate_bead_overlaps_noRecord_noSet("total");
 
             //new_overlap = current_glycosite->GetWeightedOverlap(1.0, 5.0);
 //            accept_change = monte_carlo::accept_via_metropolis_criterion(new_overlap - previous_overlap);
 //            if (!accept_change)
-            if (new_overlap >= previous_overlap)
+//            if (new_overlap >= previous_overlap)
+            // Added weights to emphasis protein overlap as more important to relieve
+            if ((new_glycan_overlap + (new_protein_overlap*2)) >= (previous_glycan_overlap + (previous_protein_overlap*2)))
             {
                 current_glycosite->SetChi1Value(previous_chi1);
                 current_glycosite->SetChi2Value(previous_chi2);
