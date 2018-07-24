@@ -16,6 +16,15 @@ You'll need GMML. See here for installation instructions: http://glycam.org/docs
 ### Installation of GlycoProteinBuilder
 export GEMSHOME=<Your Path To Gems > # eg: export GEMSHOME=/home/oliver/Programs/gems
 
+#### Makefile:
+Some commands defined in the Makefile are:
+$ make
+$ make all
+$ make bin/gp_builder
+$ make build/<file_name>.o
+$ make clean
+
+#### Comand line:
 g++ -std=c++0x -I $GEMSHOME/gmml/includes/ -I includes/ -L$GEMSHOME/gmml/bin/ -Wl,-rpath,$GEMSHOME/gmml/bin/ src/*.cpp -lgmml -o gp_builder
 
 ### Setup

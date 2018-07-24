@@ -36,22 +36,22 @@ void resolve_overlaps::weighted_protein_global_overlap_monte_carlo(Glycosylation
     //glycoprotein_builder::CalculateOverlaps(glycosites);
     glycoprotein_builder::PrintDihedralAnglesAndOverlapOfGlycosites(glycosites);
 
-    int cycle = 0;
-    int max_cycles = 50;
+    int cycle = 1;
+    int max_cycles = 500;
     bool stop = false;
     double previous_chi1;
     double previous_chi2;
 //    double previous_overlap, new_overlap;
     double previous_glycan_overlap, new_glycan_overlap, previous_protein_overlap, new_protein_overlap;
-//    double lowest_global_overlap = glycoprotein_builder::GetGlobalOverlap(glycosites);
-//    double new_global_overlap;
+    double lowest_global_overlap = glycoprotein_builder::GetGlobalOverlap(glycosites);
+    double new_global_overlap;
     bool accept_change;
 
     while ( (cycle < max_cycles) && (stop == false) )
     {
         ++cycle;
         std::cout << "Cycle " << cycle << " of " << max_cycles << std::endl;
-        std::random_shuffle (sites_with_overlaps.begin(), sites_with_overlap.end());
+        std::random_shuffle (sites_with_overlaps.begin(), sites_with_overlaps.end());
         for(GlycosylationSitePointerVector::iterator it1 = sites_with_overlaps.begin(); it1 != sites_with_overlaps.end(); ++it1)
         {
             GlycosylationSite *current_glycosite = (*it1);
@@ -74,11 +74,11 @@ void resolve_overlaps::weighted_protein_global_overlap_monte_carlo(Glycosylation
 //            new_overlap = current_glycosite->Calculate_bead_overlaps_noRecord_noSet("total");
 
             //new_overlap = current_glycosite->GetWeightedOverlap(1.0, 5.0);
-//            accept_change = monte_carlo::accept_via_metropolis_criterion((new_glycan_overlap + (new_protein_overlap*2)) - (previous_glycan_overlap + (previous_protein_overlap*2)));
-//            if (!accept_change)
+            accept_change = monte_carlo::accept_via_metropolis_criterion((new_glycan_overlap + (new_protein_overlap*5)) - (previous_glycan_overlap + (previous_protein_overlap*5)));
+            if (!accept_change)
 //            if (new_overlap >= previous_overlap)
             // Added weights to emphasis protein overlap as more important to relieve
-            if ((new_glycan_overlap + (new_protein_overlap*2)) >= (previous_glycan_overlap + (previous_protein_overlap*2)))
+//            if ((new_glycan_overlap + (new_protein_overlap*5)) >= (previous_glycan_overlap + (previous_protein_overlap*5)))
             {
                 current_glycosite->SetChi1Value(previous_chi1);
                 current_glycosite->SetChi2Value(previous_chi2);
@@ -92,14 +92,13 @@ void resolve_overlaps::weighted_protein_global_overlap_monte_carlo(Glycosylation
         //write_pdb_file(glycosites.at(0).GetGlycoprotein(), cycle, "test", 5.0);
         // Only need to write out when at lowest when doing metropolis where I might end up higher in overlap.
         //CalculateOverlaps(glycosites);
-//        new_global_overlap = glycoprotein_builder::GetGlobalOverlap(glycosites);
+        new_global_overlap = glycoprotein_builder::GetGlobalOverlap(glycosites);
 //        std::cout << "Lowest: " << lowest_global_overlap << ", Current: " << new_global_overlap << "\n";
-//        if ( lowest_global_overlap > new_global_overlap)
-//        {
-//            //Assembly *glycoprotein = glycosites.at(0).GetGlycoprotein();
-//            write_pdb_file(glycosites.at(0).GetGlycoprotein(), cycle, "best", new_global_overlap);
-//            lowest_global_overlap = new_global_overlap;
-//        }
+        if ( lowest_global_overlap > new_global_overlap + 1 )
+        {
+            write_pdb_file(glycosites.at(0).GetGlycoprotein(), cycle, "best", new_global_overlap);
+            lowest_global_overlap = new_global_overlap;
+        }
 
         //std::cout << "Updating list of sites with overlaps." << std::endl;
         sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance); // Moved glycans may clash with other glycans. Need to check.
@@ -109,6 +108,72 @@ void resolve_overlaps::weighted_protein_global_overlap_monte_carlo(Glycosylation
             stop = true;
         }
     }
+
+    // This is dumb but I rush:
+    max_cycles=1000;
+    while ( (cycle < max_cycles) && (stop == false) )
+    {
+        ++cycle;
+        std::cout << "Cycle " << cycle << " of " << max_cycles << std::endl;
+        std::random_shuffle (sites_with_overlaps.begin(), sites_with_overlaps.end());
+        for(GlycosylationSitePointerVector::iterator it1 = sites_with_overlaps.begin(); it1 != sites_with_overlaps.end(); ++it1)
+        {
+            GlycosylationSite *current_glycosite = (*it1);
+           // std::cout << "Checking " << current_glycosite->GetResidue()->GetId() << "\n";
+            //previous_overlap = current_glycosite->GetWeightedOverlap(1.0, 5.0);
+            previous_glycan_overlap = current_glycosite->GetGlycanOverlap();
+            previous_protein_overlap = current_glycosite->GetProteinOverlap();
+            previous_chi1 = current_glycosite->GetChi1Value();
+            current_glycosite->SetChi1Value(RandomAngle_360range());
+            previous_chi2 = current_glycosite->GetChi2Value();
+            current_glycosite->SetChi2Value(RandomAngle_360range());
+            new_glycan_overlap = current_glycosite->Calculate_bead_overlaps_noRecord_noSet("glycan");
+            new_protein_overlap = current_glycosite->Calculate_bead_overlaps_noRecord_noSet("protein");
+
+//            previous_overlap = current_glycosite->GetOverlap();
+//            previous_chi1 = current_glycosite->GetChi1Value();
+//            previous_chi2 = current_glycosite->GetChi2Value();
+//            current_glycosite->SetChi1Value(RandomAngle_360range());
+//            current_glycosite->SetChi2Value(RandomAngle_360range());
+//            new_overlap = current_glycosite->Calculate_bead_overlaps_noRecord_noSet("total");
+
+            //new_overlap = current_glycosite->GetWeightedOverlap(1.0, 5.0);
+ //           accept_change = monte_carlo::accept_via_metropolis_criterion((new_glycan_overlap + (new_protein_overlap*5)) - (previous_glycan_overlap + (previous_protein_overlap*5)));
+ //           if (!accept_change)
+//            if (new_overlap >= previous_overlap)
+            // Added weights to emphasis protein overlap as more important to relieve
+            if ((new_glycan_overlap + (new_protein_overlap*5)) >= (previous_glycan_overlap + (previous_protein_overlap*5)))
+            {
+                current_glycosite->SetChi1Value(previous_chi1);
+                current_glycosite->SetChi2Value(previous_chi2);
+            }
+//            else
+//            {
+//                std::cout << "Accepted a change of " << ((new_overlap) - (previous_overlap)) << "\n";
+//                current_glycosite->Calculate_bead_overlaps();
+//            }
+        }
+        //write_pdb_file(glycosites.at(0).GetGlycoprotein(), cycle, "test", 5.0);
+        // Only need to write out when at lowest when doing metropolis where I might end up higher in overlap.
+        //CalculateOverlaps(glycosites);
+        new_global_overlap = glycoprotein_builder::GetGlobalOverlap(glycosites);
+//        std::cout << "Lowest: " << lowest_global_overlap << ", Current: " << new_global_overlap << "\n";
+        if ( lowest_global_overlap > new_global_overlap + 1 )
+        {
+            write_pdb_file(glycosites.at(0).GetGlycoprotein(), cycle, "best", new_global_overlap);
+            lowest_global_overlap = new_global_overlap;
+        }
+
+        //std::cout << "Updating list of sites with overlaps." << std::endl;
+        sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance); // Moved glycans may clash with other glycans. Need to check.
+        if (sites_with_overlaps.size() == 0)
+        {
+            std::cout << "Stopping with all overlaps resolved.\n";
+            stop = true;
+        }
+    }
+
+
     std::cout << "Global overlap before deleting sites is " << glycoprotein_builder::GetGlobalOverlap(glycosites) << "\n";
     std::cout << "Finished torsions and overlaps:\n";
     glycoprotein_builder::PrintDihedralAnglesAndOverlapOfGlycosites(glycosites);

@@ -18,6 +18,7 @@ else
     echo "set xtics font 'Arial,18′
 set terminal pdf solid font 'Arial,12' # pdf files are great for inkscape
 set output 'plot.pdf'
+set size square
 unset label # Remove all labels
 unset xtics; unset ytics # Remove all tics
 set ytics nomirror # Only have tics on left
@@ -29,7 +30,7 @@ set xtics 0,30,360
 set ytics 0,30,360
 set xlabel \"Chi2\" offset -2
 set ylabel \"Chi1\" offset 2
-plot 'finished.tmp' using (\$6 <0 ? \$6+360 : \$6):(\$4 <0 ? \$4+360 : \$4):(sprintf(\"(N%d)\", \$2)) with labels point pt 7 ps 0.5 offset char 0.5,0.5 notitle" > gnuplot.in
+plot 'finished.tmp' using (\$6 <0 ? \$6+360 : \$6):(\$4 <0 ? \$4+360 : \$4):(sprintf(\"(N%d)\", \$2)) with labels point pt 7 ps 0.5 lt rgb \"red\" offset char 0.5,0.5 notitle" > gnuplot.in
 gnuplot -p gnuplot.in
 rm *.tmp gnuplot.in
     #plot 'finished.tmp' using 4:6 title \"\" with points lw 4 # lw = linewidth" > gnuplot.in
