@@ -154,10 +154,16 @@ void GlycosylationSite::AttachGlycan(Assembly glycan, Assembly &glycoprotein)
     this->SetChiAtoms(residue_);
 }
 
+/*
+ * This function prepares the glycan molecule in the glycan_ assembly for superimpostion onto an amino acid in the protein
+ * It does this by "growing" the atoms of the amino acid side chain (e.g. Asn, Thr or Ser) out from the glycan reducing terminal
+ * Another function will use these additional atoms to superimpose the glycan onto residue_
+ * This function assumes that the glycan_ assembly for this glycosylation site has already been set
+*/
 void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residue(std::string amino_acid_name)
 {
     //Dear future self, the order that you add the atoms to the residue matters for superimposition ie N, CA, CB , not CB, CA, N.
-
+    // Want: assembly.FindResidueByTag("reducing-residue");
     Residue* reducing_Residue = glycan_.GetAllResiduesOfAssembly().at(1); // I assume I assumed something stupid here.
     AtomVector reducing_Atoms = reducing_Residue->GetAtoms();
 
@@ -166,6 +172,7 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
     Atom* atomC1;
 
     // Want: residue.FindAtom(string Name);
+    // Want: residue.FindAtomByTag("anomeric-carbon"); The below is risky as it uses atoms names, i.e. would break for Sialic acid.
     for(AtomVector::iterator it = reducing_Atoms.begin(); it != reducing_Atoms.end(); ++it)
     {
        Atom* atom = *it;
@@ -185,134 +192,55 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
        aglycon->RemoveAtom(atom);
     }
 
-    //Ok so going to set it so that the new "superimposition residue" is the old aglycon residue i.e. .at(0)
+    // Ok so going to set it so that the new "superimposition residue" is the old aglycon residue i.e. .at(0)
     // This avoids having to delete the algycon residue object from assembly and adding the super residue to assembly.
-
-   // Assembly* assembly = new Assembly();
-   // Residue* super_residue = new Residue();
-    //Residue* alt_residue = new Residue();
-   // super_residue->SetAssembly(&glycan_);
-   // glycan_.AddResidue(super_residue);
-    Residue* super_residue = aglycon; // "renaming" so the below reads better.
-    super_residue->SetName("SUP");
-    super_residue->SetId("SUP_?_1_?_?_1");
+    // Deleting the residue is actually hard as the atoms still exist and are referenced from other places.
+    Residue* superimposition_residue = aglycon; // "renaming" so the below reads better.
+    superimposition_residue->SetName("SUP");
+    superimposition_residue->SetId("SUP_?_1_?_?_1");
 
     if (amino_acid_name.compare("ASN")==0)
     {
-        //super_residue->SetName("NLN");
-        //super_residue->SetId("NLN_?_1_?_?_1");
+        Atom *atomND2 = new Atom(superimposition_residue, "ND2", (gmml::get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 109.3, 180, 1.53)));
+        Atom *atomCG = new Atom(superimposition_residue, "CG", (gmml::get_cartesian_point_from_internal_coords(atomO5, atomC1, atomND2, 109.3, 261, 1.325)));
+        Atom *atomOD1 = new Atom(superimposition_residue, "OD1", (gmml::get_cartesian_point_from_internal_coords(atomC1, atomND2, atomCG, 126, 0, 1.22)));
 
-        Atom *atomND2 = new Atom(super_residue, "ND2", (gmml::get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 109.3, 180, 1.53)));
-        Atom *atomCG = new Atom(super_residue, "CG", (gmml::get_cartesian_point_from_internal_coords(atomO5, atomC1, atomND2, 109.3, 261, 1.325)));
-        Atom *atomOD1 = new Atom(super_residue, "OD1", (gmml::get_cartesian_point_from_internal_coords(atomC1, atomND2, atomCG, 126, 0, 1.22)));
-   //     Atom *atomCB = new Atom(super_residue, "CB", (gmml::get_cartesian_point_from_internal_coords(atomC1, atomND2, atomCG, 114, 177.3, 1.53)));
-   //     Atom *atomCA = new Atom(super_residue, "CA", (gmml::get_cartesian_point_from_internal_coords(atomND2, atomCG, atomCB, 111, 177.6, 1.53)));
-   //     Atom *atomN = new Atom(super_residue, "N", (gmml::get_cartesian_point_from_internal_coords(atomCG, atomCB, atomCA, 111, 191.6, 1.453)));
-
-        super_residue->AddAtom(atomCG);
-        super_residue->AddAtom(atomOD1);
-        super_residue->AddAtom(atomND2);
-        superimposition_atoms_ = super_residue->GetAtoms();
-    /*
-        alt_residue->SetName("NLN");
-        alt_residue->SetId("NLN_?_1_?_?_1");
-        alt_residue->SetAssembly(&alternate_sidechain_);
-        alternate_sidechain_.AddResidue(alt_residue);
-        alt_residue->AddAtom(atomN);
-        alt_residue->AddAtom(atomCA);
-        alt_residue->AddAtom(atomCB);
-        alt_residue->AddAtom(atomCG);
-        alt_residue->AddAtom(atomOD1);
-        alt_residue->AddAtom(atomND2);
-        alternate_sidechain_.BuildStructureByDistance();
-        */
-
-       // outputPdbFile = alternate_sidechain_.BuildPdbFileStructureFromAssembly();
-       // outputPdbFile->Write("/home/oliver/Programs/Cplusplus/GlycoproteinBuilder/glycoproteinBuilder/outputs/NLN_AlignedToGlycan.pdb");
+        superimposition_residue->AddAtom(atomCG);
+        superimposition_residue->AddAtom(atomOD1);
+        superimposition_residue->AddAtom(atomND2);
+        superimposition_atoms_ = superimposition_residue->GetAtoms();
     }
     else if (amino_acid_name.compare("THR")==0 || amino_acid_name.compare("SER")==0)
     {
-        //super_residue->SetName("OLS");
-        //super_residue->SetId("OLS_?_1_?_?_1");
+        Atom *atomOG1 = new Atom(superimposition_residue, "OG", (gmml::get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
+        Atom *atomCB = new Atom(superimposition_residue, "CB", (gmml::get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOG1, 109.3, 75, 1.53)));
+        Atom *atomCA = new Atom(superimposition_residue, "CA", (gmml::get_cartesian_point_from_internal_coords(atomC1, atomOG1, atomCB, 109.3, 125, 1.53)));
 
-        Atom *atomOG1 = new Atom(super_residue, "OG", (gmml::get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
-        Atom *atomCB = new Atom(super_residue, "CB", (gmml::get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOG1, 109.3, 75, 1.53)));
-        Atom *atomCA = new Atom(super_residue, "CA", (gmml::get_cartesian_point_from_internal_coords(atomC1, atomOG1, atomCB, 109.3, 125, 1.53)));
-       // Atom *atomN = new Atom(super_residue, "N", (gmml::get_cartesian_point_from_internal_coords(atomOG1, atomCB, atomCA, 109.3, 180, 1.53)));
-       // Atom *atomCG2 = new Atom(super_residue, "CG2", (gmml::get_cartesian_point_from_internal_coords(atomC1, atomOG1, atomCB, 109.3, -60, 1.53)));
+        superimposition_residue->AddAtom(atomCA);
+        superimposition_residue->AddAtom(atomCB);
+        superimposition_residue->AddAtom(atomOG1);
+        superimposition_atoms_ = superimposition_residue->GetAtoms();
 
-        super_residue->AddAtom(atomCA);
-        super_residue->AddAtom(atomCB);
-        super_residue->AddAtom(atomOG1);
-        superimposition_atoms_ = super_residue->GetAtoms();
-
-        /*
-        alt_residue->SetName("OLS");
-        alt_residue->SetId("OLS_?_1_?_?_1");
-        alt_residue->SetAssembly(&alternate_sidechain_);
-        alternate_sidechain_.AddResidue(alt_residue);
-        alt_residue->AddAtom(atomN);
-        alt_residue->AddAtom(atomCA);
-        alt_residue->AddAtom(atomCB);
-        alt_residue->AddAtom(atomOG1);
-        */
-
-       /* if (amino_acid_name.compare("SER")==0)
-        {
-            alternate_sidechain_.BuildStructureByDistance();
-        }
-        else
-        {
-            alt_residue->SetName("OLT"); //Thr = Ser + CG2
-            alt_residue->SetId("OLT_?_1_?_?_1");
-            alt_residue->AddAtom(atomCG2);
-            atomOG1->SetName("OG1"); // It's OG in Ser.
-            alternate_sidechain_.BuildStructureByDistance();
-        }
-        */
         if (amino_acid_name.compare("THR")==0)
         {
             atomOG1->SetName("OG1"); // It's OG in Ser.
         }
     }
-
     else if (amino_acid_name.compare("TYR")==0)
     {
-      //  super_residue->SetName("OLY");
-      //  super_residue->SetId("OLY_?_1_?_?_1");
+        Atom *atomOH = new Atom(superimposition_residue, "OH", (gmml::get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
+        Atom *atomCZ = new Atom(superimposition_residue, "CZ", (gmml::get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOH, 117, 60, 1.35)));
+        Atom *atomCE1 = new Atom(superimposition_residue, "CE1", (gmml::get_cartesian_point_from_internal_coords(atomC1, atomOH, atomCZ, 120, 180, 1.37)));
 
-        Atom *atomOH = new Atom(super_residue, "OH", (gmml::get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
-        Atom *atomCZ = new Atom(super_residue, "CZ", (gmml::get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOH, 117, 60, 1.35)));
-        Atom *atomCE1 = new Atom(super_residue, "CE1", (gmml::get_cartesian_point_from_internal_coords(atomC1, atomOH, atomCZ, 120, 180, 1.37)));
-      /*  Atom *atomCD1 = new Atom(super_residue, "CD1", (gmml::get_cartesian_point_from_internal_coords(atomOH, atomCZ, atomCE1, 120, 180, 1.37)));
-        Atom *atomCE2 = new Atom(super_residue, "CE2", (gmml::get_cartesian_point_from_internal_coords(atomC1, atomOH, atomCZ, 120, 0, 1.37)));
-        Atom *atomCD2 = new Atom(super_residue, "CD2", (gmml::get_cartesian_point_from_internal_coords(atomOH, atomCZ, atomCE2, 120, 180, 1.37)));
-        Atom *atomCG = new Atom(super_residue, "CG", (gmml::get_cartesian_point_from_internal_coords(atomCZ, atomCE2, atomCD2, 120, 0, 1.37)));
-        Atom *atomCB = new Atom(super_residue, "CB", (gmml::get_cartesian_point_from_internal_coords(atomCE2, atomCD2, atomCG, 122, 180, 1.51)));
-        Atom *atomCA = new Atom(super_residue, "CA", (gmml::get_cartesian_point_from_internal_coords(atomCD2, atomCG, atomCB, 111, -107, 1.55)));
-        Atom *atomN = new Atom(super_residue, "N", (gmml::get_cartesian_point_from_internal_coords(atomCG, atomCB, atomCA, 114, -170, 1.44)));
-         */
-        super_residue->AddAtom(atomCE1);
-        super_residue->AddAtom(atomCZ);
-        super_residue->AddAtom(atomOH);
-        superimposition_atoms_ = super_residue->GetAtoms();
-        /*
-        alt_residue->SetName("OLY");
-        alt_residue->SetId("OLY_?_1_?_?_1");
-        alt_residue->SetAssembly(&alternate_sidechain_);
-        alternate_sidechain_.AddResidue(alt_residue);
-        alt_residue->AddAtom(atomN);
-        alt_residue->AddAtom(atomCA);
-        alt_residue->AddAtom(atomCB);
-        alt_residue->AddAtom(atomOH);
-        alt_residue->AddAtom(atomCZ);
-        alt_residue->AddAtom(atomCE1);
-        alt_residue->AddAtom(atomCD1);
-        alt_residue->AddAtom(atomCE2);
-        alt_residue->AddAtom(atomCD2);
-        alt_residue->AddAtom(atomCG);
-        alternate_sidechain_.BuildStructureByDistance();
-        */
+        superimposition_residue->AddAtom(atomCE1);
+        superimposition_residue->AddAtom(atomCZ);
+        superimposition_residue->AddAtom(atomOH);
+        superimposition_atoms_ = superimposition_residue->GetAtoms();
+    }
+    else
+    {
+        // OK I DON'T KNOW HOW TO HANDLE EXCEPTIONS. This will never happen though I promise.
+        std::cout << "Problem in glycosylationsite::Prepare_Glycans_For_Superimposition_To_Particular_Residue(). Expect Segfault soon." << std::endl;
     }
     return;
 }
@@ -365,8 +293,8 @@ void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_resid
     last_protein_atom->GetNode()->AddNodeNeighbor(atomC1);
     atomC1->GetNode()->AddNodeNeighbor(last_protein_atom);
     //Delete the atoms used to superimpose the glycan onto the protein. Remove the residue.
-    Residue *super_residue = glycan_.GetAllResiduesOfAssembly().at(0);
-    glycan_.RemoveResidue(super_residue);
+    Residue *superimposition_residue = glycan_.GetAllResiduesOfAssembly().at(0);
+    glycan_.RemoveResidue(superimposition_residue);
 //    std::cout << "glycan_ now contains: ";
 //    ResidueVector residues = glycan_.GetResidues();
 //    for (ResidueVector::iterator it = residues.begin(); it != residues.end(); ++it)
