@@ -15,23 +15,21 @@ void glycoprotein_builder::AttachGlycansToGlycosites(MolecularModeling::Assembly
         bool stop = false;
         std::string glycosite_number = glycosite->GetResidueNumber();
         ResidueVector::iterator it2 = protein_residues.begin();
-        while ( (!stop) && (it2 != protein_residues.end()) ) {
-           // for (ResidueVector::iterator it2 = protein_residues.begin(); it2 != protein_residues.end(); ++it2)
+        while ( (!stop) && (it2 != protein_residues.end()) )
+        {
+            MolecularModeling::Residue *protein_residue = *it2;
+            std::string id = protein_residue->GetId();
+            std::string formatted_glycosite_number = "_" + glycosite_number + "_";
+            if( id.compare(3, formatted_glycosite_number.size(), formatted_glycosite_number) == 0)
             {
-                MolecularModeling::Residue *protein_residue = *it2;
-                std::string id = protein_residue->GetId();
-                std::string formatted_glycosite_number = "_" + glycosite_number + "_";
-                if( id.compare(5, formatted_glycosite_number.size(), formatted_glycosite_number) == 0)
-                {
-                    //std::cout << "glycosite: " << glycosite_number << std::endl;
-                    std::cout << "glycosite id:" << id << std::endl;
-                    glycosite->SetResidue(protein_residue);
-                    stop = true;
-                    // Remove residue from list, so if user has listed same residue name twice, it will go on next instance (i.e. on next chain) of residue number
-                    protein_residues.erase(std::remove(protein_residues.begin(), protein_residues.end(), *it2), protein_residues.end()); // Note need #include <algorithm>
-                }
-                ++it2;
+                //std::cout << "glycosite: " << glycosite_number << std::endl;
+                std::cout << "glycosite id:" << id << std::endl;
+                glycosite->SetResidue(protein_residue);
+                stop = true;
+                // Remove residue from list, so if user has listed same residue name twice, it will go on next instance (i.e. on next chain) of residue number
+                protein_residues.erase(std::remove(protein_residues.begin(), protein_residues.end(), *it2), protein_residues.end()); // Note need #include <algorithm>
             }
+            ++it2;
         }
     }
 //    // Find protein residues in Glycoprotein that will get a glycan added. Set Residue in Glycosite.
