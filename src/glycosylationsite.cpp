@@ -440,9 +440,10 @@ double GlycosylationSite::Calculate_bead_overlaps(AtomVector &atomsA, AtomVector
 }
 
 
-// Copied this from gmml Assembly.
+// Copied this from gmml Assembly. Oly updated to fix memory leaks
 double GlycosylationSite::CalculateTorsionAngle(AtomVector atoms)
 {
+
     double current_dihedral = 0.0;
 
     GeometryTopology::Coordinate *atom1_crd = atoms.at(0)->GetCoordinates().at(0);
@@ -450,27 +451,28 @@ double GlycosylationSite::CalculateTorsionAngle(AtomVector atoms)
     GeometryTopology::Coordinate *atom3_crd = atoms.at(2)->GetCoordinates().at(0);
     GeometryTopology::Coordinate *atom4_crd = atoms.at(3)->GetCoordinates().at(0);
 
-    GeometryTopology::Coordinate* b1 = new GeometryTopology::Coordinate(*atom2_crd);
-    b1->operator -(*atom1_crd);
-    GeometryTopology::Coordinate* b2 = new GeometryTopology::Coordinate(*atom3_crd);
-    b2->operator -(*atom2_crd);
-    GeometryTopology::Coordinate* b3 = new GeometryTopology::Coordinate(*atom4_crd);
-    b3->operator -(*atom3_crd);
-    GeometryTopology::Coordinate* b4 = new GeometryTopology::Coordinate(*b2);
-    b4->operator *(-1);
+    // Oliver updates to solve memory leaks
+    GeometryTopology::Coordinate b1 = *atom2_crd; // deep copy
+    GeometryTopology::Coordinate b2 = *atom3_crd;
+    GeometryTopology::Coordinate b3 = *atom4_crd;
+    GeometryTopology::Coordinate b4 = b2;
+    b1.operator -(*atom1_crd);
+    b2.operator -(*atom2_crd);
+    b3.operator -(*atom3_crd);
+    b4.operator *(-1);
 
-    GeometryTopology::Coordinate* b2xb3 = new GeometryTopology::Coordinate(*b2);
-    b2xb3->CrossProduct(*b3);
+    GeometryTopology::Coordinate b2xb3 = b2; // deep copy
+    b2xb3.CrossProduct(b3);
 
-    GeometryTopology::Coordinate* b1_m_b2n = new GeometryTopology::Coordinate(*b1);
-    b1_m_b2n->operator *(b2->length());
+    GeometryTopology::Coordinate b1_m_b2n = b1;
+    b1_m_b2n.operator *(b2.length());
 
-    GeometryTopology::Coordinate* b1xb2 = new GeometryTopology::Coordinate(*b1);
-    b1xb2->CrossProduct(*b2);
+    GeometryTopology::Coordinate b1xb2 = b1; // deep copy
+    b1xb2.CrossProduct(b2);
 
-    current_dihedral = atan2(b1_m_b2n->DotProduct(*b2xb3), b1xb2->DotProduct(*b2xb3));
-    delete b1, b2, b3, b4, b2xb3, b1_m_b2n, b1xb2; 
+    current_dihedral = atan2(b1_m_b2n.DotProduct(b2xb3), b1xb2.DotProduct(b2xb3));
     return (current_dihedral * (180 / PI ) ); // Convert to DEGREES
+
 }
 
 //////////////////////////////////////////////////////////

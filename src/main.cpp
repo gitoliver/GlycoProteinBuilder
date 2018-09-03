@@ -58,6 +58,7 @@ int main(int argc, char* argv[])
     std::cout << "AttachGlycansToGlycosites"  << std::endl;
     glycoprotein_builder::AttachGlycansToGlycosites(glycoprotein, glycosites, glycanDirectory);
     glycoprotein_builder::SetReasonableChi1Chi2Values(glycosites);
+
     //************************************************//
     // Prep for Resolve Overlaps                      //
     //************************************************//
@@ -67,7 +68,7 @@ int main(int argc, char* argv[])
     outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Initial.pdb");
     // Add beads. They make the overlap calculation faster.
     std::cout << "Add_Beads"  << std::endl;
-    Add_Beads(glycoprotein, glycosites);
+    beads::Add_Beads(glycoprotein, glycosites);
 
     //************************************************//
     // Resolve Overlaps                               //
@@ -78,10 +79,20 @@ int main(int argc, char* argv[])
     {
         std::cout << "Could not resolve quickly" << std::endl;
         glycoprotein_builder::SetReasonableChi1Chi2Values(glycosites); // Reset to reasonable starting points
-        resolve_overlaps::weighted_protein_global_overlap_monte_carlo(glycosites);
+        resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites);
     }
+
+    // Testing algorithms:
+//    glycoprotein_builder::SetRandomChi1Chi2Values(glycosites);
+//    int max_cycles = 100;
+//    for(int i=0; i < 5; ++i)
+//    {
+//        resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, max_cycles);
+//        resolve_overlaps::weighted_protein_global_overlap_monte_carlo(glycosites, max_cycles);
+//    }
+
     std::cout << "Global overlap is " << glycoprotein_builder::GetGlobalOverlap(glycosites) << "\n";
-    Remove_Beads(glycoprotein); //Remove beads and write a final PDB & PRMTOP
+    beads::Remove_Beads(glycoprotein); //Remove beads and write a final PDB & PRMTOP
 
     //glycoprotein_builder::PrintDihedralAnglesOfGlycosites(glycosites);
     outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);

@@ -15,6 +15,7 @@ public:
     //                    TYPE DEFINITION                   //
     //////////////////////////////////////////////////////////
 
+    typedef std::vector<GlycosylationSite> GlycosylationSiteVector;
     typedef std::vector<GlycosylationSite*> GlycosylationSitePointerVector;
     typedef std::vector<Overlap_record> OverlapRecordVector;
 
