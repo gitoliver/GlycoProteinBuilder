@@ -76,10 +76,10 @@ void resolve_overlaps::weighted_protein_global_overlap_random_descent(Glycosylat
             lowest_global_overlap = new_global_overlap;
         }
     }
-//    std::cout << "Global overlap before deleting sites is " << glycoprotein_builder::GetGlobalOverlap(glycosites) << "\n";
-//    std::cout << "Finished torsions and overlaps:\n";
-//    glycoprotein_builder::PrintDihedralAnglesAndOverlapOfGlycosites(glycosites);
-    //DeleteSitesIterativelyWithOverlapAboveTolerance(glycosites, loose_tolerance);
+    std::cout << "Global overlap before deleting sites is " << glycoprotein_builder::GetGlobalOverlap(glycosites) << "\n";
+    std::cout << "Finished torsions and overlaps:\n";
+    glycoprotein_builder::PrintDihedralAnglesAndOverlapOfGlycosites(glycosites);
+    DeleteSitesIterativelyWithOverlapAboveTolerance(glycosites, loose_tolerance);
 }
 
 void resolve_overlaps::weighted_protein_global_overlap_monte_carlo(GlycosylationSiteVector &glycosites, int max_cycles)
