@@ -1,10 +1,17 @@
 #include "../includes/bead_residues.h"
 
-void Add_Beads(MolecularModeling::Assembly &glycoprotein, GlycosylationSiteVector &glycosites)
+void beads::Add_Beads(MolecularModeling::Assembly &glycoprotein, GlycosylationSiteVector &glycosites)
 {
+    /*
+    / This function creates atoms with large radii called "beads" for the protein and glycans
+    / The beads are added directly in glycoprotein and put in the AtomNode connection network
+    / Within each glycosite an atomvector (vector of pointers to each bead) is added.
+    / Each glycosite will have atomvectors of protein beads, glycan beads, and other glycan beads.
+    / Other glycan beads are beads from glycans attached to other glycosites.
+    */
+    // Add beads to protein atoms first.
     AtomVector protein_beads = Add_Beads_To_Protein(glycoprotein);
-    // Go through all glycosite glycans, add bead in center of each residue, attach it to one other atom in residue.
-    // Then set protein_beads
+    // Go through all glycosite glycans, add bead to each residue, attach it to one other atom in residue.
     for (GlycosylationSiteVector::iterator it1 = glycosites.begin(); it1 != glycosites.end(); ++it1)
     {
     	GlycosylationSite *glycosite = &(*it1);
@@ -13,14 +20,14 @@ void Add_Beads(MolecularModeling::Assembly &glycoprotein, GlycosylationSiteVecto
         double distance = ( GetMaxDistanceBetweenAtoms(glycosite->GetAttachedGlycan()->GetAllAtomsOfAssembly()) + 5); // added 5 to account for CB-C1(glycan) distance
         AtomVector close_protein_beads = selection::AtomsWithinDistanceOf(cb_atom, distance, protein_beads);
         glycosite->SetProteinBeads(&close_protein_beads);
-        AtomVector these_beads = Add_Beads_To_Glycan(glycosite->GetAttachedGlycan());
-        glycosite->SetSelfGlycanBeads(&these_beads);
+        AtomVector self_glycan_beads = Add_Beads_To_Glycan(glycosite->GetAttachedGlycan());
+        glycosite->SetSelfGlycanBeads(&self_glycan_beads);
     }
     // Now find beads from other glycans and add them to list of other_glycan_beads for each glycosite
    Set_Other_Glycan_Beads(glycosites);
 }
 
-void Set_Other_Glycan_Beads(GlycosylationSiteVector &glycosites)
+void beads::Set_Other_Glycan_Beads(GlycosylationSiteVector &glycosites)
 {
     for (GlycosylationSiteVector::iterator it1 = glycosites.begin(); it1 != glycosites.end(); ++it1)
     {
@@ -41,8 +48,13 @@ void Set_Other_Glycan_Beads(GlycosylationSiteVector &glycosites)
     }
 }
 
-AtomVector Add_Beads_To_Protein(MolecularModeling::Assembly &assembly)
+AtomVector beads::Add_Beads_To_Protein(MolecularModeling::Assembly &assembly)
 {
+    // sfat stands for sidechain fat atom. mfat stands for mainchain fat atom. fat atoms are now called beads, but the name stayed.
+    // Different names allow for easy selection in VMD visualisation problem. They serve no other purpose.
+    // The beads should completely envelope all atoms in the protein. I first did all CA atoms in the mainchain, then visualized in VMD
+    // and manually selected sidechain atoms that would cover the rest of the protein.
+    // The code below adds to CA atoms and then selected other atoms based on their name and sometimes also the residue name.
     AtomVector protein_beads;
     ResidueVector protein_residues = assembly.GetAllProteinResiduesOfAssembly();
     for (ResidueVector::iterator it1 = protein_residues.begin(); it1 != protein_residues.end(); ++it1)
@@ -52,15 +64,14 @@ AtomVector Add_Beads_To_Protein(MolecularModeling::Assembly &assembly)
         for (AtomVector::iterator it2 = atoms.begin(); it2 != atoms.end(); ++it2)
         {
             Atom *atom = *it2;
-            // Okay so all CA atoms and then I've picked out others by hand in VMD that will cover the sidechains
-            if (atom->GetName().compare("CA")==0)
+            if (atom->GetName().compare("CA")==0) // Main chain (mfat) CA atoms
             {
                 //std::cout << "Adding bead to protein " << residue->GetId() << std::endl;
                 Atom* bead_atom = new Atom(residue, "mfat", atom->GetCoordinates());
                 residue->AddAtom(bead_atom);
                 protein_beads.push_back(bead_atom);
             }
-            else if ( (atom->GetName().compare("NZ")==0) ||
+            else if ( (atom->GetName().compare("NZ")==0) || // Sidechain (sfat) atoms I've manually selected
                       (atom->GetName().compare("CZ")==0) ||
                       (atom->GetName().compare("NE2")==0) ||
                       (atom->GetName().compare("OD1")==0) ||
@@ -79,7 +90,7 @@ AtomVector Add_Beads_To_Protein(MolecularModeling::Assembly &assembly)
     return protein_beads;
 }
 
-AtomVector Add_Beads_To_Glycan(MolecularModeling::Assembly *assembly)
+AtomVector beads::Add_Beads_To_Glycan(MolecularModeling::Assembly *assembly)
 {
     AtomVector glycan_beads;
     ResidueVector glycan_residues = assembly->GetResidues();
@@ -96,7 +107,6 @@ AtomVector Add_Beads_To_Glycan(MolecularModeling::Assembly *assembly)
             glycan_beads.push_back(bead_atom);
             //Bond bead_atom to any other atom in residue so when glycan is moved, bead_atom moves too.
             Atom *any_atom = residue->GetAtoms().at(0); // 0 is arbitrary, any atom would do.
-            //std::cout << "Blow here?" << any_atom->GetId() << std::endl;
             any_atom->GetNode()->AddNodeNeighbor(bead_atom);
             AtomVector temp = {any_atom};
             AtomNode *node = new AtomNode(); // DELETE IS FOR LOSERS.
@@ -142,8 +152,11 @@ AtomVector Add_Beads_To_Glycan(MolecularModeling::Assembly *assembly)
     return glycan_beads;
 }
 
-void Remove_Beads(MolecularModeling::Assembly &glycoprotein)
+void beads::Remove_Beads(MolecularModeling::Assembly &glycoprotein)
 {
+    // Removes all bead atoms from the assembly.
+    // Based on having "fat" in the name.
+    // When finished, assembly should look the same as before Add_Beads was called.
     ResidueVector all_residues = glycoprotein.GetAllResiduesOfAssembly();
     for (ResidueVector::iterator it1 = all_residues.begin(); it1 != all_residues.end(); ++it1)
     {
