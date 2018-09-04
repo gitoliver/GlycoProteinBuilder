@@ -6,9 +6,7 @@ number_of_tests=1
 tests_passed=0
 
 ##################### Test 1 ########################
-echo "Testing detect_sugar..."
-#Runs the script that is being tested
-cd $GEMSHOME #detect sugars has hardcoded path to apps/BFMP/detect_shape in GMML::Assembly.ExtractSugars.
+echo "Testing Glycoprotein Builder..."
 ./bin/gp_builder tests/simple > test1_output
 cd - >> /dev/null 2>&1 #return now to reduce chance of forgetting later
 DIFF=$(diff test1_output tests/simple/output.txt)
