@@ -1,4 +1,4 @@
-Working directory is tests/simple/
+Working directory is tests/simple
 Read_Input_File
 Build glycoprotein Structure By Distance
 Building assembly from pdb file ...
