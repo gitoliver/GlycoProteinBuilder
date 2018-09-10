@@ -25,15 +25,6 @@ Setup for ASN_A_24_?_?_1 chi1: -180 chi2: 180
 Setup for ASN_A_38_?_?_1 chi1: 180 chi2: 180
 Setup for ASN_A_83_?_?_1 chi1: 180 chi2: -180
 BuildGlycoproteinStructure
-Creating PDB file
-hey1
-hey2
-hey2.1
-hey2.2
-hey3
-hey4
-hey5
-PDB file created
 Add_Beads
       Site        |  Total | Protein | Glycan 
    ASN_A_24_?_?_1 |   0.51 |    0.51 |   0.00
@@ -103,15 +94,6 @@ Cycle 3 of 500
    ASN_A_24_?_?_1 |   0.51 |    0.51 |   0.00
    ASN_A_38_?_?_1 |   0.24 |    0.24 |   0.00
    ASN_A_83_?_?_1 |   2.64 |    2.64 |   0.00
-Creating PDB file
-hey1
-hey2
-hey2.1
-hey2.2
-hey3
-hey4
-hey5
-PDB file created
 Cycle 4 of 500
       Site        |  Total | Protein | Glycan 
    ASN_A_24_?_?_1 |   0.51 |    0.51 |   0.00
@@ -154,15 +136,6 @@ Cycle 11 of 500
 Cycle 12 of 500
       Site        |  Total | Protein | Glycan 
    ASN_A_24_?_?_1 |   0.51 |    0.51 |   0.00
-Creating PDB file
-hey1
-hey2
-hey2.1
-hey2.2
-hey3
-hey4
-hey5
-PDB file created
 Cycle 13 of 500
       Site        |  Total | Protein | Glycan 
    ASN_A_24_?_?_1 |   0.51 |    0.51 |   0.00
@@ -208,13 +181,4 @@ site: A_24 chi1: -128.00, chi2: -58.00, overlap: 0.00
 site: A_38 chi1: 22.00, chi2: -24.00, overlap: 0.00
 site: A_83 chi1: -163.00, chi2: 78.00, overlap: 0.00
 Global overlap is 0.00
-Creating PDB file
-hey1
-hey2
-hey2.1
-hey2.2
-hey3
-hey4
-hey5
-PDB file created
 Program got to end ok
