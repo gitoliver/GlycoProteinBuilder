@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
     //************************************************//
     std::cout << "Build glycoprotein Structure By Distance" << std::endl;
     Assembly glycoprotein( (working_Directory + "/" + proteinPDB), gmml::InputFileType::PDB);
-    glycoprotein.BuildStructureByDistance(4, 1.91); // 4 threads, 1.91 cutoff to allow C-S in Cys and Met to be bonded.
+    glycoprotein.BuildStructureByDistance(4, 1.6); // 4 threads, 1.91 cutoff to allow C-S in Cys and Met to be bonded. Nope that did bad things
 
     //************************************************//
     // Load Glycans and Attach to glycosites          //
@@ -57,6 +57,8 @@ int main(int argc, char* argv[])
 
     std::cout << "AttachGlycansToGlycosites"  << std::endl;
     glycoprotein_builder::AttachGlycansToGlycosites(glycoprotein, glycosites, glycanDirectory);
+    PdbFileSpace::PdbFile *outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
+    outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Initial.pdb");
     glycoprotein_builder::SetReasonableChi1Chi2Values(glycosites);
 
     //************************************************//
@@ -64,8 +66,8 @@ int main(int argc, char* argv[])
     //************************************************//
 
     std::cout << "BuildGlycoproteinStructure"  << std::endl;
-    PdbFileSpace::PdbFile *outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
-    outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Initial.pdb");
+//    PdbFileSpace::PdbFile *outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
+//    outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Initial.pdb");
     // Add beads. They make the overlap calculation faster.
     std::cout << "Add_Beads"  << std::endl;
     beads::Add_Beads(glycoprotein, glycosites);
