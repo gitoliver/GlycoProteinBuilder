@@ -5,21 +5,22 @@
 
 using namespace MolecularModeling;
 
-class rotatable_dihedral
+class Rotatable_dihedral
 {
 public:
     //////////////////////////////////////////////////////////
     //                    TYPE DEFINITION                   //
     //////////////////////////////////////////////////////////
 
+    typedef std::vector<Rotatable_dihedral> RotatableDihedralVector;
 
     //////////////////////////////////////////////////////////
     //                       CONSTRUCTOR                    //
     //////////////////////////////////////////////////////////
 
-    rotatable_dihedral();
-    rotatable_dihedral(Atom *atom1, Atom *atom2, Atom *atom3, Atom *atom4);
-    rotatable_dihedral(AtomVector atoms);
+    Rotatable_dihedral();
+    Rotatable_dihedral(Atom *atom1, Atom *atom2, Atom *atom3, Atom *atom4);
+    Rotatable_dihedral(AtomVector atoms);
 
 
     //////////////////////////////////////////////////////////
@@ -42,6 +43,7 @@ public:
     void SetAngle(double angle);
     void SetAtoms(AtomVector atoms);
     void SetAtomsThatMove(AtomVector atoms);
+    void SetDihedral(double torsion);
     double RandomizeAngleWithinRanges(std::vector<std::pair<double,double>> ranges);
     double RandomizeAngle();
     double RandomizeAngleWithinRange(double min, double max);
@@ -66,10 +68,10 @@ private:
     //                       ATTRIBUTES                     //
     //////////////////////////////////////////////////////////
 
-    Atom atom1_;
-    Atom atom2_;
-    Atom atom3_;
-    Atom atom4_;
+    Atom *atom1_;
+    Atom *atom2_;
+    Atom *atom3_;
+    Atom *atom4_;
     AtomVector atoms_that_move_;
 
 };

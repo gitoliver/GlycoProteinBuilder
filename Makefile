@@ -16,10 +16,10 @@ INC = ./includes
 BUILD = ./build
 BIN = ./bin
 
-all: $(BIN)/gp_builder $(BUILD)/bead_residues.o $(BUILD)/genetic_algorithm.o $(BUILD)/glycoprotein_builder.o $(BUILD)/glycosylationsite.o $(BUILD)/io.o $(BUILD)/main.o $(BUILD)/overlap_record.o $(BUILD)/resolve_overlaps.o $(BUILD)/selections.o
+all: $(BIN)/gp_builder $(BUILD)/bead_residues.o $(BUILD)/genetic_algorithm.o $(BUILD)/glycoprotein_builder.o $(BUILD)/glycosylationsite.o $(BUILD)/io.o $(BUILD)/main.o $(BUILD)/overlap_record.o $(BUILD)/resolve_overlaps.o $(BUILD)/selections.o $(BUILD)/rotatable_dihedral.o
 
-$(BIN)/gp_builder: $(BUILD)/main.o $(BUILD)/bead_residues.o $(BUILD)/genetic_algorithm.o $(BUILD)/glycoprotein_builder.o $(BUILD)/glycosylationsite.o $(BUILD)/io.o $(BUILD)/overlap_record.o $(BUILD)/resolve_overlaps.o $(BUILD)/selections.o
-	$(CC) $(BUILD)/main.o $(BUILD)/bead_residues.o $(BUILD)/genetic_algorithm.o $(BUILD)/glycoprotein_builder.o $(BUILD)/glycosylationsite.o $(BUILD)/io.o $(BUILD)/overlap_record.o $(BUILD)/resolve_overlaps.o $(BUILD)/selections.o $(LINK) $(RUNTIME) -o $(BIN)/gp_builder
+$(BIN)/gp_builder: $(BUILD)/main.o $(BUILD)/bead_residues.o $(BUILD)/genetic_algorithm.o $(BUILD)/glycoprotein_builder.o $(BUILD)/glycosylationsite.o $(BUILD)/io.o $(BUILD)/overlap_record.o $(BUILD)/resolve_overlaps.o $(BUILD)/selections.o $(BUILD)/rotatable_dihedral.o
+	$(CC) $(BUILD)/main.o $(BUILD)/bead_residues.o $(BUILD)/genetic_algorithm.o $(BUILD)/glycoprotein_builder.o $(BUILD)/glycosylationsite.o $(BUILD)/io.o $(BUILD)/overlap_record.o $(BUILD)/resolve_overlaps.o $(BUILD)/selections.o $(BUILD)/rotatable_dihedral.o $(LINK) $(RUNTIME) -o $(BIN)/gp_builder
 
 $(BUILD)/main.o: $(SRC)/main.cpp $(INC)/io.h $(INC)/resolve_overlaps.h $(INC)/bead_residues.h $(INC)/genetic_algorithm.h $(INC)/glycoprotein_builder.h
 	$(COMPILE) $(SRC)/main.cpp -o $(BUILD)/main.o

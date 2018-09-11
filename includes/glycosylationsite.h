@@ -3,6 +3,7 @@
 
 #include "gmml.hpp"
 #include "overlap_record.h"
+#include "rotatable_dihedral.h"
 #include <iomanip> // For setting precision and formating in std::cout 
 #include <algorithm> //  std::erase, std::remove
 
@@ -18,6 +19,8 @@ public:
     typedef std::vector<GlycosylationSite> GlycosylationSiteVector;
     typedef std::vector<GlycosylationSite*> GlycosylationSitePointerVector;
     typedef std::vector<Overlap_record> OverlapRecordVector;
+    typedef std::vector<Rotatable_dihedral> RotatableDihedralVector;
+
 
     //////////////////////////////////////////////////////////
     //                       CONSTRUCTOR                    //
@@ -114,6 +117,7 @@ private:
     double protein_overlap_;
     AtomVector chi1_;
     AtomVector chi2_;
+    RotatableDihedralVector rotatable_bonds_;
     AtomVector self_glycan_beads_;
     AtomVector other_glycan_beads_;
     AtomVector protein_beads_;

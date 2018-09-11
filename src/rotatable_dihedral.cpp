@@ -4,12 +4,12 @@
 //////////////////////////////////////////////////////////
 //                       CONSTRUCTOR                    //
 //////////////////////////////////////////////////////////
-rotatable_dihedral::rotatable_dihedral()
+Rotatable_dihedral::Rotatable_dihedral()
 {
-    this->angle_ = gmml::dNotSet;
+    std::cout << "This is a bad idea, use one of the other constructors\n";
 }
 
-rotatable_dihedral::rotatable_dihedral(Atom *atom1, Atom *atom2, Atom *atom3, Atom *atom4)
+Rotatable_dihedral::Rotatable_dihedral(Atom *atom1, Atom *atom2, Atom *atom3, Atom *atom4)
 {
     atom1_ = atom1;
     atom2_ = atom2;
@@ -19,27 +19,22 @@ rotatable_dihedral::rotatable_dihedral(Atom *atom1, Atom *atom2, Atom *atom3, At
     atoms_that_move.push_back(atom2_);
     atom3_->FindConnectedAtoms(atoms_that_move);
     atoms_that_move_ = atoms_that_move;
-    angle_ = this->CalculateDihedral();
 }
 
-rotatable_dihedral::rotatable_dihedral(AtomVector atoms)
+Rotatable_dihedral::Rotatable_dihedral(AtomVector atoms)
 {
-    atom1_ = atoms.at(0);
-    atom2_ = atoms.at(1);
-    atom3_ = atoms.at(2);
-    atom4_ = atoms.at(3);
+    this->SetAtoms(atoms);
     AtomVector atoms_that_move;
     atoms_that_move.push_back(atom2_);
     atom3_->FindConnectedAtoms(atoms_that_move);
     atoms_that_move_ = atoms_that_move;
-    angle_ = this->CalculateDihedral();
 }
 
 //////////////////////////////////////////////////////////
 //                       ACCESSOR                       //
 //////////////////////////////////////////////////////////
 
-double rotatable_dihedral::CalculateAngle()
+double Rotatable_dihedral::CalculateAngle()
 {
     GeometryTopology::Coordinate* a1 = atom1_->GetCoordinate();
     GeometryTopology::Coordinate* a2 = atom2_->GetCoordinate();
@@ -69,54 +64,58 @@ double rotatable_dihedral::CalculateAngle()
     return current_dihedral;
 }
 
-AtomVector rotatable_dihedral::GetAtoms()
+AtomVector Rotatable_dihedral::GetAtoms()
 {
-
+    AtomVector atoms = {atom1_, atom2_, atom3_, atom4_};
+    return atoms;
 }
-AtomVector rotatable_dihedral::GetAtomsThatMove()
+AtomVector Rotatable_dihedral::GetAtomsThatMove()
 {
-
+    return atoms_that_move_;
 }
 
 //////////////////////////////////////////////////////////
 //                       MUTATOR                        //
 //////////////////////////////////////////////////////////
 
-void rotatable_dihedral::SetAtoms(AtomVector atoms)
+void Rotatable_dihedral::SetAtoms(AtomVector atoms)
 {
-
+    atom1_ = atoms.at(0);
+    atom2_ = atoms.at(1);
+    atom3_ = atoms.at(2);
+    atom4_ = atoms.at(3);
 }
 
-void rotatable_dihedral::SetAtomsThatMove(AtomVector atoms)
+void Rotatable_dihedral::SetAtomsThatMove(AtomVector atoms)
 {
-
+    atoms_that_move_ = atoms;
 }
 
-double rotatable_dihedral::CalculateAngle()
+double Rotatable_dihedral::RandomizeAngle()
 {
-
-}
-
-
-double rotatable_dihedral::RandomizeAngle()
-{
-    double random_angle = rotatable_dihedral::RandomizeAngleWithinRange(0.0, 360.0);
-    this->SetAngle(random_angle);
-    return random_angle;
+    return Rotatable_dihedral::RandomizeAngleWithinRange(0.0, 360.0);
     //return (rand() % 360) + 1 - 180; // Can get same one everytime for testing
 }
 
-double rotatable_dihedral::RandomizeAngleWithinRange(double min, double max)
+double Rotatable_dihedral::RandomizeAngleWithinRange(double min, double max)
 {
     std::random_device rd1; // obtain a random number from hardware
     std::mt19937 eng1(rd1()); // seed the generator
     std::uniform_real_distribution<> angle_distribution(min, max); // define the range
 
-    return angle_distribution(eng1);
+    double random_angle = angle_distribution(eng1);
+
+    /*******************************************/
+    /*               IMPORTANT                 */
+    /*******************************************/
+
+    this->SetDihedral(random_angle); // THIS IS IMPORTANT!!! THIS SHOULD BE SEPARATED BY DESIGN!!!
+
+    return random_angle;
     //return rand() % (max + 1 - min) + min; // Can get same one everytime for testing
 }
 
-double rotatable_dihedral::RandomizeAngleWithinRanges(std::vector<std::pair<double,double>> ranges)
+double Rotatable_dihedral::RandomizeAngleWithinRanges(std::vector<std::pair<double,double>> ranges)
 {
     // For usage, can do ranges.emplace_back(min, max);
     // Pass in a vector of pairs of ranges.
@@ -130,13 +129,12 @@ double rotatable_dihedral::RandomizeAngleWithinRanges(std::vector<std::pair<doub
 
     // Select one of the ranges
     int range_selection = distr(eng);
-    std::pair *selected_range = ranges.at(range_selection);
 
     // create an angle within the selected range
-    return rotatable_dihedral::RandomizeAngleWithinRange(selected_range->first, selected_range->second);
+    return Rotatable_dihedral::RandomizeAngleWithinRange(ranges.at(range_selection).first, ranges.at(range_selection).second);
 }
 
-void rotatable_dihedral::SetDihedral(double torsion, AtomVector &atomsToRotate)
+void Rotatable_dihedral::SetDihedral(double torsion)
 {
     GeometryTopology::Coordinate* a1 = atom1_->GetCoordinate();
     GeometryTopology::Coordinate* a2 = atom2_->GetCoordinate();
@@ -169,7 +167,8 @@ void rotatable_dihedral::SetDihedral(double torsion, AtomVector &atomsToRotate)
 //    atomsToRotate.push_back(atom2);
 //    atom3->FindConnectedAtoms(atomsToRotate);
  //   std::cout << "Moving: ";
-    for(AtomVector::iterator it = atomsToRotate.begin(); it != atomsToRotate.end(); it++)
+    // Yo you should add something here that checks if atoms_that_move_ is set. Yeah you.
+    for(AtomVector::iterator it = atoms_that_move_.begin(); it != atoms_that_move_.end(); it++)
     {
         Atom *atom = *it;
         GeometryTopology::Coordinate* atom_coordinate = atom->GetCoordinate();
