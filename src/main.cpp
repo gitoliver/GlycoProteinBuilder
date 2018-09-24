@@ -18,7 +18,6 @@
 #include "../includes/io.h"
 #include "../includes/resolve_overlaps.h"
 #include "../includes/bead_residues.h"
-#include "../includes/genetic_algorithm.h"
 #include "../includes/glycoprotein_builder.h"
 
 constexpr auto PI = 3.14159265358979323846;
@@ -59,46 +58,56 @@ int main(int argc, char* argv[])
     glycoprotein_builder::AttachGlycansToGlycosites(glycoprotein, glycosites, glycanDirectory);
     PdbFileSpace::PdbFile *outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
     outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Initial.pdb");
-    glycoprotein_builder::SetReasonableChi1Chi2Values(glycosites);
+    //glycoprotein_builder::SetResonableChi1Chi2DihedralAngles(glycosites);
 
-    //************************************************//
-    // Prep for Resolve Overlaps                      //
-    //************************************************//
 
-    std::cout << "BuildGlycoproteinStructure"  << std::endl;
-//    PdbFileSpace::PdbFile *outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
-//    outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Initial.pdb");
-    // Add beads. They make the overlap calculation faster.
-    std::cout << "Add_Beads"  << std::endl;
-    beads::Add_Beads(glycoprotein, glycosites);
-
-    //************************************************//
-    // Resolve Overlaps                               //
-    //************************************************//
-
-    // Fast and stupid:
-    if (!resolve_overlaps::dumb_random_walk(glycosites))
+    for(GlycosylationSiteVector::iterator glycosite = glycosites.begin(); glycosite != glycosites.end(); ++glycosite)
     {
-        std::cout << "Could not resolve quickly" << std::endl;
-        glycoprotein_builder::SetReasonableChi1Chi2Values(glycosites); // Reset to reasonable starting points
-        resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites);
+        Residue *protein_residue = glycosite->GetResidue();
+        Residue *glycan_residue = glycosite->GetAttachedGlycan()->GetResidues().at(0);
+        std::cout << "Finding rot bonds between " << protein_residue->GetId() << " and " << glycan_residue->GetId() << std::endl;
+        glycosite->FindRotatableBondsConnectingResidues(protein_residue, glycan_residue);
+
     }
 
-    // Testing algorithms:
-//    glycoprotein_builder::SetRandomChi1Chi2Values(glycosites);
-//    int max_cycles = 100;
-//    for(int i=0; i < 5; ++i)
+//    //************************************************//
+//    // Prep for Resolve Overlaps                      //
+//    //************************************************//
+
+//    std::cout << "BuildGlycoproteinStructure"  << std::endl;
+////    PdbFileSpace::PdbFile *outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
+////    outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Initial.pdb");
+//    // Add beads. They make the overlap calculation faster.
+//    std::cout << "Add_Beads"  << std::endl;
+//    beads::Add_Beads(glycoprotein, glycosites);
+
+//    //************************************************//
+//    // Resolve Overlaps                               //
+//    //************************************************//
+
+//    // Fast and stupid:
+//    if (!resolve_overlaps::dumb_random_walk(glycosites))
 //    {
-//        resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, max_cycles);
-//        resolve_overlaps::weighted_protein_global_overlap_monte_carlo(glycosites, max_cycles);
+//        std::cout << "Could not resolve quickly" << std::endl;
+//        glycoprotein_builder::SetResonableChi1Chi2DihedralAngles(glycosites); // Reset to reasonable starting points
+//        resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites);
 //    }
 
-    std::cout << "Global overlap is " << glycoprotein_builder::GetGlobalOverlap(glycosites) << "\n";
-    beads::Remove_Beads(glycoprotein); //Remove beads and write a final PDB & PRMTOP
+//    // Testing algorithms:
+////    glycoprotein_builder::SetRandomChi1Chi2Values(glycosites);
+////    int max_cycles = 100;
+////    for(int i=0; i < 5; ++i)
+////    {
+////        resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, max_cycles);
+////        resolve_overlaps::weighted_protein_global_overlap_monte_carlo(glycosites, max_cycles);
+////    }
 
-    //glycoprotein_builder::PrintDihedralAnglesOfGlycosites(glycosites);
-    outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
-    outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Resolved.pdb");
+//    std::cout << "Global overlap is " << glycoprotein_builder::GetGlobalOverlap(glycosites) << "\n";
+//    beads::Remove_Beads(glycoprotein); //Remove beads and write a final PDB & PRMTOP
+
+//    //glycoprotein_builder::PrintDihedralAnglesOfGlycosites(glycosites);
+//    outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
+//    outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Resolved.pdb");
 
     std::cout << "Program got to end ok" << std::endl;
     return 0;

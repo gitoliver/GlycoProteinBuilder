@@ -2,7 +2,7 @@
 
 constexpr auto PI = 3.14159265358979323846;
 
-typedef std::vector<Overlap_record> OverlapRecordVector;
+//typedef std::vector<Overlap_record> OverlapRecordVector;
 
 
 //////////////////////////////////////////////////////////
@@ -13,8 +13,6 @@ GlycosylationSite::GlycosylationSite()
     SetGlycanName("");
     SetGlycanOverlap(0.0);
     SetProteinOverlap(0.0);
-    SetBestOverlapRecord(123456789.0, 0.0, 0.0);
-    SetBestOverlapRecord(123456789.0, 0.0, 0.0, "protein");
 }
 
 GlycosylationSite::GlycosylationSite(std::string glycan_name)
@@ -22,8 +20,6 @@ GlycosylationSite::GlycosylationSite(std::string glycan_name)
     SetGlycanName(glycan_name);
     SetGlycanOverlap(0.0);
     SetProteinOverlap(0.0);
-    SetBestOverlapRecord(123456789.0, 0.0, 0.0);
-    SetBestOverlapRecord(123456789.0, 0.0, 0.0, "protein");
 }
 
 GlycosylationSite::GlycosylationSite(std::string glycan_name, std::string residue_number)
@@ -32,8 +28,6 @@ GlycosylationSite::GlycosylationSite(std::string glycan_name, std::string residu
     SetResidueNumber(residue_number);
     SetGlycanOverlap(0.0);
     SetProteinOverlap(0.0);
-    SetBestOverlapRecord(123456789.0, 0.0, 0.0);
-    SetBestOverlapRecord(123456789.0, 0.0, 0.0, "protein");
 }
 
 /*GlycosylationSite::GlycosylationSite(std::string glycan_name, Assembly glycan, Residue* residue)
@@ -101,16 +95,6 @@ double GlycosylationSite::GetProteinOverlap()
     return protein_overlap_;
 }
 
-double GlycosylationSite::GetChi1Value()
-{
-    return GlycosylationSite::CalculateTorsionAngle(chi1_);
-}
-
-double GlycosylationSite::GetChi2Value()
-{
-    return GlycosylationSite::CalculateTorsionAngle(chi2_);
-}
-
 AtomVector GlycosylationSite::GetSelfGlycanBeads()
 {
     return self_glycan_beads_;
@@ -124,18 +108,6 @@ AtomVector GlycosylationSite::GetProteinBeads()
 AtomVector GlycosylationSite::GetOtherGlycanBeads()
 {
     return other_glycan_beads_;
-}
-
-Overlap_record GlycosylationSite::GetBestOverlapRecord(std::string overlap_type)
-{
-    if(overlap_type.compare("total")==0)
-    {
-        return best_overlap_records_.back(); // Return the last element of the vector. Only pushback progressively better overlap records.
-    }
-    else if(overlap_type.compare("protein")==0)
-    {
-        return best_protein_overlap_records_.back();
-    }
 }
 
 
@@ -322,7 +294,7 @@ void GlycosylationSite::SetChiAtoms(Residue* residue)
         if ( atom->GetName().compare("ND2")==0 ) { atom5 = atom; is_Chi2 = true; } // Asn
         if ( atom->GetName().compare("CD1")==0 ) { atom5 = atom; is_Chi2 = true; } // Tyr
     }
-    chi1_ = {atom1, atom2, atom3, atom4};
+    //chi1_ = {atom1, atom2, atom3, atom4};
     if (!is_Chi2)
     {
         Residue *reducing_Residue = this->GetAttachedGlycan()->GetResidues().at(1);
@@ -339,13 +311,77 @@ void GlycosylationSite::SetChiAtoms(Residue* residue)
     }
     if (is_Chi2)
     {
-        chi2_ = {atom2, atom3, atom4, atom5};
+       // chi2_ = {atom2, atom3, atom4, atom5};
     }
     else
     {
         std::cout << "Chi2 not set in GlycosylationSite::SetChiAtoms, program likely to crash" << std::endl;
     }
 }
+
+// Not sure where this function really belongs, probably in rotatable_dihedral or an interResidueLinkage class? YES, one of those!
+void GlycosylationSite::FindRotatableBondsConnectingResidues(Residue *first_residue, Residue *second_residue)
+{
+    // Going to ignore tags etc.
+    // Given two residues tha are connected. Find connecting atoms.
+    // Search neighbors other than connected atom. Ie search out in both directions, but remain within same residue.
+    // Warning, residue may have fused cycles!
+    // Looking for N atom in a protein residue. name is N and IsProtein
+    // Looking for anomeric carbon in carbohydrate residue.
+    // Will fail for non-protein residues without cycles. As don't have a non-rotatable bond to anchor from. Can code that later (and deal with branches from these residues).
+    std::cout << "Finding rot bonds for " << first_residue->GetId() << " and " << second_residue->GetId() << "\n";
+    AtomVector connecting_atoms;
+    bool found = false;
+    selection::FindAtomsConnectingResidues(first_residue->GetAtoms().at(0), second_residue, &connecting_atoms, &found);
+
+    Atom *connection_atom1 = connecting_atoms.at(0);
+    Atom *connection_atom2 = connecting_atoms.at(1);
+
+    AtomVector rotation_points = selection::FindRotationPoints(connection_atom1);
+    AtomVector rotation_points2 = selection::FindRotationPoints(connection_atom2);
+    // Need to reverse one of these, so when concatenated, they are ordered ok. This might not be ok.
+    std::reverse(rotation_points2.begin(), rotation_points2.end());
+    // Now concatenate:
+    rotation_points.insert( rotation_points.begin(), rotation_points2.begin(), rotation_points2.end() );
+    // Now that have a list of rotation points. Split into pairs and find rotatable bonds between them
+    // BUT remember that first and last atom in list are just there to define dihedrals. Skip those
+    for(int i = 0; i < rotation_points.size(); i = i+2)
+    {
+        Atom *rotation_point1 = rotation_points.at(i);
+        Atom *rotation_point2 = rotation_points.at(i+1);
+
+        found = false;
+        connecting_atoms.clear();
+       // std::cout << "Finding Path between " << rotation_point1->GetId() << " and " << rotation_point2->GetId() << ".\n";
+        selection::FindPathBetweenTwoAtoms(rotation_point1, rotation_point2, &connecting_atoms, &found);
+        selection::ClearAtomDescriptions(rotation_point1->GetResidue());
+        selection::ClearAtomDescriptions(rotation_point2->GetResidue());
+        // Find neighboring atoms needed to define dihedral. Pass in connecting atoms so don't find any of those.
+        Atom *neighbor1 =  selection::FindCyclePointNeighbor(connecting_atoms, rotation_point1);
+        Atom *neighbor2 =  selection::FindCyclePointNeighbor(connecting_atoms, rotation_point2);
+        // Insert these neighbors into list of connecting atoms, at beginning and end of vector.
+        // connecting_atoms gets populated as it falls out, so list is reveresed from what you'd expect
+        connecting_atoms.insert(connecting_atoms.begin(), neighbor2);
+        connecting_atoms.push_back(neighbor1);
+
+        std::cout << "Updated Path between " << rotation_point1->GetId() << " and " << rotation_point2->GetId() << ":\n";
+        for(AtomVector::iterator it1 = connecting_atoms.begin(); it1 != connecting_atoms.end(); ++it1)
+        {
+            Atom *atom = *it1;
+            std::cout << atom->GetId() << "\n";
+        }
+
+    }
+
+
+
+
+
+
+
+}
+
+
 
 double GlycosylationSite::Calculate_and_print_bead_overlaps()
 {
@@ -366,53 +402,32 @@ void GlycosylationSite::Print_bead_overlaps()
     std::endl;
 }
 
-double GlycosylationSite::Calculate_bead_overlaps(std::string overlap_type)
+double GlycosylationSite::Calculate_bead_overlaps(std::string overlap_type, bool record)
 {
     double overlap = 0.0;
     if(overlap_type.compare("total")==0)
     {
         overlap = (this->Calculate_bead_overlaps("protein") + this->Calculate_bead_overlaps("glycan"));
-        // Keep a record of the chi1 and chi2 values that produce the lowest overlap value
-        if(this->GetBestOverlapRecord(overlap_type).GetOverlap() >= (overlap))
-        {
-            this->SetBestOverlapRecord(overlap, this->GetChi1Value(), this->GetChi2Value(), overlap_type);
-        }
     }
     if(overlap_type.compare("protein")==0)
     {
         overlap = this->Calculate_bead_overlaps(self_glycan_beads_, protein_beads_);
-        SetProteinOverlap(overlap);
-        // Keep a record of the chi1 and chi2 values that produce the lowest overlap value
-        if(this->GetBestOverlapRecord(overlap_type).GetOverlap() >= (overlap))
+        if(record)
         {
-            this->SetBestOverlapRecord(overlap, this->GetChi1Value(), this->GetChi2Value(), overlap_type);
+            SetProteinOverlap(overlap);
         }
     }
     if(overlap_type.compare("glycan")==0)
     {
         overlap = this->Calculate_bead_overlaps(self_glycan_beads_, other_glycan_beads_);
-        SetGlycanOverlap(overlap);
+        if(record)
+        {
+            SetGlycanOverlap(overlap);
+        }
     }
     return overlap;
 }
 
-double GlycosylationSite::Calculate_bead_overlaps_noRecord_noSet(std::string overlap_type)
-{
-    double overlap = 0.0;
-    if(overlap_type.compare("total")==0)
-    {
-        overlap = (this->Calculate_bead_overlaps("protein") + this->Calculate_bead_overlaps("glycan"));
-    }
-    if(overlap_type.compare("protein")==0)
-    {
-        overlap = this->Calculate_bead_overlaps(self_glycan_beads_, protein_beads_);
-    }
-    if(overlap_type.compare("glycan")==0)
-    {
-        overlap = this->Calculate_bead_overlaps(self_glycan_beads_, other_glycan_beads_);
-    }
-    return overlap;
-}
 
 double GlycosylationSite::Calculate_bead_overlaps(AtomVector &atomsA, AtomVector &atomsB)
 {
@@ -509,34 +524,22 @@ void GlycosylationSite::SetProteinOverlap(double overlap)
     protein_overlap_ = overlap;
 }
 
-void GlycosylationSite::SetChi1Value(double angle)
-{
-    Atom *atom1 = chi1_.at(0); // horrific, fix later.
-    Atom *atom2 = chi1_.at(1);
-    Atom *atom3 = chi1_.at(2);
-    Atom *atom4 = chi1_.at(3);
+//void GlycosylationSite::SetChi1Value(double angle)
+//{
+//    Atom *atom1 = chi1_.at(0); // horrific, fix later.
+//    Atom *atom2 = chi1_.at(1);
+//    Atom *atom3 = chi1_.at(2);
+//    Atom *atom4 = chi1_.at(3);
 
-//    std::cout << std::fixed;
-//    std::cout << std::setprecision(10);
-//    std::cout << angle << std::endl;
-//    std::cout << "Setting dihedral for " << atom1->GetName() << ", " << atom2->GetName() << ", " << atom3->GetName() << ", " << atom4->GetName() << "\n";
-    this->GetGlycoprotein()->SetDihedral(atom1, atom2, atom3, atom4, angle);
-//    std::cout << this->GetChi1Value() << std::endl;
+////    std::cout << std::fixed;
+////    std::cout << std::setprecision(10);
+////    std::cout << angle << std::endl;
+////    std::cout << "Setting dihedral for " << atom1->GetName() << ", " << atom2->GetName() << ", " << atom3->GetName() << ", " << atom4->GetName() << "\n";
+//    this->GetGlycoprotein()->SetDihedral(atom1, atom2, atom3, atom4, angle);
+////    std::cout << this->GetChi1Value() << std::endl;
 
-}
-void GlycosylationSite::SetChi2Value(double angle)
-{
-    Atom *atom1 = chi2_.at(0); // horrific, fix later.
-    Atom *atom2 = chi2_.at(1);
-    Atom *atom3 = chi2_.at(2);
-    Atom *atom4 = chi2_.at(3);
-//    std::cout << std::fixed;
-//    std::cout << std::setprecision(10);
-//    std::cout << angle << std::endl;
-//    std::cout << "Setting dihedral for " << atom1->GetName() << ", " << atom2->GetName() << ", " << atom3->GetName() << ", " << atom4->GetName() << "\n";
-    this->GetGlycoprotein()->SetDihedral(atom1, atom2, atom3, atom4, angle);
-//    std::cout << this->GetChi2Value() << std::endl;
-}
+//}
+
 
 void GlycosylationSite::SetSelfGlycanBeads(AtomVector *beads)
 {
@@ -545,7 +548,7 @@ void GlycosylationSite::SetSelfGlycanBeads(AtomVector *beads)
 
 void GlycosylationSite::SetProteinBeads(AtomVector *beads)
 {
-    protein_beads_ = *beads;
+    protein_beads_ = *beads; // This creates a copy
     //Remove beads from attachment point residue. Don't want to count overlaps between glycan and residue it is attached to.
     for(AtomVector::iterator it1 = protein_beads_.begin(); it1 != protein_beads_.end(); /* Not incrementing here as erasing increments*/)
     {
@@ -566,15 +569,29 @@ void GlycosylationSite::SetOtherGlycanBeads(AtomVector *beads)
     other_glycan_beads_ = *beads;
 }
 
-void GlycosylationSite::SetBestOverlapRecord(double overlap, double chi1, double chi2, std::string overlap_type)
+// This is funkin dodgy hey:
+void GlycosylationSite::SetResonableChi1Chi2DihedralAngles()
 {
-    if(overlap_type.compare("total")==0)
+    rotatable_bonds_.at(0).SetDihedralAngle(180);
+    rotatable_bonds_.at(1).SetDihedralAngle(180);
+    //    Statistical analysis of the protein environment of N-glycosylation sites: implications for occupancy, structure, and folding
+    //    Andrei-J. Petrescu  Adina-L. Milac  Stefana M. Petrescu  Raymond A. Dwek Mark R. Wormald
+    //    Glycobiology, Volume 14, Issue 2, 1 February 2004, Pages 103–114,
+}
+
+void GlycosylationSite::RandomizeDihedralAngles()
+{
+    for(RotatableDihedralVector::iterator current_dihedral = rotatable_bonds_.begin(); current_dihedral != rotatable_bonds_.end(); ++current_dihedral)
     {
-    best_overlap_records_.emplace_back(overlap, chi1, chi2);
+        current_dihedral->RandomizeDihedralAngle();
     }
-    else if(overlap_type.compare("protein")==0)
+}
+
+void GlycosylationSite::ResetDihedralAngles()
+{
+    for(RotatableDihedralVector::iterator current_dihedral = rotatable_bonds_.begin(); current_dihedral != rotatable_bonds_.end(); ++current_dihedral)
     {
-        best_protein_overlap_records_.emplace_back(overlap, chi1, chi2);
+        current_dihedral->ResetDihedralAngle();
     }
 }
 
@@ -582,9 +599,18 @@ void GlycosylationSite::SetBestOverlapRecord(double overlap, double chi1, double
 //                       DISPLAY FUNCTION               //
 //////////////////////////////////////////////////////////
 
-/*void GlycosylationSite::Print(ostream &out)
+void GlycosylationSite::Print(std::string type)
 {
-    std::out << "Residue ID: " << residue_->GetId() << endl;
-    //out << "Glycan sequence: " << this->GetGlycanSequence() << endl;
+    if (type.compare("All")==0)
+    {
+        std::cout << "Residue ID: " << residue_->GetId() << std::endl;
+        for(RotatableDihedralVector::iterator current_dihedral = rotatable_bonds_.begin(); current_dihedral != rotatable_bonds_.end(); ++current_dihedral)
+        {
+            current_dihedral->Print();
+        }
+        std::cout << "\n";
+
+    }
+
 }
-*/
+

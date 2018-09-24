@@ -1,11 +1,12 @@
-#ifndef ROTATABLE_DIHEDRAL_H
-#define ROTATABLE_DIHEDRAL_H
+#ifndef RESIDUE_LINKAGE_H
+#define RESIDUE_LINKAGE_H
 
-#include "../../../includes/gmml.hpp"
 
-using namespace MolecularModeling;
 
-class Rotatable_dihedral
+#include "rotatable_dihedral.h"
+
+
+class Residue_linkage
 {
 public:
     //////////////////////////////////////////////////////////
@@ -18,21 +19,18 @@ public:
     //                       CONSTRUCTOR                    //
     //////////////////////////////////////////////////////////
 
-    Rotatable_dihedral();
-    Rotatable_dihedral(Atom *atom1, Atom *atom2, Atom *atom3, Atom *atom4);
-    Rotatable_dihedral(AtomVector atoms);
-    Rotatable_dihedral(AtomVector atoms, AtomVector atoms_that_move);
+    Residue_linkage();
+    Residue_linkage(Residue *residue1, Residue *residue2);
+    Residue_linkage(Residue *residue1, Residue *residue2, std::vector <double> dihedral_angles);
+
 
 
     //////////////////////////////////////////////////////////
     //                       ACCESSOR                       //
     //////////////////////////////////////////////////////////
 
-    double CalculateDihedralAngle();
-    AtomVector GetAtoms();
-    AtomVector GetAtomsThatMove();
-    double GetPreviousDihedralAngle();
-
+    ResidueVector GetResidues();
+    RotatableDihedralVector GetRotatableDihedrals();
 
     //////////////////////////////////////////////////////////
     //                       FUNCTIONS                      //
@@ -43,19 +41,17 @@ public:
     //                       MUTATOR                        //
     //////////////////////////////////////////////////////////
 
-    void SetAtoms(AtomVector atoms);
-    void SetAtomsThatMove(AtomVector atoms);
-    void SetDihedralAngle(double dihedral_angle);
-    void ResetDihedralAngle();
-    double RandomizeDihedralAngleWithinRanges(std::vector<std::pair<double,double>> ranges);
-    double RandomizeDihedralAngle();
-    double RandomizeDihedralAngleWithinRange(double min, double max);
+    void SetResidues(Residue *residue1, Residue *residue2);
+    void SetDihedralAngles(std::vector <double> dihedral_angles);
+    void ResetDihedralAngles();
+    double RandomizeDihedralAnglesWithinTheirRanges();
+    double RandomizeDihedralAngles();
 
     //////////////////////////////////////////////////////////
     //                       DISPLAY FUNCTION               //
     //////////////////////////////////////////////////////////
 
-    void Print();
+  //  void Print();
 
     //////////////////////////////////////////////////////////
     //                       OPERATORS                      //
@@ -67,19 +63,15 @@ private:
     //                       FUNCTIONS                      //
     //////////////////////////////////////////////////////////
 
-    void RecordPreviousDihedralAngle(double dihedral_angle);
 
     //////////////////////////////////////////////////////////
     //                       ATTRIBUTES                     //
     //////////////////////////////////////////////////////////
 
-    Atom *atom1_;
-    Atom *atom2_;
-    Atom *atom3_;
-    Atom *atom4_;
-    AtomVector atoms_that_move_;
-    double previous_dihedral_angle_;
+    Residue* residue1_;
+    Residue* residue2_;
+    RotatableDihedralVector rotatable_bonds_;
 
 };
 
-#endif // ROTATABLE_DIHEDRAL_H
+#endif // RESIDUE_LINKAGE_H

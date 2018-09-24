@@ -2,8 +2,8 @@
 #define GLYCOSYLATIONSITE_H
 
 #include "gmml.hpp"
-#include "overlap_record.h"
-#include "rotatable_dihedral.h"
+#include "residue_linkage.h"
+#include "selections.h"
 #include <iomanip> // For setting precision and formating in std::cout 
 #include <algorithm> //  std::erase, std::remove
 
@@ -18,8 +18,7 @@ public:
 
     typedef std::vector<GlycosylationSite> GlycosylationSiteVector;
     typedef std::vector<GlycosylationSite*> GlycosylationSitePointerVector;
-    typedef std::vector<Overlap_record> OverlapRecordVector;
-    typedef std::vector<Rotatable_dihedral> RotatableDihedralVector;
+   // typedef std::vector<Rotatable_dihedral> RotatableDihedralVector;
 
 
     //////////////////////////////////////////////////////////
@@ -44,22 +43,20 @@ public:
     double GetWeightedOverlap(double glycan_weight, double protein_weight);
     double GetGlycanOverlap();
     double GetProteinOverlap();
-    double GetChi1Value();
-    double GetChi2Value();
     AtomVector GetSelfGlycanBeads();
     AtomVector GetProteinBeads();
     AtomVector GetOtherGlycanBeads();
-    Overlap_record GetBestOverlapRecord(std::string overlap_type = "total");
 
 
     //////////////////////////////////////////////////////////
     //                       FUNCTIONS                      //
     //////////////////////////////////////////////////////////
     void AttachGlycan(Assembly glycan, Assembly &glycoprotein);
-    double Calculate_bead_overlaps(std::string overlap_type = "total");
-    double Calculate_bead_overlaps_noRecord_noSet(std::string overlap_type = "total");
+    double Calculate_bead_overlaps(std::string overlap_type = "total", bool record = true);
     double Calculate_and_print_bead_overlaps();
     void SetChiAtoms(Residue* residue);
+    void FindRotatableBondsConnectingResidues(Residue *first_residue, Residue *second_residue);
+
 
     //////////////////////////////////////////////////////////
     //                       MUTATOR                        //
@@ -71,18 +68,19 @@ public:
     void SetGlycan(Assembly glycan);
     void SetGlycanOverlap(double overlap);
     void SetProteinOverlap(double overlap);
-    void SetChi1Value(double angle);
-    void SetChi2Value(double angle);
     void SetSelfGlycanBeads(AtomVector *beads);
     void SetProteinBeads(AtomVector *beads);
     void SetOtherGlycanBeads(AtomVector *beads);
-    void SetBestOverlapRecord(double overlap, double chi1, double chi2, std::string overlap_type = "total");
+    void RandomizeDihedralAngles();
+    void SetResonableChi1Chi2DihedralAngles();
+    void ResetDihedralAngles();
 
     //////////////////////////////////////////////////////////
     //                       DISPLAY FUNCTION               //
     //////////////////////////////////////////////////////////
 
     void Print_bead_overlaps();
+    void Print(std::string type = "All");
 
     //////////////////////////////////////////////////////////
     //                       OPERATORS                      //
@@ -115,14 +113,10 @@ private:
     AtomVector superimposition_atoms_;               /*!< The 3 atoms used for superimposition of glycan to sidechain >*/
     double glycan_overlap_;
     double protein_overlap_;
-    AtomVector chi1_;
-    AtomVector chi2_;
-    RotatableDihedralVector rotatable_bonds_;
+    Residue_linkage rotatable_bonds_;
     AtomVector self_glycan_beads_;
     AtomVector other_glycan_beads_;
     AtomVector protein_beads_;
-    OverlapRecordVector best_overlap_records_;
-    OverlapRecordVector best_protein_overlap_records_;
 };
 
 #endif // GLYCOSYLATIONSITE_H

@@ -9,6 +9,7 @@ Rotatable_dihedral::Rotatable_dihedral()
     std::cout << "This is a bad idea, use one of the other constructors\n";
 }
 
+// Of the next two forms, I'll probably use only one and delete the other later
 Rotatable_dihedral::Rotatable_dihedral(Atom *atom1, Atom *atom2, Atom *atom3, Atom *atom4)
 {
     atom1_ = atom1;
@@ -30,11 +31,18 @@ Rotatable_dihedral::Rotatable_dihedral(AtomVector atoms)
     atoms_that_move_ = atoms_that_move;
 }
 
+// Not sure if I'll want to trust connection atoms or not, maybe pass it in like this:
+Rotatable_dihedral::Rotatable_dihedral(AtomVector atoms, AtomVector atoms_that_move)
+{
+    this->SetAtoms(atoms);
+    atoms_that_move_ = atoms_that_move;
+}
+
 //////////////////////////////////////////////////////////
 //                       ACCESSOR                       //
 //////////////////////////////////////////////////////////
 
-double Rotatable_dihedral::CalculateAngle()
+double Rotatable_dihedral::CalculateDihedralAngle()
 {
     GeometryTopology::Coordinate* a1 = atom1_->GetCoordinate();
     GeometryTopology::Coordinate* a2 = atom2_->GetCoordinate();
@@ -59,9 +67,9 @@ double Rotatable_dihedral::CalculateAngle()
     GeometryTopology::Coordinate b1xb2 = b1;
     b1xb2.CrossProduct(b2);
 
-    double current_dihedral = atan2(b1_m_b2n.DotProduct(b2xb3), b1xb2.DotProduct(b2xb3));
+    double current_dihedral_angle = atan2(b1_m_b2n.DotProduct(b2xb3), b1xb2.DotProduct(b2xb3));
 
-    return current_dihedral;
+    return current_dihedral_angle;
 }
 
 AtomVector Rotatable_dihedral::GetAtoms()
@@ -72,6 +80,11 @@ AtomVector Rotatable_dihedral::GetAtoms()
 AtomVector Rotatable_dihedral::GetAtomsThatMove()
 {
     return atoms_that_move_;
+}
+
+double Rotatable_dihedral::GetPreviousDihedralAngle()
+{
+    return previous_dihedral_angle_;
 }
 
 //////////////////////////////////////////////////////////
@@ -91,13 +104,13 @@ void Rotatable_dihedral::SetAtomsThatMove(AtomVector atoms)
     atoms_that_move_ = atoms;
 }
 
-double Rotatable_dihedral::RandomizeAngle()
+double Rotatable_dihedral::RandomizeDihedralAngle()
 {
-    return Rotatable_dihedral::RandomizeAngleWithinRange(0.0, 360.0);
+    return Rotatable_dihedral::RandomizeDihedralAngleWithinRange(0.0, 360.0);
     //return (rand() % 360) + 1 - 180; // Can get same one everytime for testing
 }
 
-double Rotatable_dihedral::RandomizeAngleWithinRange(double min, double max)
+double Rotatable_dihedral::RandomizeDihedralAngleWithinRange(double min, double max)
 {
     std::random_device rd1; // obtain a random number from hardware
     std::mt19937 eng1(rd1()); // seed the generator
@@ -109,13 +122,17 @@ double Rotatable_dihedral::RandomizeAngleWithinRange(double min, double max)
     /*               IMPORTANT                 */
     /*******************************************/
 
-    this->SetDihedral(random_angle); // THIS IS IMPORTANT!!! THIS SHOULD BE SEPARATED BY DESIGN!!!
+    this->SetDihedralAngle(random_angle); // THIS IS IMPORTANT!!! THIS SHOULD BE SEPARATED?!?!
+
+    /*******************************************/
+    /*               IMPORTANT                 */
+    /*******************************************/
 
     return random_angle;
     //return rand() % (max + 1 - min) + min; // Can get same one everytime for testing
 }
 
-double Rotatable_dihedral::RandomizeAngleWithinRanges(std::vector<std::pair<double,double>> ranges)
+double Rotatable_dihedral::RandomizeDihedralAngleWithinRanges(std::vector<std::pair<double,double>> ranges)
 {
     // For usage, can do ranges.emplace_back(min, max);
     // Pass in a vector of pairs of ranges.
@@ -131,10 +148,20 @@ double Rotatable_dihedral::RandomizeAngleWithinRanges(std::vector<std::pair<doub
     int range_selection = distr(eng);
 
     // create an angle within the selected range
-    return Rotatable_dihedral::RandomizeAngleWithinRange(ranges.at(range_selection).first, ranges.at(range_selection).second);
+    return Rotatable_dihedral::RandomizeDihedralAngleWithinRange(ranges.at(range_selection).first, ranges.at(range_selection).second);
 }
 
-void Rotatable_dihedral::SetDihedral(double torsion)
+void Rotatable_dihedral::RecordPreviousDihedralAngle(double dihedral_angle)
+{
+    previous_dihedral_angle_=dihedral_angle;
+}
+
+void Rotatable_dihedral::ResetDihedralAngle()
+{
+    this->SetDihedralAngle(this->GetPreviousDihedralAngle());
+}
+
+void Rotatable_dihedral::SetDihedralAngle(double dihedral_angle)
 {
     GeometryTopology::Coordinate* a1 = atom1_->GetCoordinate();
     GeometryTopology::Coordinate* a2 = atom2_->GetCoordinate();
@@ -160,8 +187,8 @@ void Rotatable_dihedral::SetDihedral(double torsion)
     b1xb2.CrossProduct(b2);
 
     double current_dihedral = atan2(b1_m_b2n.DotProduct(b2xb3), b1xb2.DotProduct(b2xb3));
-
-    double** torsion_matrix = gmml::GenerateRotationMatrix(&b4, a2, current_dihedral - gmml::ConvertDegree2Radian(torsion));
+    double** dihedral_angle_matrix = gmml::GenerateRotationMatrix(&b4, a2, current_dihedral - gmml::ConvertDegree2Radian(dihedral_angle));
+    this->RecordPreviousDihedralAngle(current_dihedral);
 
 //    AtomVector atomsToRotate = AtomVector();
 //    atomsToRotate.push_back(atom2);
@@ -173,12 +200,12 @@ void Rotatable_dihedral::SetDihedral(double torsion)
         Atom *atom = *it;
         GeometryTopology::Coordinate* atom_coordinate = atom->GetCoordinate();
         GeometryTopology::Coordinate result;
-        result.SetX(torsion_matrix[0][0] * atom_coordinate->GetX() + torsion_matrix[0][1] * atom_coordinate->GetY() +
-                torsion_matrix[0][2] * atom_coordinate->GetZ() + torsion_matrix[0][3]);
-        result.SetY(torsion_matrix[1][0] * atom_coordinate->GetX() + torsion_matrix[1][1] * atom_coordinate->GetY() +
-                torsion_matrix[1][2] * atom_coordinate->GetZ() + torsion_matrix[1][3]);
-        result.SetZ(torsion_matrix[2][0] * atom_coordinate->GetX() + torsion_matrix[2][1] * atom_coordinate->GetY() +
-                torsion_matrix[2][2] * atom_coordinate->GetZ() + torsion_matrix[2][3]);
+        result.SetX(dihedral_angle_matrix[0][0] * atom_coordinate->GetX() + dihedral_angle_matrix[0][1] * atom_coordinate->GetY() +
+                dihedral_angle_matrix[0][2] * atom_coordinate->GetZ() + dihedral_angle_matrix[0][3]);
+        result.SetY(dihedral_angle_matrix[1][0] * atom_coordinate->GetX() + dihedral_angle_matrix[1][1] * atom_coordinate->GetY() +
+                dihedral_angle_matrix[1][2] * atom_coordinate->GetZ() + dihedral_angle_matrix[1][3]);
+        result.SetZ(dihedral_angle_matrix[2][0] * atom_coordinate->GetX() + dihedral_angle_matrix[2][1] * atom_coordinate->GetY() +
+                dihedral_angle_matrix[2][2] * atom_coordinate->GetZ() + dihedral_angle_matrix[2][3]);
 
         atom->GetCoordinate()->SetX(result.GetX());
         atom->GetCoordinate()->SetY(result.GetY());
@@ -186,4 +213,13 @@ void Rotatable_dihedral::SetDihedral(double torsion)
     }
 //    std::cout << "\n";
     return;
+}
+
+//////////////////////////////////////////////////////////
+//                       DISPLAY FUNCTION               //
+//////////////////////////////////////////////////////////
+
+void Rotatable_dihedral::Print()
+{
+    std::cout << atom1_->GetName() << ", " << atom2_->GetName() << ", " << atom3_->GetName() << ", " << atom4_->GetName() << ": " << this->CalculateDihedralAngle() << ".";
 }
