@@ -31,7 +31,7 @@ Rotatable_dihedral::Rotatable_dihedral(AtomVector atoms)
     atoms_that_move_ = atoms_that_move;
 }
 
-// Not sure if I'll want to trust connection atoms or not, maybe pass it in like this:
+// Not sure if I'll want to trust FindConnectedAtoms to work or not, maybe pass it in like this:
 Rotatable_dihedral::Rotatable_dihedral(AtomVector atoms, AtomVector atoms_that_move)
 {
     this->SetAtoms(atoms);
@@ -122,7 +122,7 @@ double Rotatable_dihedral::RandomizeDihedralAngleWithinRange(double min, double 
     /*               IMPORTANT                 */
     /*******************************************/
 
-    this->SetDihedralAngle(random_angle); // THIS IS IMPORTANT!!! THIS SHOULD BE SEPARATED?!?!
+    this->SetDihedralAngle(random_angle); // THIS IS IMPORTANT!!! THIS SHOULD BE SEPARATED?!?! The two other functions call this one. Seems fragile.
 
     /*******************************************/
     /*               IMPORTANT                 */
@@ -190,10 +190,6 @@ void Rotatable_dihedral::SetDihedralAngle(double dihedral_angle)
     double** dihedral_angle_matrix = gmml::GenerateRotationMatrix(&b4, a2, current_dihedral - gmml::ConvertDegree2Radian(dihedral_angle));
     this->RecordPreviousDihedralAngle(current_dihedral);
 
-//    AtomVector atomsToRotate = AtomVector();
-//    atomsToRotate.push_back(atom2);
-//    atom3->FindConnectedAtoms(atomsToRotate);
- //   std::cout << "Moving: ";
     // Yo you should add something here that checks if atoms_that_move_ is set. Yeah you.
     for(AtomVector::iterator it = atoms_that_move_.begin(); it != atoms_that_move_.end(); it++)
     {
@@ -211,7 +207,6 @@ void Rotatable_dihedral::SetDihedralAngle(double dihedral_angle)
         atom->GetCoordinate()->SetY(result.GetY());
         atom->GetCoordinate()->SetZ(result.GetZ());
     }
-//    std::cout << "\n";
     return;
 }
 
@@ -221,5 +216,5 @@ void Rotatable_dihedral::SetDihedralAngle(double dihedral_angle)
 
 void Rotatable_dihedral::Print()
 {
-    std::cout << atom1_->GetName() << ", " << atom2_->GetName() << ", " << atom3_->GetName() << ", " << atom4_->GetName() << ": " << this->CalculateDihedralAngle() << ".";
+    std::cout << atom1_->GetName() << ", " << atom2_->GetName() << ", " << atom3_->GetName() << ", " << atom4_->GetName() << ": " << this->CalculateDihedralAngle() << ".\n";
 }

@@ -55,7 +55,6 @@ public:
     double Calculate_bead_overlaps(std::string overlap_type = "total", bool record = true);
     double Calculate_and_print_bead_overlaps();
     void SetChiAtoms(Residue* residue);
-    void FindRotatableBondsConnectingResidues(Residue *first_residue, Residue *second_residue);
 
 
     //////////////////////////////////////////////////////////
@@ -101,6 +100,7 @@ private:
     void Superimpose_Glycan_To_Glycosite(Residue *glycosite_residue);
     double CalculateTorsionAngle(AtomVector atoms);
     double Calculate_bead_overlaps(AtomVector &atomsA, AtomVector &atomsB);
+    void SetRotatableBonds(Residue *residue1, Residue *residue2);
 
     //////////////////////////////////////////////////////////
     //                       ATTRIBUTES                     //

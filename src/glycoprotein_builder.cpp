@@ -7,8 +7,7 @@
 void glycoprotein_builder::AttachGlycansToGlycosites(MolecularModeling::Assembly &glycoprotein, GlycosylationSiteVector &glycosites, const std::string glycanDirectory)
 {
     // Find protein residues in Glycoprotein that will get a glycan added. Set Residue in Glycosite.
-    // Often there are multiple chains with the same residue number. If the input file repeats a residue number, it will go on the next instance (next chain)
-    // of that residue number. This is not a good long term solution, as users will want to select chains.
+    // Looks for chainID and residue number.
     ResidueVector protein_residues = glycoprotein.GetResidues();
     for(GlycosylationSiteVector::iterator glycosite = glycosites.begin(); glycosite != glycosites.end(); ++glycosite)
     {
@@ -77,7 +76,7 @@ void glycoprotein_builder::AttachGlycansToGlycosites(MolecularModeling::Assembly
                 MolecularModeling::Assembly input_glycan(filepath, gmml::InputFileType::PDB);
                 input_glycan.BuildStructureByDistance();
                 glycosite->AttachGlycan(input_glycan, glycoprotein);
-                //std::cout << "Added " << glycosite->GetGlycanName() << " to " << glycosite->GetResidueNumber();
+                std::cout << "Added " << glycosite->GetGlycanName() << " to " << glycosite->GetResidueNumber() << "\n";
             }
         }
     }

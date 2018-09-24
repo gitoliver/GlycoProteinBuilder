@@ -122,8 +122,9 @@ void GlycosylationSite::AttachGlycan(Assembly glycan, Assembly &glycoprotein)
     this->SetGlycan(glycan);
     this->Prepare_Glycans_For_Superimposition_To_Particular_Residue(residue_->GetName());
     this->Superimpose_Glycan_To_Glycosite(residue_);
-    glycoprotein.MergeAssembly(&glycan_); // Add glycan to glycoprotein assembly, allows SetDihedral later.
-    this->SetChiAtoms(residue_);
+    glycoprotein.MergeAssembly(&glycan_); // Add glycan to glycoprotein assembly, allows SetDihedral later. May not be necessary anymore with new Rotatable Dihedral class.
+    this->SetRotatableBonds(residue_, glycan_.GetResidues().at(0));
+    rotatable_bonds_.Print();
 }
 
 /*
@@ -319,68 +320,6 @@ void GlycosylationSite::SetChiAtoms(Residue* residue)
     }
 }
 
-// Not sure where this function really belongs, probably in rotatable_dihedral or an interResidueLinkage class? YES, one of those!
-void GlycosylationSite::FindRotatableBondsConnectingResidues(Residue *first_residue, Residue *second_residue)
-{
-    // Going to ignore tags etc.
-    // Given two residues tha are connected. Find connecting atoms.
-    // Search neighbors other than connected atom. Ie search out in both directions, but remain within same residue.
-    // Warning, residue may have fused cycles!
-    // Looking for N atom in a protein residue. name is N and IsProtein
-    // Looking for anomeric carbon in carbohydrate residue.
-    // Will fail for non-protein residues without cycles. As don't have a non-rotatable bond to anchor from. Can code that later (and deal with branches from these residues).
-    std::cout << "Finding rot bonds for " << first_residue->GetId() << " and " << second_residue->GetId() << "\n";
-    AtomVector connecting_atoms;
-    bool found = false;
-    selection::FindAtomsConnectingResidues(first_residue->GetAtoms().at(0), second_residue, &connecting_atoms, &found);
-
-    Atom *connection_atom1 = connecting_atoms.at(0);
-    Atom *connection_atom2 = connecting_atoms.at(1);
-
-    AtomVector rotation_points = selection::FindRotationPoints(connection_atom1);
-    AtomVector rotation_points2 = selection::FindRotationPoints(connection_atom2);
-    // Need to reverse one of these, so when concatenated, they are ordered ok. This might not be ok.
-    std::reverse(rotation_points2.begin(), rotation_points2.end());
-    // Now concatenate:
-    rotation_points.insert( rotation_points.begin(), rotation_points2.begin(), rotation_points2.end() );
-    // Now that have a list of rotation points. Split into pairs and find rotatable bonds between them
-    // BUT remember that first and last atom in list are just there to define dihedrals. Skip those
-    for(int i = 0; i < rotation_points.size(); i = i+2)
-    {
-        Atom *rotation_point1 = rotation_points.at(i);
-        Atom *rotation_point2 = rotation_points.at(i+1);
-
-        found = false;
-        connecting_atoms.clear();
-       // std::cout << "Finding Path between " << rotation_point1->GetId() << " and " << rotation_point2->GetId() << ".\n";
-        selection::FindPathBetweenTwoAtoms(rotation_point1, rotation_point2, &connecting_atoms, &found);
-        selection::ClearAtomDescriptions(rotation_point1->GetResidue());
-        selection::ClearAtomDescriptions(rotation_point2->GetResidue());
-        // Find neighboring atoms needed to define dihedral. Pass in connecting atoms so don't find any of those.
-        Atom *neighbor1 =  selection::FindCyclePointNeighbor(connecting_atoms, rotation_point1);
-        Atom *neighbor2 =  selection::FindCyclePointNeighbor(connecting_atoms, rotation_point2);
-        // Insert these neighbors into list of connecting atoms, at beginning and end of vector.
-        // connecting_atoms gets populated as it falls out, so list is reveresed from what you'd expect
-        connecting_atoms.insert(connecting_atoms.begin(), neighbor2);
-        connecting_atoms.push_back(neighbor1);
-
-        std::cout << "Updated Path between " << rotation_point1->GetId() << " and " << rotation_point2->GetId() << ":\n";
-        for(AtomVector::iterator it1 = connecting_atoms.begin(); it1 != connecting_atoms.end(); ++it1)
-        {
-            Atom *atom = *it1;
-            std::cout << atom->GetId() << "\n";
-        }
-
-    }
-
-
-
-
-
-
-
-}
-
 
 
 double GlycosylationSite::Calculate_and_print_bead_overlaps()
@@ -559,7 +498,7 @@ void GlycosylationSite::SetProteinBeads(AtomVector *beads)
         }
         else
         {
-            ++it1; // erase increments, so if no erase happens then increment.
+            ++it1; // "erase" increments it1, so if no erase happens this does an increment instead.
         }
     }
 }
@@ -572,27 +511,26 @@ void GlycosylationSite::SetOtherGlycanBeads(AtomVector *beads)
 // This is funkin dodgy hey:
 void GlycosylationSite::SetResonableChi1Chi2DihedralAngles()
 {
-    rotatable_bonds_.at(0).SetDihedralAngle(180);
-    rotatable_bonds_.at(1).SetDihedralAngle(180);
-    //    Statistical analysis of the protein environment of N-glycosylation sites: implications for occupancy, structure, and folding
-    //    Andrei-J. Petrescu  Adina-L. Milac  Stefana M. Petrescu  Raymond A. Dwek Mark R. Wormald
-    //    Glycobiology, Volume 14, Issue 2, 1 February 2004, Pages 103–114,
+    rotatable_bonds_.SetReasonableChi1Chi2DihedralAngles();
 }
 
 void GlycosylationSite::RandomizeDihedralAngles()
 {
-    for(RotatableDihedralVector::iterator current_dihedral = rotatable_bonds_.begin(); current_dihedral != rotatable_bonds_.end(); ++current_dihedral)
-    {
-        current_dihedral->RandomizeDihedralAngle();
-    }
+    rotatable_bonds_.RandomizeDihedralAngles();
 }
 
 void GlycosylationSite::ResetDihedralAngles()
 {
-    for(RotatableDihedralVector::iterator current_dihedral = rotatable_bonds_.begin(); current_dihedral != rotatable_bonds_.end(); ++current_dihedral)
-    {
-        current_dihedral->ResetDihedralAngle();
-    }
+    rotatable_bonds_.ResetDihedralAngles();
+}
+
+void GlycosylationSite::SetRotatableBonds(Residue *residue1, Residue *residue2)
+{
+
+    Residue_linkage rotatable_bonds(residue1, residue2);
+    rotatable_bonds_ = rotatable_bonds;
+    // Copy is ok for now. I set up Residue_linkage to be consructed, but would need Glycosidic linkage to be constructed all at once too. Need to look into that.
+    // I.e. Construct everything all at once via "constructors".
 }
 
 //////////////////////////////////////////////////////////
@@ -604,10 +542,7 @@ void GlycosylationSite::Print(std::string type)
     if (type.compare("All")==0)
     {
         std::cout << "Residue ID: " << residue_->GetId() << std::endl;
-        for(RotatableDihedralVector::iterator current_dihedral = rotatable_bonds_.begin(); current_dihedral != rotatable_bonds_.end(); ++current_dihedral)
-        {
-            current_dihedral->Print();
-        }
+        rotatable_bonds_.Print();
         std::cout << "\n";
 
     }

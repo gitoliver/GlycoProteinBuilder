@@ -4,7 +4,7 @@
 
 
 #include "rotatable_dihedral.h"
-
+#include "selections.h"
 
 class Residue_linkage
 {
@@ -29,13 +29,16 @@ public:
     //                       ACCESSOR                       //
     //////////////////////////////////////////////////////////
 
-    AtomVector GetResidues();
-    AtomVector GetRotatableDihedrals();
+    ResidueVector GetResidues();
+    RotatableDihedralVector GetRotatableDihedrals();
 
     //////////////////////////////////////////////////////////
     //                       FUNCTIONS                      //
     //////////////////////////////////////////////////////////
 
+    RotatableDihedralVector FindRotatableBondsConnectingResidues(Residue *first_residue, Residue *second_residue);
+    RotatableDihedralVector SplitAtomVectorIntoRotatableBonds(AtomVector atoms);
+    void SetReasonableChi1Chi2DihedralAngles();
 
     //////////////////////////////////////////////////////////
     //                       MUTATOR                        //
@@ -51,7 +54,7 @@ public:
     //                       DISPLAY FUNCTION               //
     //////////////////////////////////////////////////////////
 
-  //  void Print();
+    void Print();
 
     //////////////////////////////////////////////////////////
     //                       OPERATORS                      //

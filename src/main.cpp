@@ -65,8 +65,8 @@ int main(int argc, char* argv[])
     {
         Residue *protein_residue = glycosite->GetResidue();
         Residue *glycan_residue = glycosite->GetAttachedGlycan()->GetResidues().at(0);
-        std::cout << "Finding rot bonds between " << protein_residue->GetId() << " and " << glycan_residue->GetId() << std::endl;
-        glycosite->FindRotatableBondsConnectingResidues(protein_residue, glycan_residue);
+        //std::cout << "Finding rot bonds between " << protein_residue->GetId() << " and " << glycan_residue->GetId() << std::endl;
+        //glycosite->FindRotatableBondsConnectingResidues(protein_residue, glycan_residue);
 
     }
 
