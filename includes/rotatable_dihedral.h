@@ -33,7 +33,6 @@ public:
     AtomVector GetAtomsThatMove();
     double GetPreviousDihedralAngle();
 
-
     //////////////////////////////////////////////////////////
     //                       FUNCTIONS                      //
     //////////////////////////////////////////////////////////
@@ -43,8 +42,7 @@ public:
     //                       MUTATOR                        //
     //////////////////////////////////////////////////////////
 
-    void SetAtoms(AtomVector atoms);
-    void SetAtomsThatMove(AtomVector atoms);
+    void DetermineAtomsThatMove();
     void SetDihedralAngle(double dihedral_angle);
     void ResetDihedralAngle();
     double RandomizeDihedralAngleWithinRanges(std::vector<std::pair<double,double>> ranges);
@@ -67,6 +65,8 @@ private:
     //                       FUNCTIONS                      //
     //////////////////////////////////////////////////////////
 
+    void SetAtoms(AtomVector atoms);
+    void SetAtomsThatMove(AtomVector atoms);
     void RecordPreviousDihedralAngle(double dihedral_angle);
 
     //////////////////////////////////////////////////////////

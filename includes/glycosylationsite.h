@@ -46,6 +46,8 @@ public:
     AtomVector GetSelfGlycanBeads();
     AtomVector GetProteinBeads();
     AtomVector GetOtherGlycanBeads();
+    Residue_linkage GetRotatableBonds();
+
 
 
     //////////////////////////////////////////////////////////
@@ -54,7 +56,9 @@ public:
     void AttachGlycan(Assembly glycan, Assembly &glycoprotein);
     double Calculate_bead_overlaps(std::string overlap_type = "total", bool record = true);
     double Calculate_and_print_bead_overlaps();
-    void SetChiAtoms(Residue* residue);
+    void UpdateAtomsThatMoveInLinkages();
+
+   // void SetChiAtoms(Residue* residue);
 
 
     //////////////////////////////////////////////////////////
@@ -101,6 +105,7 @@ private:
     double CalculateTorsionAngle(AtomVector atoms);
     double Calculate_bead_overlaps(AtomVector &atomsA, AtomVector &atomsB);
     void SetRotatableBonds(Residue *residue1, Residue *residue2);
+
 
     //////////////////////////////////////////////////////////
     //                       ATTRIBUTES                     //

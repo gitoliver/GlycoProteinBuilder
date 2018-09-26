@@ -284,6 +284,7 @@ GlycosylationSitePointerVector glycoprotein_builder::GetSitesWithOverlap(Glycosy
     return sites_to_return;
 }
 
+// This is getting stuck in a loop when the last site in the list must be removed.
 GlycosylationSitePointerVector glycoprotein_builder::DeleteSitesWithOverlaps(GlycosylationSiteVector &glycosites, double tolerance, std::string overlap_type)
 {
     GlycosylationSitePointerVector sites_to_return;
@@ -310,6 +311,7 @@ GlycosylationSitePointerVector glycoprotein_builder::DeleteSitesWithOverlaps(Gly
             sites_to_return.push_back(&(*current_glycosite));
             ++current_glycosite; // This will get you. Erase/Remove advances current_glycosite.
         }
+
     }
     return sites_to_return;
 }
@@ -373,6 +375,15 @@ void glycoprotein_builder::DeleteSitesIterativelyWithOverlapAboveTolerance(Glyco
         }
     }
     return;
+}
+
+void glycoprotein_builder::UpdateAtomsThatMoveInLinkages(GlycosylationSiteVector &glycosites)
+{
+    for (GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end(); ++current_glycosite)
+    {
+        current_glycosite->UpdateAtomsThatMoveInLinkages();
+    }
+
 }
 
 //void glycoprotein_builder::Overlap_Weighted_Adjust_Torsions_For_X_Cycles(GlycosylationSitePointerVector &sites, GlycosylationSiteVector &glycosites, int max_cycles, double tolerance, std::string overlap_type)

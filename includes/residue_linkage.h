@@ -44,6 +44,7 @@ public:
     //                       MUTATOR                        //
     //////////////////////////////////////////////////////////
 
+    void DetermineAtomsThatMove();
     void SetResidues(Residue *residue1, Residue *residue2);
     void SetDihedralAngles(std::vector <double> dihedral_angles);
     void ResetDihedralAngles();

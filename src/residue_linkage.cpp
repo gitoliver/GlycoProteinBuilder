@@ -146,6 +146,14 @@ void Residue_linkage::SetReasonableChi1Chi2DihedralAngles()
 //                       MUTATOR                        //
 //////////////////////////////////////////////////////////
 
+void Residue_linkage::DetermineAtomsThatMove()
+{
+    for(RotatableDihedralVector::iterator rotatable_bond = rotatable_bonds_.begin(); rotatable_bond != rotatable_bonds_.end(); ++rotatable_bond)
+    {
+        rotatable_bond->DetermineAtomsThatMove();
+    }
+}
+
 void Residue_linkage::SetResidues(Residue *residue1, Residue *residue2)
 {
     residue1_ = residue1;

@@ -12,30 +12,22 @@ Rotatable_dihedral::Rotatable_dihedral()
 // Of the next two forms, I'll probably use only one and delete the other later
 Rotatable_dihedral::Rotatable_dihedral(Atom *atom1, Atom *atom2, Atom *atom3, Atom *atom4)
 {
-    atom1_ = atom1;
-    atom2_ = atom2;
-    atom3_ = atom3;
-    atom4_ = atom4;
-    AtomVector atoms_that_move;
-    atoms_that_move.push_back(atom2_);
-    atom3_->FindConnectedAtoms(atoms_that_move);
-    atoms_that_move_ = atoms_that_move;
+    AtomVector atoms {atom1, atom2, atom3, atom4};
+    this->SetAtoms(atoms);
+    this->DetermineAtomsThatMove();
 }
 
 Rotatable_dihedral::Rotatable_dihedral(AtomVector atoms)
 {
     this->SetAtoms(atoms);
-    AtomVector atoms_that_move;
-    atoms_that_move.push_back(atom2_);
-    atom3_->FindConnectedAtoms(atoms_that_move);
-    atoms_that_move_ = atoms_that_move;
+    this->DetermineAtomsThatMove();
 }
 
-// Not sure if I'll want to trust FindConnectedAtoms to work or not, maybe pass it in like this:
+// Not sure if I'll want to trust FindConnectedAtoms to work or not, maybe pass it in like this. Nope probably don't do this:
 Rotatable_dihedral::Rotatable_dihedral(AtomVector atoms, AtomVector atoms_that_move)
 {
     this->SetAtoms(atoms);
-    atoms_that_move_ = atoms_that_move;
+    this->SetAtomsThatMove(atoms_that_move);
 }
 
 //////////////////////////////////////////////////////////
@@ -90,6 +82,15 @@ double Rotatable_dihedral::GetPreviousDihedralAngle()
 //////////////////////////////////////////////////////////
 //                       MUTATOR                        //
 //////////////////////////////////////////////////////////
+
+void Rotatable_dihedral::DetermineAtomsThatMove()
+{
+    AtomVector atoms_that_move;
+    atoms_that_move.push_back(atom2_);
+    atom3_->FindConnectedAtoms(atoms_that_move);
+    this->SetAtomsThatMove(atoms_that_move);
+}
+
 
 void Rotatable_dihedral::SetAtoms(AtomVector atoms)
 {
@@ -153,7 +154,7 @@ double Rotatable_dihedral::RandomizeDihedralAngleWithinRanges(std::vector<std::p
 
 void Rotatable_dihedral::RecordPreviousDihedralAngle(double dihedral_angle)
 {
-    previous_dihedral_angle_=dihedral_angle;
+    previous_dihedral_angle_ = dihedral_angle;
 }
 
 void Rotatable_dihedral::ResetDihedralAngle()
@@ -191,9 +192,11 @@ void Rotatable_dihedral::SetDihedralAngle(double dihedral_angle)
     this->RecordPreviousDihedralAngle(current_dihedral);
 
     // Yo you should add something here that checks if atoms_that_move_ is set. Yeah you.
+    std::cout << "Moving: ";
     for(AtomVector::iterator it = atoms_that_move_.begin(); it != atoms_that_move_.end(); it++)
     {
         Atom *atom = *it;
+        std::cout << ", " << atom->GetName();
         GeometryTopology::Coordinate* atom_coordinate = atom->GetCoordinate();
         GeometryTopology::Coordinate result;
         result.SetX(dihedral_angle_matrix[0][0] * atom_coordinate->GetX() + dihedral_angle_matrix[0][1] * atom_coordinate->GetY() +
@@ -207,6 +210,7 @@ void Rotatable_dihedral::SetDihedralAngle(double dihedral_angle)
         atom->GetCoordinate()->SetY(result.GetY());
         atom->GetCoordinate()->SetZ(result.GetZ());
     }
+    std::cout << std::endl;
     return;
 }
 
@@ -217,4 +221,10 @@ void Rotatable_dihedral::SetDihedralAngle(double dihedral_angle)
 void Rotatable_dihedral::Print()
 {
     std::cout << atom1_->GetName() << ", " << atom2_->GetName() << ", " << atom3_->GetName() << ", " << atom4_->GetName() << ": " << this->CalculateDihedralAngle() << ".\n";
+    for(AtomVector::iterator it1 = atoms_that_move_.begin(); it1 != atoms_that_move_.end(); ++it1)
+    {
+        Atom *atom = *it1;
+        std::cout << atom->GetName() << ", ";
+    }
+    std::cout << std::endl;
 }

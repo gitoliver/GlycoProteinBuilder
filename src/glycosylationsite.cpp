@@ -110,6 +110,12 @@ AtomVector GlycosylationSite::GetOtherGlycanBeads()
     return other_glycan_beads_;
 }
 
+Residue_linkage GlycosylationSite::GetRotatableBonds()
+{
+    return rotatable_bonds_;
+}
+
+
 
 //////////////////////////////////////////////////////////
 //                       FUNCTIONS                      //
@@ -278,47 +284,47 @@ void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_resid
 }
 
 // This is a dumb way to do it. Need dihedral class but in a rush. Fix later.
-void GlycosylationSite::SetChiAtoms(Residue* residue)
-{
-    AtomVector atoms = residue->GetAtoms();
-    Atom *atom1, *atom2, *atom3, *atom4, *atom5;
-    bool is_Chi2 = false;
-    for(AtomVector::iterator it1 = atoms.begin(); it1 != atoms.end(); ++it1)
-    {
-        Atom *atom = *it1;
-        if ( atom->GetName().compare("N"  )==0 ) { atom1 = atom; } // All residues
-        if ( atom->GetName().compare("CA" )==0 ) { atom2 = atom; } // All residues   
-        if ( atom->GetName().compare("CB" )==0 ) { atom3 = atom; } // All residues
-        if ( atom->GetName().compare("CG" )==0 ) { atom4 = atom; } // Asn + Tyr
-        if ( atom->GetName().compare("OG1")==0 ) { atom4 = atom; } // Thr
-        if ( atom->GetName().compare("OG" )==0 ) { atom4 = atom; } // Ser
-        if ( atom->GetName().compare("ND2")==0 ) { atom5 = atom; is_Chi2 = true; } // Asn
-        if ( atom->GetName().compare("CD1")==0 ) { atom5 = atom; is_Chi2 = true; } // Tyr
-    }
-    //chi1_ = {atom1, atom2, atom3, atom4};
-    if (!is_Chi2)
-    {
-        Residue *reducing_Residue = this->GetAttachedGlycan()->GetResidues().at(1);
-        AtomVector reducing_Atoms = reducing_Residue->GetAtoms();
-        for(AtomVector::iterator it = reducing_Atoms.begin(); it != reducing_Atoms.end(); ++it)
-        {
-            Atom* atom = *it;
-            if(atom->GetName().compare("C1")==0) // Need a way to get reducing atom from Residue. This is dumb as have residues such as 0SA were C1 is not the reducing atom.
-            {
-                atom5 = atom;
-                is_Chi2 = true;
-            }
-        }
-    }
-    if (is_Chi2)
-    {
-       // chi2_ = {atom2, atom3, atom4, atom5};
-    }
-    else
-    {
-        std::cout << "Chi2 not set in GlycosylationSite::SetChiAtoms, program likely to crash" << std::endl;
-    }
-}
+//void GlycosylationSite::SetChiAtoms(Residue* residue)
+//{
+//    AtomVector atoms = residue->GetAtoms();
+//    Atom *atom1, *atom2, *atom3, *atom4, *atom5;
+//    bool is_Chi2 = false;
+//    for(AtomVector::iterator it1 = atoms.begin(); it1 != atoms.end(); ++it1)
+//    {
+//        Atom *atom = *it1;
+//        if ( atom->GetName().compare("N"  )==0 ) { atom1 = atom; } // All residues
+//        if ( atom->GetName().compare("CA" )==0 ) { atom2 = atom; } // All residues
+//        if ( atom->GetName().compare("CB" )==0 ) { atom3 = atom; } // All residues
+//        if ( atom->GetName().compare("CG" )==0 ) { atom4 = atom; } // Asn + Tyr
+//        if ( atom->GetName().compare("OG1")==0 ) { atom4 = atom; } // Thr
+//        if ( atom->GetName().compare("OG" )==0 ) { atom4 = atom; } // Ser
+//        if ( atom->GetName().compare("ND2")==0 ) { atom5 = atom; is_Chi2 = true; } // Asn
+//        if ( atom->GetName().compare("CD1")==0 ) { atom5 = atom; is_Chi2 = true; } // Tyr
+//    }
+//    //chi1_ = {atom1, atom2, atom3, atom4};
+//    if (!is_Chi2)
+//    {
+//        Residue *reducing_Residue = this->GetAttachedGlycan()->GetResidues().at(1);
+//        AtomVector reducing_Atoms = reducing_Residue->GetAtoms();
+//        for(AtomVector::iterator it = reducing_Atoms.begin(); it != reducing_Atoms.end(); ++it)
+//        {
+//            Atom* atom = *it;
+//            if(atom->GetName().compare("C1")==0) // Need a way to get reducing atom from Residue. This is dumb as have residues such as 0SA were C1 is not the reducing atom.
+//            {
+//                atom5 = atom;
+//                is_Chi2 = true;
+//            }
+//        }
+//    }
+//    if (is_Chi2)
+//    {
+//       // chi2_ = {atom2, atom3, atom4, atom5};
+//    }
+//    else
+//    {
+//        std::cout << "Chi2 not set in GlycosylationSite::SetChiAtoms, program likely to crash" << std::endl;
+//    }
+//}
 
 
 
@@ -532,6 +538,12 @@ void GlycosylationSite::SetRotatableBonds(Residue *residue1, Residue *residue2)
     // Copy is ok for now. I set up Residue_linkage to be consructed, but would need Glycosidic linkage to be constructed all at once too. Need to look into that.
     // I.e. Construct everything all at once via "constructors".
 }
+
+void GlycosylationSite::UpdateAtomsThatMoveInLinkages()
+{
+    rotatable_bonds_.DetermineAtomsThatMove();
+}
+
 
 //////////////////////////////////////////////////////////
 //                       DISPLAY FUNCTION               //
