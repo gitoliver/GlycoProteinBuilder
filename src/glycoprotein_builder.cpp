@@ -373,6 +373,10 @@ void glycoprotein_builder::DeleteSitesIterativelyWithOverlapAboveTolerance(Glyco
         {
             continue_deleting = false;
         }
+        if(glycosites.empty()) // If we have deleted every site
+        {
+            continue_deleting = false;
+        }
     }
     return;
 }

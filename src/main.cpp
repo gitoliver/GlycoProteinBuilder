@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
     // Fast and stupid:
     if (!resolve_overlaps::dumb_random_walk(glycosites))
     {
-        int max_cycles = 100;
+        int max_cycles = 2;
         std::cout << "Could not resolve quickly" << std::endl;
         glycoprotein_builder::SetResonableChi1Chi2DihedralAngles(glycosites); // Reset to reasonable starting points
         resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, max_cycles);

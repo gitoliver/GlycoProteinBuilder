@@ -192,11 +192,11 @@ void Rotatable_dihedral::SetDihedralAngle(double dihedral_angle)
     this->RecordPreviousDihedralAngle(current_dihedral);
 
     // Yo you should add something here that checks if atoms_that_move_ is set. Yeah you.
-    std::cout << "Moving: ";
+   // std::cout << "Moving: ";
     for(AtomVector::iterator it = atoms_that_move_.begin(); it != atoms_that_move_.end(); it++)
     {
         Atom *atom = *it;
-        std::cout << ", " << atom->GetName();
+      //  std::cout << ", " << atom->GetName();
         GeometryTopology::Coordinate* atom_coordinate = atom->GetCoordinate();
         GeometryTopology::Coordinate result;
         result.SetX(dihedral_angle_matrix[0][0] * atom_coordinate->GetX() + dihedral_angle_matrix[0][1] * atom_coordinate->GetY() +
@@ -210,7 +210,7 @@ void Rotatable_dihedral::SetDihedralAngle(double dihedral_angle)
         atom->GetCoordinate()->SetY(result.GetY());
         atom->GetCoordinate()->SetZ(result.GetZ());
     }
-    std::cout << std::endl;
+  //  std::cout << std::endl;
     return;
 }
 

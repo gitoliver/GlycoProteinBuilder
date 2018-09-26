@@ -130,7 +130,6 @@ void GlycosylationSite::AttachGlycan(Assembly glycan, Assembly &glycoprotein)
     this->Superimpose_Glycan_To_Glycosite(residue_);
     glycoprotein.MergeAssembly(&glycan_); // Add glycan to glycoprotein assembly, allows SetDihedral later. May not be necessary anymore with new Rotatable Dihedral class.
     this->SetRotatableBonds(residue_, glycan_.GetResidues().at(0));
-    rotatable_bonds_.Print();
 }
 
 /*
@@ -554,7 +553,7 @@ void GlycosylationSite::Print(std::string type)
     if (type.compare("All")==0)
     {
         std::cout << "Residue ID: " << residue_->GetId() << std::endl;
-        rotatable_bonds_.Print();
+        //rotatable_bonds_.Print();
         std::cout << "\n";
 
     }
