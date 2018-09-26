@@ -221,10 +221,10 @@ void Rotatable_dihedral::SetDihedralAngle(double dihedral_angle)
 void Rotatable_dihedral::Print()
 {
     std::cout << atom1_->GetName() << ", " << atom2_->GetName() << ", " << atom3_->GetName() << ", " << atom4_->GetName() << ": " << this->CalculateDihedralAngle() << ".\n";
-    for(AtomVector::iterator it1 = atoms_that_move_.begin(); it1 != atoms_that_move_.end(); ++it1)
-    {
-        Atom *atom = *it1;
-        std::cout << atom->GetName() << ", ";
-    }
+//    for(AtomVector::iterator it1 = atoms_that_move_.begin(); it1 != atoms_that_move_.end(); ++it1)
+//    {
+//        Atom *atom = *it1;
+//        std::cout << atom->GetName() << ", ";
+//    }
     std::cout << std::endl;
 }

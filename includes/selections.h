@@ -1,7 +1,9 @@
 #ifndef SELECTIONS_H
 #define SELECTIONS_H
 
-#include "../../../includes/gmml.hpp"
+//#include "../../../includes/gmml.hpp"
+#include "gmml.hpp"
+
 using namespace MolecularModeling;
 namespace selection
 {

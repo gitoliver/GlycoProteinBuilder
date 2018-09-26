@@ -552,7 +552,10 @@ void GlycosylationSite::Print(std::string type)
 {
     if (type.compare("All")==0)
     {
-        std::cout << "Residue ID: " << residue_->GetId() << std::endl;
+        std::cout << "Residue ID: " << this->GetResidue()->GetId();
+        std::cout << ", overlap: " << this->GetOverlap() << std::endl;
+        std::cout << "Dihedrals: \n";
+        this->GetRotatableBonds().Print();
         //rotatable_bonds_.Print();
         std::cout << "\n";
 

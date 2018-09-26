@@ -1,7 +1,8 @@
 #ifndef ROTATABLE_DIHEDRAL_H
 #define ROTATABLE_DIHEDRAL_H
 
-#include "../../../includes/gmml.hpp"
+//#include "../../../includes/gmml.hpp"
+#include "gmml.hpp"
 
 using namespace MolecularModeling;
 
