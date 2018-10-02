@@ -29,8 +29,8 @@ public:
     //                       ACCESSOR                       //
     //////////////////////////////////////////////////////////
 
-    double CalculateDihedralAngle();
-    AtomVector GetAtoms();
+    double CalculateDihedralAngle() const;
+    AtomVector GetAtoms() const;
     AtomVector GetAtomsThatMove();
     double GetPreviousDihedralAngle();
 
@@ -82,5 +82,7 @@ private:
     double previous_dihedral_angle_;
 
 };
+
+std::ostream& operator<<(std::ostream& os, const Rotatable_dihedral&);
 
 #endif // ROTATABLE_DIHEDRAL_H
