@@ -1,8 +1,10 @@
 #ifndef RESIDUE_LINKAGE_H
 #define RESIDUE_LINKAGE_H
-
-
-
+/*
+ * This class figures out the rotatable bonds between two residues
+ * Starts/ends at the CA atoms in proteins. Looks for cycles (as they aren't rotatable).
+ * Stores each rotatable bond as a rotatable_dihedral object.
+ */
 #include "rotatable_dihedral.h"
 #include "selections.h"
 
@@ -37,7 +39,10 @@ public:
     //////////////////////////////////////////////////////////
 
     RotatableDihedralVector FindRotatableBondsConnectingResidues(Residue *first_residue, Residue *second_residue);
+    // Previous function generates a list of linearly connected atoms that define the rotatable bonds
+    // This function splits that list into groups of 4 and creates rotatable_dihedral objects
     RotatableDihedralVector SplitAtomVectorIntoRotatableBonds(AtomVector atoms);
+    // This is bad, but sets Chi1 and Chi2 to 180. These bonds are present in protein residues except Gly.
     void SetReasonableChi1Chi2DihedralAngles();
 
     //////////////////////////////////////////////////////////

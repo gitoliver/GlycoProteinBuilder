@@ -1,6 +1,5 @@
 #include "../includes/residue_linkage.h"
 
-
 //////////////////////////////////////////////////////////
 //                    TYPE DEFINITION                   //
 //////////////////////////////////////////////////////////
@@ -19,14 +18,14 @@ Residue_linkage::Residue_linkage()
 Residue_linkage::Residue_linkage(Residue *residue1, Residue *residue2)
 {
     this->SetResidues(residue1, residue2);
-    rotatable_bonds_=this->FindRotatableBondsConnectingResidues(residue1, residue2);
-    this->RandomizeDihedralAngles();
+    rotatable_bonds_ = this->FindRotatableBondsConnectingResidues(residue1, residue2);
 }
 
 
 Residue_linkage::Residue_linkage(Residue *residue1, Residue *residue2, std::vector <double> dihedral_angles)
 {
     this->SetResidues(residue1, residue2);
+    rotatable_bonds_ = this->FindRotatableBondsConnectingResidues(residue1, residue2);
     this->SetDihedralAngles(dihedral_angles);
 }
 
@@ -50,8 +49,6 @@ RotatableDihedralVector Residue_linkage::GetRotatableDihedrals()
 //                       FUNCTIONS                      //
 //////////////////////////////////////////////////////////
 
-
-// Not sure where this function really belongs, probably in rotatable_dihedral or an interResidueLinkage class? YES, one of those!
 RotatableDihedralVector Residue_linkage::FindRotatableBondsConnectingResidues(Residue *first_residue, Residue *second_residue)
 {
     // Going to ignore tags etc.

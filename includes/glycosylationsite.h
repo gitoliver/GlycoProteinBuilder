@@ -118,7 +118,7 @@ private:
     AtomVector superimposition_atoms_;               /*!< The 3 atoms used for superimposition of glycan to sidechain >*/
     double glycan_overlap_;
     double protein_overlap_;
-    Residue_linkage rotatable_bonds_;
+    Residue_linkage rotatable_bonds_; // This should become a vector of residue_linkages?
     AtomVector self_glycan_beads_;
     AtomVector other_glycan_beads_;
     AtomVector protein_beads_;

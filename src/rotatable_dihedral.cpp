@@ -1,5 +1,11 @@
 #include "../includes/rotatable_dihedral.h"
 #include <random>
+#include "../includes/pcg_random.hpp"
+
+// Seed with a real random value, if available
+static pcg_extras::seed_seq_from<std::random_device> seed_source;
+// Make a random number engine
+static pcg32 rng(seed_source);
 
 //////////////////////////////////////////////////////////
 //                       CONSTRUCTOR                    //
@@ -9,21 +15,18 @@ Rotatable_dihedral::Rotatable_dihedral()
     std::cout << "This is a bad idea, use one of the other constructors\n";
 }
 
-// Of the next two forms, I'll probably use only one and delete the other later
+// Of the next three forms, I'll probably use only one and delete the others later
 Rotatable_dihedral::Rotatable_dihedral(Atom *atom1, Atom *atom2, Atom *atom3, Atom *atom4)
 {
     AtomVector atoms {atom1, atom2, atom3, atom4};
-    this->SetAtoms(atoms);
-    this->DetermineAtomsThatMove();
+    this->Initialize(atoms);
 }
 
 Rotatable_dihedral::Rotatable_dihedral(AtomVector atoms)
 {
-    this->SetAtoms(atoms);
-    this->DetermineAtomsThatMove();
+    this->Initialize(atoms);
 }
 
-// Not sure if I'll want to trust FindConnectedAtoms to work or not, maybe pass it in like this. Nope probably don't do this:
 Rotatable_dihedral::Rotatable_dihedral(AtomVector atoms, AtomVector atoms_that_move)
 {
     this->SetAtoms(atoms);
@@ -91,6 +94,12 @@ void Rotatable_dihedral::DetermineAtomsThatMove()
     this->SetAtomsThatMove(atoms_that_move);
 }
 
+void Rotatable_dihedral::Initialize(AtomVector atoms)
+{
+    this->SetAtoms(atoms);
+    this->DetermineAtomsThatMove();
+}
+
 
 void Rotatable_dihedral::SetAtoms(AtomVector atoms)
 {
@@ -113,11 +122,13 @@ double Rotatable_dihedral::RandomizeDihedralAngle()
 
 double Rotatable_dihedral::RandomizeDihedralAngleWithinRange(double min, double max)
 {
-    std::random_device rd1; // obtain a random number from hardware
-    std::mt19937 eng1(rd1()); // seed the generator
+//    std::random_device rd1; // obtain a random number from hardware
+//    std::mt19937 eng1(rd1()); // seed the generator
     std::uniform_real_distribution<> angle_distribution(min, max); // define the range
 
-    double random_angle = angle_distribution(eng1);
+//    double random_angle = angle_distribution(eng1);
+    double random_angle = angle_distribution(rng);
+    std::cout << "Random angle is: " << random_angle << "\n";
 
     /*******************************************/
     /*               IMPORTANT                 */
@@ -141,12 +152,12 @@ double Rotatable_dihedral::RandomizeDihedralAngleWithinRanges(std::vector<std::p
     // Then create an angle within the selected range.
 
     // Rando stuff from slack overflow:
-    std::random_device rd; // obtain a random number from hardware
-    std::mt19937 eng(rd()); // seed the generator
+//    std::random_device rd; // obtain a random number from hardware
+//    std::mt19937 eng(rd()); // seed the generator
     std::uniform_int_distribution<> distr(0, (ranges.size() - 1)); // define the range
 
     // Select one of the ranges
-    int range_selection = distr(eng);
+    int range_selection = distr(rng);
 
     // create an angle within the selected range
     return Rotatable_dihedral::RandomizeDihedralAngleWithinRange(ranges.at(range_selection).first, ranges.at(range_selection).second);
