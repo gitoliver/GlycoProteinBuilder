@@ -40,7 +40,7 @@ ResidueVector Residue_linkage::GetResidues()
     return residues;
 }
 
-RotatableDihedralVector Residue_linkage::GetRotatableDihedrals()
+RotatableDihedralVector Residue_linkage::GetRotatableDihedrals() const
 {
     return rotatable_bonds_;
 }
@@ -213,5 +213,14 @@ void Residue_linkage::Print()
 //                       OPERATORS                      //
 //////////////////////////////////////////////////////////
 
+std::ostream& operator<<(std::ostream& os, const Residue_linkage& residue_linkage)
+{
+    RotatableDihedralVector rotatable_bonds = residue_linkage.GetRotatableDihedrals();
+    for(RotatableDihedralVector::iterator rotatable_bond = rotatable_bonds.begin(); rotatable_bond != rotatable_bonds.end(); ++rotatable_bond)
+    {
+        os << (*rotatable_bond);
+    }
+    return os;
+} // operator<<
 
 

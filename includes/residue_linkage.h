@@ -32,7 +32,7 @@ public:
     //////////////////////////////////////////////////////////
 
     ResidueVector GetResidues();
-    RotatableDihedralVector GetRotatableDihedrals();
+    RotatableDihedralVector GetRotatableDihedrals() const;
 
     //////////////////////////////////////////////////////////
     //                       FUNCTIONS                      //
@@ -82,5 +82,7 @@ private:
     RotatableDihedralVector rotatable_bonds_;
 
 };
+
+std::ostream& operator<<(std::ostream& os, const Residue_linkage&);
 
 #endif // RESIDUE_LINKAGE_H

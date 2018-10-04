@@ -37,7 +37,7 @@ Rotatable_dihedral::Rotatable_dihedral(AtomVector atoms, AtomVector atoms_that_m
 //                       ACCESSOR                       //
 //////////////////////////////////////////////////////////
 
-double Rotatable_dihedral::CalculateDihedralAngle()
+double Rotatable_dihedral::CalculateDihedralAngle() const
 {
     GeometryTopology::Coordinate* a1 = atom1_->GetCoordinate();
     GeometryTopology::Coordinate* a2 = atom2_->GetCoordinate();
@@ -67,7 +67,7 @@ double Rotatable_dihedral::CalculateDihedralAngle()
     return current_dihedral_angle;
 }
 
-AtomVector Rotatable_dihedral::GetAtoms()
+AtomVector Rotatable_dihedral::GetAtoms() const
 {
     AtomVector atoms = {atom1_, atom2_, atom3_, atom4_};
     return atoms;
@@ -239,3 +239,14 @@ void Rotatable_dihedral::Print()
 //    }
     std::cout << std::endl;
 }
+
+//////////////////////////////////////////////////////////
+//                       OPERATORS                      //
+//////////////////////////////////////////////////////////
+
+std::ostream& operator<<(std::ostream& os, const Rotatable_dihedral& rotatable_dihedral)
+{
+    AtomVector atoms = rotatable_dihedral.GetAtoms();
+    os << atoms.at(0)->GetName() << ", " << atoms.at(1)->GetName() << ", " << atoms.at(2)->GetName() << ", " << atoms.at(3)->GetName() << ": " << rotatable_dihedral.CalculateDihedralAngle() << ".\n";
+    return os;
+} // operator<<
