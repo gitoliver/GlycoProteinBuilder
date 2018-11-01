@@ -285,36 +285,36 @@ GlycosylationSitePointerVector glycoprotein_builder::GetSitesWithOverlap(Glycosy
 }
 
 // This is getting stuck in a loop when the last site in the list must be removed.
-GlycosylationSitePointerVector glycoprotein_builder::DeleteSitesWithOverlaps(GlycosylationSiteVector &glycosites, double tolerance, std::string overlap_type)
-{
-    GlycosylationSitePointerVector sites_to_return;
-    double overlap = 0.0;
-    for (GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end();)
-    {
-        overlap = current_glycosite->Calculate_bead_overlaps(overlap_type);
-        // Delete site from list if overlap is greater than the tolerance value
-        std::cout << "Site " << current_glycosite->GetResidueNumber() << ": " << overlap << " :";
-        if ( overlap > tolerance)
-        {
-            std::cout << "Removed\n";
-            ResidueVector glycan_residues = current_glycosite->GetAttachedGlycan()->GetResidues();
-            for(ResidueVector::iterator it = glycan_residues.begin(); it != glycan_residues.end(); ++it)
-            {
-                current_glycosite->GetGlycoprotein()->RemoveResidue(*it);
-                //glycoprotein.RemoveResidue(*it);
-            }
-            glycosites.erase(std::remove(glycosites.begin(), glycosites.end(), *current_glycosite), glycosites.end()); // Note need #include <algorithm>
-        }
-        else
-        {
-            std::cout << "Retained\n";
-            sites_to_return.push_back(&(*current_glycosite));
-            ++current_glycosite; // This will get you. Erase/Remove advances current_glycosite.
-        }
+//GlycosylationSitePointerVector glycoprotein_builder::DeleteSitesWithOverlaps(GlycosylationSiteVector &glycosites, double tolerance, std::string overlap_type)
+//{
+//    GlycosylationSitePointerVector sites_to_return;
+//    double overlap = 0.0;
+//    for (GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end();)
+//    {
+//        overlap = current_glycosite->Calculate_bead_overlaps(overlap_type);
+//        // Delete site from list if overlap is greater than the tolerance value
+//        std::cout << "Site " << current_glycosite->GetResidueNumber() << ": " << overlap << " :";
+//        if ( overlap > tolerance)
+//        {
+//            std::cout << "Removed\n";
+//            ResidueVector glycan_residues = current_glycosite->GetAttachedGlycan()->GetResidues();
+//            for(ResidueVector::iterator it = glycan_residues.begin(); it != glycan_residues.end(); ++it)
+//            {
+//                current_glycosite->GetGlycoprotein()->RemoveResidue(*it);
+//                //glycoprotein.RemoveResidue(*it);
+//            }
+//            glycosites.erase(std::remove(glycosites.begin(), glycosites.end(), *current_glycosite), glycosites.end()); // Note need #include <algorithm>
+//        }
+//        else
+//        {
+//            std::cout << "Retained\n";
+//            sites_to_return.push_back(&(*current_glycosite));
+//            ++current_glycosite; // This will get you. Erase/Remove advances current_glycosite.
+//        }
 
-    }
-    return sites_to_return;
-}
+//    }
+//    return sites_to_return;
+//}
 
 //void glycoprotein_builder::DeleteSitesWithOverlapRecordsAboveTolerance(GlycosylationSiteVector &glycosites, double tolerance, std::string overlap_type)
 //{
@@ -360,6 +360,7 @@ void glycoprotein_builder::DeleteSitesIterativelyWithOverlapAboveTolerance(Glyco
         {
             continue_deleting = true;
             std::cout << "Site " << worst_site->GetResidueNumber() << ": " << worst_site->GetOverlap() << " :" << "Removed\n";
+            worst_site->Rename_Protein_Residue_From_GLYCAM_To_Standard();
             ResidueVector glycan_residues = worst_site->GetAttachedGlycan()->GetResidues();
             for(ResidueVector::iterator it = glycan_residues.begin(); it != glycan_residues.end(); ++it)
             {

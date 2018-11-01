@@ -128,8 +128,9 @@ void GlycosylationSite::AttachGlycan(Assembly glycan, Assembly &glycoprotein)
     this->SetGlycan(glycan);
     this->Prepare_Glycans_For_Superimposition_To_Particular_Residue(residue_->GetName());
     this->Superimpose_Glycan_To_Glycosite(residue_);
+    this->Rename_Protein_Residue_To_GLYCAM_Nomenclature();
     glycoprotein.MergeAssembly(&glycan_); // Add glycan to glycoprotein assembly, allows SetDihedral later. May not be necessary anymore with new Rotatable Dihedral class.
-    this->SetRotatableBonds(residue_, glycan_.GetResidues().at(0));
+    this->SetRotatableBonds(glycan_.GetResidues().at(0), residue_);
 }
 
 /*
@@ -177,7 +178,8 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
     superimposition_residue->SetName("SUP");
     superimposition_residue->SetId("SUP_?_1_?_?_1");
 
-    if (amino_acid_name.compare("ASN")==0)
+    // I put both the regular name and the O/N-linked glycam name here, as I'm not sure when it will be renamed.
+    if ( (amino_acid_name.compare("ASN")==0) || (amino_acid_name.compare("NLN")==0) )
     {
         Atom *atomND2 = new Atom(superimposition_residue, "ND2", (gmml::get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 109.3, 180, 1.53)));
         Atom *atomCG = new Atom(superimposition_residue, "CG", (gmml::get_cartesian_point_from_internal_coords(atomO5, atomC1, atomND2, 109.3, 261, 1.325)));
@@ -188,7 +190,7 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
         superimposition_residue->AddAtom(atomND2);
         superimposition_atoms_ = superimposition_residue->GetAtoms();
     }
-    else if (amino_acid_name.compare("THR")==0 || amino_acid_name.compare("SER")==0)
+    else if ( (amino_acid_name.compare("THR")==0) || (amino_acid_name.compare("SER")==0) || (amino_acid_name.compare("OLT")==0) || (amino_acid_name.compare("OLS")==0) )
     {
         Atom *atomOG1 = new Atom(superimposition_residue, "OG", (gmml::get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
         Atom *atomCB = new Atom(superimposition_residue, "CB", (gmml::get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOG1, 109.3, 75, 1.53)));
@@ -199,12 +201,12 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
         superimposition_residue->AddAtom(atomOG1);
         superimposition_atoms_ = superimposition_residue->GetAtoms();
 
-        if (amino_acid_name.compare("THR")==0)
+        if ( (amino_acid_name.compare("THR")==0) || (amino_acid_name.compare("OLT")==0) )
         {
             atomOG1->SetName("OG1"); // It's OG in Ser.
         }
     }
-    else if (amino_acid_name.compare("TYR")==0)
+    else if ( (amino_acid_name.compare("TYR")==0) || (amino_acid_name.compare("OLY")==0) )
     {
         Atom *atomOH = new Atom(superimposition_residue, "OH", (gmml::get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
         Atom *atomCZ = new Atom(superimposition_residue, "CZ", (gmml::get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOH, 117, 60, 1.35)));
@@ -325,7 +327,23 @@ void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_resid
 //    }
 //}
 
+void GlycosylationSite::Rename_Protein_Residue_To_GLYCAM_Nomenclature()
+{
+    std::string amino_acid_name = this->GetResidue()->GetName();
+    if (amino_acid_name.compare("ASN")==0) {this->GetResidue()->SetName("NLN");}
+    if (amino_acid_name.compare("SER")==0) {this->GetResidue()->SetName("OLS");}
+    if (amino_acid_name.compare("THR")==0) {this->GetResidue()->SetName("OLT");}
+    if (amino_acid_name.compare("TYR")==0) {this->GetResidue()->SetName("OLY");}
+}
 
+void GlycosylationSite::Rename_Protein_Residue_From_GLYCAM_To_Standard()
+{
+    std::string amino_acid_name = this->GetResidue()->GetName();
+    if (amino_acid_name.compare("NLN")==0) {this->GetResidue()->SetName("ASN");}
+    if (amino_acid_name.compare("OLS")==0) {this->GetResidue()->SetName("SER");}
+    if (amino_acid_name.compare("OLT")==0) {this->GetResidue()->SetName("THR");}
+    if (amino_acid_name.compare("OLY")==0) {this->GetResidue()->SetName("TYR");}
+}
 
 double GlycosylationSite::Calculate_and_print_bead_overlaps()
 {

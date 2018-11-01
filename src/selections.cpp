@@ -181,9 +181,13 @@ AtomVector selection::FindRotationPoints(Atom *atom)
 Atom* selection::FindCyclePointNeighbor(const AtomVector atom_path, Atom *cycle_point)
 {
     Atom *selected_neighbor;
-    if (cycle_point->GetName().compare("CA")==0)
+    if (cycle_point->GetName().compare("CA")==0) // This is a protein, and we always want the N atom.
     {
         selected_neighbor = cycle_point->GetResidue()->GetAtom("N");
+    }
+    else if (cycle_point->GetName().compare("C2")==0) // This is a Sia, and we always want the C1 atom.
+    {
+        selected_neighbor = cycle_point->GetResidue()->GetAtom("C1");
     }
     else
     {

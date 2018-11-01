@@ -7,6 +7,7 @@
  */
 #include "rotatable_dihedral.h"
 #include "selections.h"
+#include "../../../includes/MolecularMetadata/GLYCAM/dihedralangledata.hpp"
 
 class Residue_linkage
 {

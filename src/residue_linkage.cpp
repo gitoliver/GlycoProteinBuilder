@@ -49,16 +49,67 @@ RotatableDihedralVector Residue_linkage::GetRotatableDihedrals() const
 //                       FUNCTIONS                      //
 //////////////////////////////////////////////////////////
 
+// This is the way I did it before implementing MetaData and realising that, although it is very clever (good boy Oliver), it is very stupid.
+//RotatableDihedralVector Residue_linkage::FindRotatableBondsConnectingResidues(Residue *first_residue, Residue *second_residue)
+//{
+//    // Going to ignore tags etc.
+//    // Given two residues that are connected. Find connecting atoms.
+//    // Search neighbors other than connected atom. Ie search out in both directions, but remain within same residue.
+//    // Warning, residue may have fused cycles!
+//    // Looking for N atom in a protein residue. name is N and IsProtein
+//    // Looking for anomeric carbon in carbohydrate residue.
+//    // Will fail for non-protein residues without cycles. As don't have a non-rotatable bond to anchor from. Can code that later (and deal with branches from these residues).
+//    std::cout << "Finding rot bonds for " << first_residue->GetId() << " and " << second_residue->GetId() << "\n";
+//    AtomVector connecting_atoms;
+//    bool found = false;
+//    selection::FindAtomsConnectingResidues(first_residue->GetAtoms().at(0), second_residue, &connecting_atoms, &found);
+
+//    Atom *connection_atom1 = connecting_atoms.at(0);
+//    Atom *connection_atom2 = connecting_atoms.at(1);
+
+//    AtomVector rotation_points = selection::FindRotationPoints(connection_atom1);
+//    AtomVector rotation_points2 = selection::FindRotationPoints(connection_atom2);
+//    // Need to reverse one of these, so when concatenated, they are ordered ok. This might not be ok.
+//    std::reverse(rotation_points2.begin(), rotation_points2.end());
+//    // Now concatenate:
+//    rotation_points.insert( rotation_points.begin(), rotation_points2.begin(), rotation_points2.end() );
+//    // Now that have a list of rotation points. Split into pairs and find rotatable bonds between them
+//    // BUT remember that first and last atom in list are just there to define dihedrals. Skip those
+//    for(int i = 0; i < rotation_points.size(); i = i+2)
+//    {
+//        Atom *rotation_point1 = rotation_points.at(i);
+//        Atom *rotation_point2 = rotation_points.at(i+1);
+
+//        found = false;
+//        connecting_atoms.clear();
+//       // std::cout << "Finding Path between " << rotation_point1->GetId() << " and " << rotation_point2->GetId() << ".\n";
+//        selection::FindPathBetweenTwoAtoms(rotation_point1, rotation_point2, &connecting_atoms, &found);
+//        selection::ClearAtomDescriptions(rotation_point1->GetResidue());
+//        selection::ClearAtomDescriptions(rotation_point2->GetResidue());
+//        // Find neighboring atoms needed to define dihedral. Pass in connecting atoms so don't find any of those.
+//        Atom *neighbor1 =  selection::FindCyclePointNeighbor(connecting_atoms, rotation_point1);
+//        Atom *neighbor2 =  selection::FindCyclePointNeighbor(connecting_atoms, rotation_point2);
+//        // Insert these neighbors into list of connecting atoms, at beginning and end of vector.
+//        // connecting_atoms gets populated as it falls out, so list is reveresed from what you'd expect
+//        connecting_atoms.insert(connecting_atoms.begin(), neighbor2);
+//        connecting_atoms.push_back(neighbor1);
+
+//        std::cout << "Updated Path between " << rotation_point1->GetId() << " and " << rotation_point2->GetId() << ":\n";
+//        for(AtomVector::iterator it1 = connecting_atoms.begin(); it1 != connecting_atoms.end(); ++it1)
+//        {
+//            Atom *atom = *it1;
+//            std::cout << atom->GetId() << "\n";
+//        }
+//    }
+//    RotatableDihedralVector rotatable_bonds = this->SplitAtomVectorIntoRotatableBonds(connecting_atoms);
+//    return rotatable_bonds;
+//}
+
 RotatableDihedralVector Residue_linkage::FindRotatableBondsConnectingResidues(Residue *first_residue, Residue *second_residue)
 {
-    // Going to ignore tags etc.
-    // Given two residues that are connected. Find connecting atoms.
-    // Search neighbors other than connected atom. Ie search out in both directions, but remain within same residue.
-    // Warning, residue may have fused cycles!
-    // Looking for N atom in a protein residue. name is N and IsProtein
-    // Looking for anomeric carbon in carbohydrate residue.
-    // Will fail for non-protein residues without cycles. As don't have a non-rotatable bond to anchor from. Can code that later (and deal with branches from these residues).
-    std::cout << "Finding rot bonds for " << first_residue->GetId() << " and " << second_residue->GetId() << "\n";
+    //using namespace gmml::MolecularMetaData::GLYCAM;
+//    // Given two residues that are connected. Find connecting atoms.
+//    // Will fail for non-protein residues without cycles. As don't have a non-rotatable bond to anchor from. Can code that later (and deal with branches from these residues).
     AtomVector connecting_atoms;
     bool found = false;
     selection::FindAtomsConnectingResidues(first_residue->GetAtoms().at(0), second_residue, &connecting_atoms, &found);
@@ -66,44 +117,18 @@ RotatableDihedralVector Residue_linkage::FindRotatableBondsConnectingResidues(Re
     Atom *connection_atom1 = connecting_atoms.at(0);
     Atom *connection_atom2 = connecting_atoms.at(1);
 
-    AtomVector rotation_points = selection::FindRotationPoints(connection_atom1);
-    AtomVector rotation_points2 = selection::FindRotationPoints(connection_atom2);
-    // Need to reverse one of these, so when concatenated, they are ordered ok. This might not be ok.
-    std::reverse(rotation_points2.begin(), rotation_points2.end());
-    // Now concatenate:
-    rotation_points.insert( rotation_points.begin(), rotation_points2.begin(), rotation_points2.end() );
-    // Now that have a list of rotation points. Split into pairs and find rotatable bonds between them
-    // BUT remember that first and last atom in list are just there to define dihedrals. Skip those
-    for(int i = 0; i < rotation_points.size(); i = i+2)
+    gmml::MolecularMetadata::GLYCAM::DihedralAngleDataContainer DihedralAngleMetadata;
+
+    gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector matching_entries = DihedralAngleMetadata.GetEntriesForLinkage(connection_atom1, connection_atom2);
+    std::cout << "Found these " << matching_entries.size() << " entries:\n";
+    for (const auto& entry : matching_entries)
     {
-        Atom *rotation_point1 = rotation_points.at(i);
-        Atom *rotation_point2 = rotation_points.at(i+1);
-
-        found = false;
-        connecting_atoms.clear();
-       // std::cout << "Finding Path between " << rotation_point1->GetId() << " and " << rotation_point2->GetId() << ".\n";
-        selection::FindPathBetweenTwoAtoms(rotation_point1, rotation_point2, &connecting_atoms, &found);
-        selection::ClearAtomDescriptions(rotation_point1->GetResidue());
-        selection::ClearAtomDescriptions(rotation_point2->GetResidue());
-        // Find neighboring atoms needed to define dihedral. Pass in connecting atoms so don't find any of those.
-        Atom *neighbor1 =  selection::FindCyclePointNeighbor(connecting_atoms, rotation_point1);
-        Atom *neighbor2 =  selection::FindCyclePointNeighbor(connecting_atoms, rotation_point2);
-        // Insert these neighbors into list of connecting atoms, at beginning and end of vector.
-        // connecting_atoms gets populated as it falls out, so list is reveresed from what you'd expect
-        connecting_atoms.insert(connecting_atoms.begin(), neighbor2);
-        connecting_atoms.push_back(neighbor1);
-
-        std::cout << "Updated Path between " << rotation_point1->GetId() << " and " << rotation_point2->GetId() << ":\n";
-        for(AtomVector::iterator it1 = connecting_atoms.begin(); it1 != connecting_atoms.end(); ++it1)
-        {
-            Atom *atom = *it1;
-            std::cout << atom->GetId() << "\n";
-        }
+        std::cout << entry.name_ << ", " << entry.atom1_ << ", " << entry.atom2_ << ", " << entry.atom3_ << ", " << entry.atom4_ << ", " << entry.default_angle_value_ << "\n";
     }
+
     RotatableDihedralVector rotatable_bonds = this->SplitAtomVectorIntoRotatableBonds(connecting_atoms);
     return rotatable_bonds;
 }
-
 
 RotatableDihedralVector Residue_linkage::SplitAtomVectorIntoRotatableBonds(AtomVector atoms)
 {
