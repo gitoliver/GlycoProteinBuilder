@@ -22,7 +22,6 @@ public:
     //                       CONSTRUCTOR                    //
     //////////////////////////////////////////////////////////
 
-    Rotatable_dihedral();
     Rotatable_dihedral(Atom *atom1, Atom *atom2, Atom *atom3, Atom *atom4);
     Rotatable_dihedral(AtomVector atoms);
     Rotatable_dihedral(AtomVector atoms, AtomVector atoms_that_move);
@@ -51,13 +50,23 @@ public:
     // Sets the dihedral angle by rotating the bond between atom2 and atom3, moving atom4 and connected.
     void SetDihedralAngle(double dihedral_angle);
     // Sets the dihedral to previous dihedral angle
-    void ResetDihedralAngle();
-    // Takes in a set of ranges, e.g. 10 to 30, 45-55 etc. Randomly selects a range and randomly sets value within that range.
-    double RandomizeDihedralAngleWithinRanges(std::vector<std::pair<double,double>> ranges);
+    void SetPreviousDihedralAngle();
     // Randomly sets dihedral angle values between 0 and 360
     double RandomizeDihedralAngle();
+    // Takes in a set of ranges, e.g. 10 to 30, 45-55 etc. Randomly selects a range and randomly sets value within that range.
+    double RandomizeDihedralAngleWithinRanges(std::vector<std::pair<double,double>> ranges);
     // Randomly sets dihedral angle to a value within the given range. E.g. Between 25 and 30 degrees.
     double RandomizeDihedralAngleWithinRange(double min, double max);
+
+    // ALTER CONSTRUCTOR SO THESE  next two ARE PRIVATE?
+
+    // A residue-residue linkage will have metadata for each rotatable_dihedral. Multiple rotamers means multiple entries.
+    void SetMetadata(gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector metadataVector);
+    void AddMetadata(gmml::MolecularMetadata::GLYCAM::DihedralAngleData metadata);
+
+    // Set according to default values in metadata
+    double SetDihedralAngleUsingMetadata(bool use_ranges = false);
+
 
     //////////////////////////////////////////////////////////
     //                       DISPLAY FUNCTION               //
@@ -72,7 +81,7 @@ public:
 private:
 
     //////////////////////////////////////////////////////////
-    //                       FUNCTIONS                      //
+    //                  PRIVATE FUNCTIONS                   //
     //////////////////////////////////////////////////////////
 
     void Initialize(AtomVector atoms);
@@ -93,6 +102,7 @@ private:
     AtomVector atoms_that_move_;
     // I often want to reset a dihedral angle after rotating it, so recording the previous angle makes this easy.
     double previous_dihedral_angle_;
+    gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector assigned_metadata_;
 
 };
 

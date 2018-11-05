@@ -185,11 +185,15 @@ Atom* selection::FindCyclePointNeighbor(const AtomVector atom_path, Atom *cycle_
     {
         selected_neighbor = cycle_point->GetResidue()->GetAtom("N");
     }
-    else if (cycle_point->GetName().compare("C2")==0) // This is a Sia, and we always want the C1 atom.
+    else if (cycle_point->GetName().compare("C2")==0) // This is an ulose (e.g. Sia), and we always want the C1 atom.
     {
         selected_neighbor = cycle_point->GetResidue()->GetAtom("C1");
     }
-    else
+    else if (cycle_point->GetName().compare("C1")==0)
+    {
+        selected_neighbor = cycle_point->GetResidue()->GetAtom("C2"); // We can always set phi to 180 this way, regardless of alpha/beta
+    }
+    else // This bit is overdone now, as I was looking for higher numbered atoms of C1, but now I know I always want C2, so put that above.
     {
         AtomVector neighbors = cycle_point->GetNode()->GetNodeNeighbors();
         // Ok must first get a list of neighbors that weren't in the connection path
@@ -220,6 +224,73 @@ Atom* selection::FindCyclePointNeighbor(const AtomVector atom_path, Atom *cycle_
     }
     return selected_neighbor;
 }
+
+//Atom* selection::FindAtomNeighborThatMatchesQuery(Atom *atom, std::string query)
+//{
+//    Atom *selected_atom;
+//    std::regex regex(query, std::regex_constants::ECMAScript);
+//    AtomVector neighbors = atom->GetNode()->GetNodeNeighbors();
+//    for (const auto& neighbor : neighbors)
+//    {
+//        if (std::regex_search(neighbor->GetName(), regex))
+//        {
+//            std::cout << "Matching neighbor for " << atom->GetName() << " is " << neighbor->GetName() << "\n";
+//            selected_atom = &(*neighbor);
+//        }
+//    }
+//    return selected_atom;
+//}
+
+//AtomVector selection::FindBondedAtomsThatMatchQuery(Atom *anomeric_carbon, std::vector<std::regex> atom_name_queries)
+//{
+//    // Jesus.
+//    // Get every atom in Residue1 and Residue2.
+//    // Get every atom that matches first atom in query
+
+//    AtomVector found_atom_path;
+//    bool success = false;
+//    int depth = 0;
+//     selection::seek_neighbors_with_regex_query(anomeric_carbon, &found_atom_path, depth, atom_name_queries, &success);
+////    std::regex first_atom = atom_name_queries.at(0);
+////    if (std::regex_search(anomeric_carbon->GetName(), first_atom))
+////    {
+////        found_atom_path.push_back(anomeric_carbon);
+////        ++depth;
+////        selection::seek_neighbors_with_regex_query(anomeric_carbon, &found_atom_path, depth, atom_name_queries, &success);
+////    }
+////    else
+////    {
+////        depth = 0;
+// //       selection::seek_neighbors_with_regex_query(anomeric_carbon, &found_atom_path, depth, atom_name_queries, &success);
+////    }
+////    std::ptrdiff_t pos = std::distance(atom_name_queries.begin(), std::find(atom_name_queries.begin(), atom_name_queries.end(), old_name_));
+////    if(pos >= Names.size()) {
+////        //old_name_ not found
+////    }
+//}
+
+//Atom* selection::FindClosestNeighbor
+
+//void selection::seek_neighbors_with_regex_query(Atom *current_atom, AtomVector *found_atom_path, int depth, std::vector<std::regex> atom_name_queries, bool &success)
+//{
+//    std::regex current_regex = atom_name_queries.at(depth);
+//    AtomVector neighbors = current_atom->GetNode()->GetNodeNeighbors();
+//    for (const auto& neighbor : neighbors)
+//    {
+//        if (std::regex_search(neighbor->GetName(), current_regex))
+//        {
+//            if (depth == 3) // we have made it
+//            {
+//                *success = true;
+//            }
+//            else
+//            {
+//                ++depth;
+//                selection::seek_neighbors_with_regex_query(current_atom, depth, atom_name_queries, &success);
+//            }
+//        }
+//    }
+//}
 
 
 

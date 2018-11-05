@@ -3,6 +3,7 @@
 
 //#include "../../../includes/gmml.hpp"
 #include "gmml.hpp"
+#include <regex>
 
 using namespace MolecularModeling;
 namespace selection
@@ -18,6 +19,7 @@ bool FindPathBetweenTwoAtoms(Atom *current_atom, Atom *target_atom, AtomVector *
 void ClearAtomDescriptions(Residue *residue);
 AtomVector FindRotationPoints(Atom *atom);
 Atom* FindCyclePointNeighbor(const AtomVector atom_path, Atom *cycle_point);
+Atom* FindAtomNeighborThatMatchesQuery(Atom *atom, std::string query);
 }
 
 #endif // SELECTIONS_H

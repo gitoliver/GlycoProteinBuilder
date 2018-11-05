@@ -539,12 +539,12 @@ void GlycosylationSite::SetResonableChi1Chi2DihedralAngles()
 
 void GlycosylationSite::RandomizeDihedralAngles()
 {
-    rotatable_bonds_.RandomizeDihedralAngles();
+    rotatable_bonds_.SetRandomDihedralAngles();
 }
 
 void GlycosylationSite::ResetDihedralAngles()
 {
-    rotatable_bonds_.ResetDihedralAngles();
+    rotatable_bonds_.SetPreviousDihedralAngles();
 }
 
 void GlycosylationSite::SetRotatableBonds(Residue *residue1, Residue *residue2)

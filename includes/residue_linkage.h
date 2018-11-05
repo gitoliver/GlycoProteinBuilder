@@ -22,11 +22,7 @@ public:
     //                       CONSTRUCTOR                    //
     //////////////////////////////////////////////////////////
 
-    Residue_linkage();
     Residue_linkage(Residue *residue1, Residue *residue2);
-    Residue_linkage(Residue *residue1, Residue *residue2, std::vector <double> dihedral_angles);
-
-
 
     //////////////////////////////////////////////////////////
     //                       ACCESSOR                       //
@@ -34,28 +30,21 @@ public:
 
     ResidueVector GetResidues();
     RotatableDihedralVector GetRotatableDihedrals() const;
-
-    //////////////////////////////////////////////////////////
-    //                       FUNCTIONS                      //
-    //////////////////////////////////////////////////////////
-
-    RotatableDihedralVector FindRotatableBondsConnectingResidues(Residue *first_residue, Residue *second_residue);
-    // Previous function generates a list of linearly connected atoms that define the rotatable bonds
-    // This function splits that list into groups of 4 and creates rotatable_dihedral objects
-    RotatableDihedralVector SplitAtomVectorIntoRotatableBonds(AtomVector atoms);
-    // This is bad, but sets Chi1 and Chi2 to 180. These bonds are present in protein residues except Gly.
-    void SetReasonableChi1Chi2DihedralAngles();
+    int GetNumberOfRotatableBonds();
 
     //////////////////////////////////////////////////////////
     //                       MUTATOR                        //
     //////////////////////////////////////////////////////////
 
-    void DetermineAtomsThatMove();
-    void SetResidues(Residue *residue1, Residue *residue2);
-    void SetDihedralAngles(std::vector <double> dihedral_angles);
-    void ResetDihedralAngles();
-    double RandomizeDihedralAnglesWithinTheirRanges();
-    double RandomizeDihedralAngles();
+    //////////////////////////////////////////////////////////
+    //                       FUNCTIONS                      //
+    //////////////////////////////////////////////////////////
+
+    void SetDihedralAnglesToMetadataDefaults();
+    void SetRandomDihedralAnglesWithinTheirMetadataRanges();
+    void SetCustomDihedralAngles(std::vector <double> dihedral_angles);
+    void SetPreviousDihedralAngles();
+    void SetRandomDihedralAngles();
 
     //////////////////////////////////////////////////////////
     //                       DISPLAY FUNCTION               //
@@ -70,9 +59,19 @@ public:
 private:
 
     //////////////////////////////////////////////////////////
-    //                       FUNCTIONS                      //
+    //                    PRIVATE FUNCTIONS                 //
     //////////////////////////////////////////////////////////
 
+    void InitializeClass(Residue *residue1, Residue *residue2);
+    RotatableDihedralVector FindRotatableBondsConnectingResidues(Atom *connection_atom1, Atom *connection_atom2);
+    // Previous function generates a list of linearly connected atoms that define the rotatable bonds
+    // This function splits that list into groups of 4 and creates rotatable_dihedral objects
+    RotatableDihedralVector SplitAtomVectorIntoRotatableBonds(AtomVector atoms);
+    gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector FindMetadata(Atom *connection_atom1, Atom *connection_atom2);
+    void AddMetadataToRotatableDihedrals(gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector metadata);
+    void DetermineAtomsThatMove();
+    void SetResidues(Residue *residue1, Residue *residue2);
+    void SetConnectionAtoms(Residue *residue1, Residue *residue2);
 
     //////////////////////////////////////////////////////////
     //                       ATTRIBUTES                     //
@@ -80,8 +79,10 @@ private:
 
     Residue* residue1_;
     Residue* residue2_;
+    Atom* connection_atom1_;
+    Atom* connection_atom2_;
     RotatableDihedralVector rotatable_bonds_;
-
+    gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector metadata_;
 };
 
 std::ostream& operator<<(std::ostream& os, const Residue_linkage&);
