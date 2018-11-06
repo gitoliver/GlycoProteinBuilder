@@ -531,29 +531,19 @@ void GlycosylationSite::SetOtherGlycanBeads(AtomVector *beads)
     other_glycan_beads_ = *beads;
 }
 
-// This is funkin dodgy hey:
-void GlycosylationSite::SetResonableChi1Chi2DihedralAngles()
+void GlycosylationSite::SetDefaultDihedralAnglesUsingMetadata()
 {
-    rotatable_bonds_.SetReasonableChi1Chi2DihedralAngles();
+    rotatable_bonds_.SetDefaultDihedralAnglesUsingMetadata();
 }
 
-void GlycosylationSite::RandomizeDihedralAngles()
+void GlycosylationSite::SetRandomDihedralAnglesUsingMetadata()
 {
-    rotatable_bonds_.SetRandomDihedralAngles();
+    rotatable_bonds_.SetRandomDihedralAnglesUsingMetadata();
 }
 
 void GlycosylationSite::ResetDihedralAngles()
 {
     rotatable_bonds_.SetPreviousDihedralAngles();
-}
-
-void GlycosylationSite::SetRotatableBonds(Residue *residue1, Residue *residue2)
-{
-
-    Residue_linkage rotatable_bonds(residue1, residue2);
-    rotatable_bonds_ = rotatable_bonds;
-    // Copy is ok for now. I set up Residue_linkage to be consructed, but would need Glycosidic linkage to be constructed all at once too. Need to look into that.
-    // I.e. Construct everything all at once via "constructors".
 }
 
 void GlycosylationSite::UpdateAtomsThatMoveInLinkages()
@@ -581,3 +571,15 @@ void GlycosylationSite::Print(std::string type)
 
 }
 
+//////////////////////////////////////////////////////////
+//                   PRIVATE FUNCTIONS                 //
+//////////////////////////////////////////////////////////
+
+void GlycosylationSite::SetRotatableBonds(Residue *residue1, Residue *residue2)
+{
+
+    Residue_linkage rotatable_bonds(residue1, residue2);
+    rotatable_bonds_ = rotatable_bonds;
+    // Copy is ok for now. I set up Residue_linkage to be consructed, but would need Glycosidic linkage to be constructed all at once too. Need to look into that.
+    // I.e. Construct everything all at once via "constructors".
+}

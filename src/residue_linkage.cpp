@@ -10,6 +10,8 @@ typedef std::vector<Rotatable_dihedral> RotatableDihedralVector;
 //                       CONSTRUCTOR                    //
 //////////////////////////////////////////////////////////
 
+Residue_linkage::Residue_linkage() {} // Do nothin
+
 Residue_linkage::Residue_linkage(Residue *residue1, Residue *residue2)
 {
     this->InitializeClass(residue1, residue2);
@@ -43,9 +45,22 @@ int Residue_linkage::GetNumberOfRotatableBonds()
 //                       FUNCTIONS                      //
 //////////////////////////////////////////////////////////
 
-void Residue_linkage::SetDihedralAnglesToMetadataDefaults()
+void Residue_linkage::SetDefaultDihedralAnglesUsingMetadata()
 {
+    for (auto entry : rotatable_bonds_)
+    {
+        entry.SetDihedralAngleUsingMetadata();
+    }
+}
 
+// Range should be inherent to each dihedral. Should add that to the class.
+void Residue_linkage::SetRandomDihedralAnglesUsingMetadata()
+{
+    for (auto entry : rotatable_bonds_)
+    {
+        bool use_ranges = true;
+        entry.SetDihedralAngleUsingMetadata(use_ranges);
+    }
 }
 
 void Residue_linkage::SetCustomDihedralAngles(std::vector <double> dihedral_angles)
@@ -73,21 +88,21 @@ void Residue_linkage::SetPreviousDihedralAngles()
     }
 }
 
-// Range should be inherent to each dihedral. Should add that to the class.
-void Residue_linkage::SetRandomDihedralAnglesWithinTheirMetadataRanges()
-{
-    for (const auto& entry : metadata_)
-    {
-        bool use_ranges = true;
-        entry.SetDihedralAngleUsingMetadata(use_ranges);
-    }
-}
+
 
 void Residue_linkage::SetRandomDihedralAngles()
 {
     for(RotatableDihedralVector::iterator rotatable_bond = rotatable_bonds_.begin(); rotatable_bond != rotatable_bonds_.end(); ++rotatable_bond)
     {
         rotatable_bond->RandomizeDihedralAngle();
+    }
+}
+
+void Residue_linkage::DetermineAtomsThatMove()
+{
+    for(RotatableDihedralVector::iterator rotatable_bond = rotatable_bonds_.begin(); rotatable_bond != rotatable_bonds_.end(); ++rotatable_bond)
+    {
+        rotatable_bond->DetermineAtomsThatMove();
     }
 }
 
@@ -127,8 +142,8 @@ void Residue_linkage::InitializeClass(Residue *residue1, Residue *residue2)
     this->SetResidues(residue1, residue2);
     this->SetConnectionAtoms(residue1_, residue2_);
     rotatable_bonds_ = this->FindRotatableBondsConnectingResidues(connection_atom1_, connection_atom2_);
-    metadata_ = this->FindMetadata(connection_atom1_, connection_atom2_);
-    this->AddMetadataToRotatableDihedrals(metadata_);
+    gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector metadata = this->FindMetadata(connection_atom1_, connection_atom2_);
+    this->AddMetadataToRotatableDihedrals(metadata);
 }
 
 RotatableDihedralVector Residue_linkage::FindRotatableBondsConnectingResidues(Atom *connection_atom1, Atom *connection_atom2)
@@ -137,8 +152,6 @@ RotatableDihedralVector Residue_linkage::FindRotatableBondsConnectingResidues(At
     // Given two residues that are connected. Find connecting atoms.
     // Search neighbors other than connected atom. Ie search out in both directions, but remain within same residue.
     // Warning, residue may have fused cycles!
-    // Looking for N atom in a protein residue. name is N and IsProtein
-    // Looking for anomeric carbon in carbohydrate residue.
     // Will fail for non-protein residues without cycles. As don't have a non-rotatable bond to anchor from. Can code that later (and deal with branches from these residues).
     std::cout << "Finding rot bonds for " << connection_atom1->GetResidue()->GetId() << " and " << connection_atom2->GetResidue()->GetId() << "\n";
 
@@ -223,7 +236,7 @@ void Residue_linkage::AddMetadataToRotatableDihedrals(gmml::MolecularMetadata::G
     {
         int bond_number = int (entry.index_); // typecast to an int
         int vector_position = (bond_number - 1); // vectors start at 0.
-        //std::cout << "Adding to position: "<< vector_position << " in vector of size: " << rotatable_bonds_.size() << std::endl;
+        std::cout << "Adding to position: "<< vector_position << " in vector of size: " << rotatable_bonds_.size() << std::endl;
         if (vector_position <= rotatable_bonds_.size())
         {
             rotatable_bonds_.at(vector_position).AddMetadata(entry);
@@ -238,13 +251,6 @@ void Residue_linkage::AddMetadataToRotatableDihedrals(gmml::MolecularMetadata::G
     }
 }
 
-void Residue_linkage::DetermineAtomsThatMove()
-{
-    for(RotatableDihedralVector::iterator rotatable_bond = rotatable_bonds_.begin(); rotatable_bond != rotatable_bonds_.end(); ++rotatable_bond)
-    {
-        rotatable_bond->DetermineAtomsThatMove();
-    }
-}
 
 void Residue_linkage::SetResidues(Residue *residue1, Residue *residue2)
 {

@@ -127,20 +127,20 @@ void glycoprotein_builder::PrintDihedralAnglesAndOverlapOfGlycosites(Glycosylati
     return;
 }
 
-void glycoprotein_builder::SetResonableChi1Chi2DihedralAngles(GlycosylationSiteVector &glycosites)
+void glycoprotein_builder::SetDefaultDihedralAnglesUsingMetadata(GlycosylationSiteVector &glycosites)
 {
     for(GlycosylationSiteVector::iterator glycosite = glycosites.begin(); glycosite != glycosites.end(); ++glycosite)
     {
-        glycosite->SetResonableChi1Chi2DihedralAngles();
+        glycosite->SetDefaultDihedralAnglesUsingMetadata();
     }
     return;
 }
 
-void glycoprotein_builder::SetRandomChi1Chi2DihedralAngles(GlycosylationSiteVector &glycosites)
+void glycoprotein_builder::SetRandomDihedralAnglesUsingMetadata(GlycosylationSiteVector &glycosites)
 {
     for(GlycosylationSiteVector::iterator glycosite = glycosites.begin(); glycosite != glycosites.end(); ++glycosite)
     {
-        glycosite->RandomizeDihedralAngles();
+        glycosite->SetRandomDihedralAnglesUsingMetadata();
     }
     return;
 }

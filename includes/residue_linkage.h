@@ -22,6 +22,7 @@ public:
     //                       CONSTRUCTOR                    //
     //////////////////////////////////////////////////////////
 
+    Residue_linkage();
     Residue_linkage(Residue *residue1, Residue *residue2);
 
     //////////////////////////////////////////////////////////
@@ -40,11 +41,12 @@ public:
     //                       FUNCTIONS                      //
     //////////////////////////////////////////////////////////
 
-    void SetDihedralAnglesToMetadataDefaults();
-    void SetRandomDihedralAnglesWithinTheirMetadataRanges();
+    void SetDefaultDihedralAnglesUsingMetadata();
+    void SetRandomDihedralAnglesUsingMetadata();
     void SetCustomDihedralAngles(std::vector <double> dihedral_angles);
     void SetPreviousDihedralAngles();
     void SetRandomDihedralAngles();
+    void DetermineAtomsThatMove();
 
     //////////////////////////////////////////////////////////
     //                       DISPLAY FUNCTION               //
@@ -69,7 +71,6 @@ private:
     RotatableDihedralVector SplitAtomVectorIntoRotatableBonds(AtomVector atoms);
     gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector FindMetadata(Atom *connection_atom1, Atom *connection_atom2);
     void AddMetadataToRotatableDihedrals(gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector metadata);
-    void DetermineAtomsThatMove();
     void SetResidues(Residue *residue1, Residue *residue2);
     void SetConnectionAtoms(Residue *residue1, Residue *residue2);
 
@@ -82,7 +83,7 @@ private:
     Atom* connection_atom1_;
     Atom* connection_atom2_;
     RotatableDihedralVector rotatable_bonds_;
-    gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector metadata_;
+    //gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector metadata_;
 };
 
 std::ostream& operator<<(std::ostream& os, const Residue_linkage&);

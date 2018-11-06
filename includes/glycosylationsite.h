@@ -48,8 +48,6 @@ public:
     AtomVector GetOtherGlycanBeads();
     Residue_linkage GetRotatableBonds();
 
-
-
     //////////////////////////////////////////////////////////
     //                       FUNCTIONS                      //
     //////////////////////////////////////////////////////////
@@ -58,9 +56,6 @@ public:
     double Calculate_and_print_bead_overlaps();
     void UpdateAtomsThatMoveInLinkages();
     void Rename_Protein_Residue_From_GLYCAM_To_Standard();
-
-   // void SetChiAtoms(Residue* residue);
-
 
     //////////////////////////////////////////////////////////
     //                       MUTATOR                        //
@@ -75,8 +70,8 @@ public:
     void SetSelfGlycanBeads(AtomVector *beads);
     void SetProteinBeads(AtomVector *beads);
     void SetOtherGlycanBeads(AtomVector *beads);
-    void RandomizeDihedralAngles();
-    void SetResonableChi1Chi2DihedralAngles();
+    void SetDefaultDihedralAnglesUsingMetadata();
+    void SetRandomDihedralAnglesUsingMetadata();
     void ResetDihedralAngles();
 
     //////////////////////////////////////////////////////////

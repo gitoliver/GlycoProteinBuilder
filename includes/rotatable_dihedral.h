@@ -65,7 +65,7 @@ public:
     void AddMetadata(gmml::MolecularMetadata::GLYCAM::DihedralAngleData metadata);
 
     // Set according to default values in metadata
-    double SetDihedralAngleUsingMetadata(bool use_ranges = false);
+    void SetDihedralAngleUsingMetadata(bool use_ranges = false);
 
 
     //////////////////////////////////////////////////////////

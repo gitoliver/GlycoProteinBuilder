@@ -92,6 +92,59 @@ void Rotatable_dihedral::DetermineAtomsThatMove()
 }
 
 
+void Rotatable_dihedral::SetDihedralAngle(double dihedral_angle)
+{
+    GeometryTopology::Coordinate* a1 = atom1_->GetCoordinate();
+    GeometryTopology::Coordinate* a2 = atom2_->GetCoordinate();
+    GeometryTopology::Coordinate* a3 = atom3_->GetCoordinate();
+    GeometryTopology::Coordinate* a4 = atom4_->GetCoordinate();
+
+    GeometryTopology::Coordinate b1 = a2;
+    b1.operator -(*a1);
+    GeometryTopology::Coordinate b2 = a3;
+    b2.operator -(*a2);
+    GeometryTopology::Coordinate b3 = a4;
+    b3.operator -(*a3);
+    GeometryTopology::Coordinate b4 = b2;
+    b4.operator *(-1);
+
+    GeometryTopology::Coordinate b2xb3 = b2;
+    b2xb3.CrossProduct(b3);
+
+    GeometryTopology::Coordinate b1_m_b2n = b1;
+    b1_m_b2n.operator *(b2.length());
+
+    GeometryTopology::Coordinate b1xb2 = b1;
+    b1xb2.CrossProduct(b2);
+
+    double current_dihedral = atan2(b1_m_b2n.DotProduct(b2xb3), b1xb2.DotProduct(b2xb3));
+    double** dihedral_angle_matrix = gmml::GenerateRotationMatrix(&b4, a2, current_dihedral - gmml::ConvertDegree2Radian(dihedral_angle));
+    this->RecordPreviousDihedralAngle(current_dihedral);
+
+    // Yo you should add something here that checks if atoms_that_move_ is set. Yeah you.
+    // std::cout << "Moving: ";
+    for(AtomVector::iterator it = atoms_that_move_.begin(); it != atoms_that_move_.end(); it++)
+    {
+        Atom *atom = *it;
+        //  std::cout << ", " << atom->GetName();
+        GeometryTopology::Coordinate* atom_coordinate = atom->GetCoordinate();
+        GeometryTopology::Coordinate result;
+        result.SetX(dihedral_angle_matrix[0][0] * atom_coordinate->GetX() + dihedral_angle_matrix[0][1] * atom_coordinate->GetY() +
+                dihedral_angle_matrix[0][2] * atom_coordinate->GetZ() + dihedral_angle_matrix[0][3]);
+        result.SetY(dihedral_angle_matrix[1][0] * atom_coordinate->GetX() + dihedral_angle_matrix[1][1] * atom_coordinate->GetY() +
+                dihedral_angle_matrix[1][2] * atom_coordinate->GetZ() + dihedral_angle_matrix[1][3]);
+        result.SetZ(dihedral_angle_matrix[2][0] * atom_coordinate->GetX() + dihedral_angle_matrix[2][1] * atom_coordinate->GetY() +
+                dihedral_angle_matrix[2][2] * atom_coordinate->GetZ() + dihedral_angle_matrix[2][3]);
+
+        atom->GetCoordinate()->SetX(result.GetX());
+        atom->GetCoordinate()->SetY(result.GetY());
+        atom->GetCoordinate()->SetZ(result.GetZ());
+    }
+    //  std::cout << std::endl;
+    return;
+}
+
+
 void Rotatable_dihedral::SetPreviousDihedralAngle()
 {
     this->SetDihedralAngle(this->GetPreviousDihedralAngle());
@@ -142,6 +195,7 @@ double Rotatable_dihedral::RandomizeDihedralAngleWithinRanges(std::vector<std::p
 
     // Select one of the ranges
     int range_selection = distr(rng);
+    //std::cout << "Randomly selected range number " << range_selection << "\n";
 
     // create an angle within the selected range
     return Rotatable_dihedral::RandomizeDihedralAngleWithinRange(ranges.at(range_selection).first, ranges.at(range_selection).second);
@@ -165,7 +219,7 @@ void Rotatable_dihedral::SetDihedralAngleUsingMetadata(bool use_ranges)
     }
     else if(assigned_metadata_.size() == 1)
     {
-        for (const auto& entry : assigned_metadata_)
+        for (const auto& entry : assigned_metadata_) // Yes, there is only one.
         {
             double lower = entry.default_angle_value_;
             double upper = entry.default_angle_value_;
@@ -174,8 +228,8 @@ void Rotatable_dihedral::SetDihedralAngleUsingMetadata(bool use_ranges)
                 lower = (entry.default_angle_value_ - entry.lower_deviation_) ;
                 upper = (entry.default_angle_value_ + entry.upper_deviation_) ;
             }
+            Rotatable_dihedral::RandomizeDihedralAngleWithinRange(lower, upper);
         }
-        Rotatable_dihedral::RandomizeDihedralAngleWithinRange(lower, upper);
     }
     else if(assigned_metadata_.size() >= 2)
     {
@@ -230,7 +284,7 @@ void Rotatable_dihedral::RecordPreviousDihedralAngle(double dihedral_angle)
 
 void Rotatable_dihedral::Print()
 {
-    std::cout << atom1_->GetName() << ", " << atom2_->GetName() << ", " << atom3_->GetName() << ", " << atom4_->GetName() << ": " << this->CalculateDihedralAngle() << ".\n";
+    std::cout << atom1_->GetName() << ", " << atom2_->GetName() << ", " << atom3_->GetName() << ", " << atom4_->GetName() << ": " << (this->CalculateDihedralAngle() * (180 / gmml::PI_RADIAN) ) << ".\n";
 //    for(AtomVector::iterator it1 = atoms_that_move_.begin(); it1 != atoms_that_move_.end(); ++it1)
 //    {
 //        Atom *atom = *it1;

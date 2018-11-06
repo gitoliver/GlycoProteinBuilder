@@ -44,7 +44,7 @@ void resolve_overlaps::weighted_protein_global_overlap_random_descent(Glycosylat
            // std::cout << "Checking " << current_glycosite->GetResidue()->GetId() << "\n";
             previous_glycan_overlap = current_glycosite->GetGlycanOverlap();
             previous_protein_overlap = current_glycosite->GetProteinOverlap();
-            current_glycosite->RandomizeDihedralAngles();
+            current_glycosite->SetRandomDihedralAnglesUsingMetadata();
 //            previous_chi1 = current_glycosite->GetChi1Value();
 //            current_glycosite->SetChi1Value(RandomAngle_360range());
 //            previous_chi2 = current_glycosite->GetChi2Value();
@@ -220,7 +220,7 @@ bool resolve_overlaps::dumb_random_walk(GlycosylationSiteVector &glycosites)
         for(GlycosylationSitePointerVector::iterator it1 = sites_with_overlaps.begin(); it1 != sites_with_overlaps.end(); ++it1)
         {
             GlycosylationSite *current_glycosite = (*it1);
-            current_glycosite->RandomizeDihedralAngles();
+            current_glycosite->SetRandomDihedralAnglesUsingMetadata();
         }
         //std::cout << "Updating list of sites with overlaps." << std::endl;
         sites_with_overlaps = DetermineSitesWithOverlap(glycosites, tolerance); // Moved glycans may clash with other glycans. Need to check.

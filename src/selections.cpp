@@ -87,6 +87,50 @@ bool selection::FindCyclePoint(Atom *previous_atom, Atom *current_atom, AtomVect
     return *found_cycle_point;
 }
 
+// If current_atom is connected only to atoms that have zero other intra residue connections, it is a rotation point
+bool selection::FindRotationPointsForNonCycles(Atom *previous_atom, Atom *current_atom, AtomVector *rotation_points)
+{
+    AtomVector neighbors = current_atom->GetNode()->GetNodeNeighbors();
+    AtomVector intra_node_neighbors;
+    for (auto neighbor : neighbors)
+    { // If not previous atom and not from a different residue
+        if ( (neighbor->GetIndex() != previous_atom->GetIndex()) && (current_atom->GetResidue()->GetId().compare(neighbor->GetResidue()->GetId())==0))
+        {
+            intra_node_neighbors.push_back(neighbor);
+        }
+    }
+    bool found_rotation_point = true;
+    for (auto neighbor : intra_node_neighbors)
+    {
+        AtomVector neighbor_neighbors = neighbor->GetNode()->GetNodeNeighbors();
+        AtomVector intra_node_neighbor_neighbors;
+        for (auto neighbor_neighbor : neighbor_neighbors)
+        {
+            if ( (neighbor_neighbor->GetIndex() != current_atom->GetIndex()) && (current_atom->GetResidue()->GetId().compare(neighbor_neighbor->GetResidue()->GetId())==0))
+            {
+                intra_node_neighbor_neighbors.push_back(neighbor);
+            }
+        }
+        if (intra_node_neighbor_neighbors.size() > 0 )
+        {
+            found_rotation_point = false;
+        }
+    }
+    if ( found_rotation_point ) // Deadend bitchatchoes
+    {
+        rotation_points->push_back(current_atom);
+    }
+    else // Keep looking for the ends
+    {
+        for (auto neighbor : intra_node_neighbors)
+        {
+            selection::FindRotationPointsForNonCycles(current_atom, neighbor, rotation_points);
+        }
+    }
+    return (!rotation_points->empty()); // return false if rotation_points is empty
+}
+
+
 bool selection::FindPathBetweenTwoAtoms(Atom *current_atom, Atom *target_atom, AtomVector *atom_path, bool *found)
 {
     //atom_path->push_back(current_atom);
@@ -125,13 +169,17 @@ void selection::ClearAtomDescriptions(Residue *residue)
     return;
 }
 
-// Below doesn't handle non-protein non-cyclics and would fail to find inner rotatable bonds here:
-/*
+/* Below has following flaws:
+  1) fail to find inner rotatable bonds here:
    __    __
 __/  \__/  \__
   \__/  \__/
+  If the above was within one residue.
 
-  If this was within one residue
+  2) fail to find both connections of the middle Res here:
+ Res1 __
+        \__ Res4
+ Res2 __/
 */
 AtomVector selection::FindRotationPoints(Atom *atom)
 {
@@ -155,19 +203,23 @@ AtomVector selection::FindRotationPoints(Atom *atom)
             selection::FindCyclePoint(caAtom, caAtom, &atom_path, &found, cycle_point);
             rotation_points.push_back(cycle_point);
         }
-        // Want this at end of vector
+        // Always want this at the end of the vector
         rotation_points.push_back(caAtom);
-
     }
-    else // Non protein. Must have cycles for code to work!
+    else // Non protein.
     {
-        Atom *cycle_point;
+        Atom *rotation_point;
         atom_path.clear();
         found = false;
         //Find path to first cycle atom, i.e. anomeric carbon
-        if(selection::FindCyclePoint(atom, atom, &atom_path, &found, cycle_point))
+        if(selection::FindCyclePoint(atom, atom, &atom_path, &found, rotation_point))
         {
-            rotation_points.push_back(cycle_point);
+            rotation_points.push_back(rotation_point);
+        }
+        // Ok, deal with non-protein non-cycles
+        else
+        { // Look for atom(s) with neighbors with no other neighbors within residue
+            selection::FindRotationPointsForNonCycles(atom, atom, &rotation_points);
         }
     }
     return rotation_points;

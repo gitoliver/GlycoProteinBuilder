@@ -23,8 +23,8 @@ namespace glycoprotein_builder
 void Read_Input_File(GlycosylationSiteVector &glycosites, std::string &proteinPDB, std::string &glycanDirectory, const std::string working_Directory);
 void AttachGlycansToGlycosites(MolecularModeling::Assembly &glycoprotein, GlycosylationSiteVector &glycosites, const std::string glycanDirectory);
 void PrintDihedralAnglesAndOverlapOfGlycosites(GlycosylationSiteVector &glycosites);
-void SetResonableChi1Chi2DihedralAngles(GlycosylationSiteVector &glycosites);
-void SetRandomChi1Chi2DihedralAngles(GlycosylationSiteVector &glycosites);
+void SetDefaultDihedralAnglesUsingMetadata(GlycosylationSiteVector &glycosites);
+void SetRandomDihedralAnglesUsingMetadata(GlycosylationSiteVector &glycosites);
 void CalculateOverlaps(GlycosylationSiteVector &glycosites);
 double GetGlobalOverlap(GlycosylationSiteVector &glycosites);
 //double RandomAngle_360range();
