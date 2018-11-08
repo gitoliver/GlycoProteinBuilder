@@ -110,11 +110,15 @@ AtomVector GlycosylationSite::GetOtherGlycanBeads()
     return other_glycan_beads_;
 }
 
-Residue_linkage GlycosylationSite::GetRotatableBonds()
-{
-    return rotatable_bonds_;
-}
+//Residue_linkage GlycosylationSite::GetRotatableBonds()
+//{
+//    return residue_linkage_;
+//}
 
+ResidueLinkageVector GlycosylationSite::GetRotatableBonds()
+{
+    return all_residue_linkages_;
+}
 
 
 //////////////////////////////////////////////////////////
@@ -130,7 +134,11 @@ void GlycosylationSite::AttachGlycan(Assembly glycan, Assembly &glycoprotein)
     this->Superimpose_Glycan_To_Glycosite(residue_);
     this->Rename_Protein_Residue_To_GLYCAM_Nomenclature();
     glycoprotein.MergeAssembly(&glycan_); // Add glycan to glycoprotein assembly, allows SetDihedral later. May not be necessary anymore with new Rotatable Dihedral class.
-    this->SetRotatableBonds(glycan_.GetResidues().at(0), residue_);
+    //this->SetRotatableBonds(glycan_.GetResidues().at(0), residue_);
+  // ResidueLinkageVector temp;
+    all_residue_linkages_.emplace_back(glycan_.GetResidues().at(0), residue_);
+    this->FigureOutResidueLinkagesInGlycan(glycan_.GetResidues().at(0), glycan_.GetResidues().at(0), &all_residue_linkages_);
+  //  all_residue_linkages_ = temp;
 }
 
 /*
@@ -533,22 +541,38 @@ void GlycosylationSite::SetOtherGlycanBeads(AtomVector *beads)
 
 void GlycosylationSite::SetDefaultDihedralAnglesUsingMetadata()
 {
-    rotatable_bonds_.SetDefaultDihedralAnglesUsingMetadata();
+    for(auto linkage : all_residue_linkages_)
+    {
+        linkage.SetDefaultDihedralAnglesUsingMetadata();
+    }
+    //residue_linkage_.SetDefaultDihedralAnglesUsingMetadata();
 }
 
 void GlycosylationSite::SetRandomDihedralAnglesUsingMetadata()
 {
-    rotatable_bonds_.SetRandomDihedralAnglesUsingMetadata();
+    for(auto linkage : all_residue_linkages_)
+    {
+        linkage.SetRandomDihedralAnglesUsingMetadata();
+    }
+    //residue_linkage_.SetRandomDihedralAnglesUsingMetadata();
 }
 
 void GlycosylationSite::ResetDihedralAngles()
 {
-    rotatable_bonds_.SetPreviousDihedralAngles();
+    for(auto linkage : all_residue_linkages_)
+    {
+        linkage.SetPreviousDihedralAngles();
+    }
+    //residue_linkage_.SetPreviousDihedralAngles();
 }
 
 void GlycosylationSite::UpdateAtomsThatMoveInLinkages()
 {
-    rotatable_bonds_.DetermineAtomsThatMove();
+    for(auto linkage : all_residue_linkages_)
+    {
+        linkage.DetermineAtomsThatMove();
+    }
+    //residue_linkage_.DetermineAtomsThatMove();
 }
 
 
@@ -563,23 +587,99 @@ void GlycosylationSite::Print(std::string type)
         std::cout << "Residue ID: " << this->GetResidue()->GetId();
         std::cout << ", overlap: " << this->GetOverlap() << std::endl;
         std::cout << "Dihedrals: \n";
-        this->GetRotatableBonds().Print();
+        //this->GetRotatableBonds().Print();
         //rotatable_bonds_.Print();
         std::cout << "\n";
-
     }
-
 }
 
 //////////////////////////////////////////////////////////
 //                   PRIVATE FUNCTIONS                 //
 //////////////////////////////////////////////////////////
 
-void GlycosylationSite::SetRotatableBonds(Residue *residue1, Residue *residue2)
-{
+//void GlycosylationSite::SetRotatableBonds(Residue *residue1, Residue *residue2)
+//{
 
-    Residue_linkage rotatable_bonds(residue1, residue2);
-    rotatable_bonds_ = rotatable_bonds;
-    // Copy is ok for now. I set up Residue_linkage to be consructed, but would need Glycosidic linkage to be constructed all at once too. Need to look into that.
-    // I.e. Construct everything all at once via "constructors".
+//    Residue_linkage rotatable_bonds(residue1, residue2);
+//    residue_linkage_ = rotatable_bonds;
+//    // Copy is ok for now. I set up Residue_linkage to be consructed, but would need Glycosidic linkage to be constructed all at once too. Need to look into that.
+//    // I.e. Construct everything all at once via "constructors" <-- lolyes.
+
+//}
+
+// Below doesn't work as ResidueNode is not set.
+//void GlycosylationSite::FigureOutResidueLinkagesInGlycanOld(Residue *residue1, Residue *residue2, ResidueLinkageVector *residue_linkages)
+//{
+//    std::cout << "Brutus?" << std::endl;
+//    for(auto node : residue2->GetNode()->GetResidueNodeNeighbors())
+//    {
+//        Residue *next_residue = node->GetResidue();
+//        if ( next_residue->GetId().compare(residue1->GetId())!=0) // if not the previous residue
+//        {
+//            std::cout << "Et tu," << std::endl;
+//            Residue_linkage steve(residue2, next_residue);
+//            std::cout << "Buttalis?" << std::endl;
+//            //residue_linkages->push_back(steve);
+//            FigureOutResidueLinkagesInGlycanOld(residue2, next_residue, residue_linkages);
+//        }
+//    }
+//    return;
+//}
+
+// These functions do not fit here. Also, as ResidueNodes are not set, they are overly complex (nested recursive functions anyone?).
+// They traverse the residues. I want to ignore the algycon for now.
+void GlycosylationSite::FigureOutResidueLinkagesInGlycan(Residue *residue1, Residue *residue2, ResidueLinkageVector *residue_linkages)
+{
+    Atom *start_atom = residue2->GetAtoms().at(0); // Need to start somewhere.
+    ResidueVector neighbors;
+    RecursivelyGetAllNeighboringResidues(start_atom, &neighbors);
+    ResidueVector glycan_residues = glycan_.GetResidues();
+//    for(auto &neighbor : neighbors)
+//    {
+//        auto it = std::find(glycan_residues.begin(), glycan_residues.end(), neighbor);
+//        if (it != glycan_residues.end())
+//        {
+//            std::cout << neighbor->GetId() << " is in glycan_residues\n";
+//        }
+//        else
+//        {
+//            std::cout << neighbor->GetId() << " is NOT in glycan_residues\n";
+//        }
+//    }
+    for(auto &neighbor : neighbors)
+    {
+        if( (neighbor->GetIndex() != residue1->GetIndex()) && (std::find(glycan_residues.begin(), glycan_residues.end(), neighbor) != glycan_residues.end())  )
+        {
+            //std::cout << "Setting linkages for " << neighbor->GetId() << "->" << residue2->GetId() << "\n";
+            residue_linkages->emplace_back(neighbor, residue2);
+        }
+    }
+    for(auto &neighbor : neighbors)
+    {
+        if( (neighbor->GetIndex() != residue1->GetIndex()) && (std::find(glycan_residues.begin(), glycan_residues.end(), neighbor) != glycan_residues.end())  )
+        {
+            FigureOutResidueLinkagesInGlycan(residue2, neighbor, residue_linkages);
+        }
+    }
 }
+
+void GlycosylationSite::RecursivelyGetAllNeighboringResidues(Atom* current_atom, ResidueVector* neighbors)
+{
+    current_atom->SetDescription("VisitedByRecursivelyGetAllNeighboringResidues");
+    for(auto neighboring_atom : current_atom->GetNode()->GetNodeNeighbors())
+    {
+        unsigned long long neighbor_index = neighboring_atom->GetResidue()->GetIndex();
+        if(neighbor_index != current_atom->GetResidue()->GetIndex())
+        {
+            neighbors->push_back(neighboring_atom->GetResidue());
+//            std::cout << "Foreign neighbor of " << current_atom->GetId() << " is " << neighboring_atom->GetId() << "\n";
+//            std::cout << "size is now " << neighbors->size() << "\n";
+        }
+        else if (neighboring_atom->GetDescription().compare("VisitedByRecursivelyGetAllNeighboringResidues")!=0)
+        { // If in current residue, and not visited already:
+            RecursivelyGetAllNeighboringResidues(neighboring_atom, neighbors);
+        }
+    }
+}
+
+

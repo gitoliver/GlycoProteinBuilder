@@ -88,6 +88,7 @@ private:
     void SetAtoms(AtomVector atoms);
     void SetAtomsThatMove(AtomVector atoms);
     void RecordPreviousDihedralAngle(double dihedral_angle);
+    void UpdateAtomsIfPsi();
 
     //////////////////////////////////////////////////////////
     //                       ATTRIBUTES                     //

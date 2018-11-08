@@ -204,11 +204,13 @@ double Rotatable_dihedral::RandomizeDihedralAngleWithinRanges(std::vector<std::p
 void Rotatable_dihedral::SetMetadata(gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector metadataVector)
 {
     assigned_metadata_ = metadataVector;
+    this->UpdateAtomsIfPsi();
 }
 
 void Rotatable_dihedral::AddMetadata(gmml::MolecularMetadata::GLYCAM::DihedralAngleData metadata)
 {
     assigned_metadata_.push_back(metadata);
+    this->UpdateAtomsIfPsi();
 }
 
 void Rotatable_dihedral::SetDihedralAngleUsingMetadata(bool use_ranges)
@@ -277,6 +279,27 @@ void Rotatable_dihedral::RecordPreviousDihedralAngle(double dihedral_angle)
 {
     previous_dihedral_angle_ = dihedral_angle;
 }
+
+void Rotatable_dihedral::UpdateAtomsIfPsi()
+{
+    for(auto &entry : assigned_metadata_)
+    {
+        // If it's a psi angle and is supposed to be defined by a H...
+        if ((entry.dihedral_angle_name_.compare("psi")==0) && (entry.atom4_.at(0)=='H'))
+        {// Find the neighbor of current atom3 which is a hydrogen, and set it to be the new atom4;
+            for(auto &neighbor : atom3_->GetNode()->GetNodeNeighbors())
+            {
+                if(neighbor->GetName().at(0)=='H')
+                {
+                    std::cout << "Replaced atom4_ with " << neighbor->GetId() << "\n";
+                    atom4_ = neighbor;
+                }
+            }
+        }
+    }
+    return;
+}
+
 
 //////////////////////////////////////////////////////////
 //                       DISPLAY FUNCTION               //

@@ -116,7 +116,7 @@ bool selection::FindRotationPointsForNonCycles(Atom *previous_atom, Atom *curren
             found_rotation_point = false;
         }
     }
-    if ( found_rotation_point ) // Deadend bitchatchoes
+    if ( found_rotation_point ) // Deadend Chitchatchoes
     {
         rotation_points->push_back(current_atom);
     }

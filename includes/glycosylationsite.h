@@ -7,6 +7,9 @@
 #include <iomanip> // For setting precision and formating in std::cout 
 #include <algorithm> //  std::erase, std::remove
 
+typedef std::vector<Residue_linkage> ResidueLinkageVector;
+
+
 using namespace MolecularModeling;
 
 class GlycosylationSite
@@ -18,7 +21,6 @@ public:
 
     typedef std::vector<GlycosylationSite> GlycosylationSiteVector;
     typedef std::vector<GlycosylationSite*> GlycosylationSitePointerVector;
-   // typedef std::vector<Rotatable_dihedral> RotatableDihedralVector;
 
 
     //////////////////////////////////////////////////////////
@@ -46,11 +48,13 @@ public:
     AtomVector GetSelfGlycanBeads();
     AtomVector GetProteinBeads();
     AtomVector GetOtherGlycanBeads();
-    Residue_linkage GetRotatableBonds();
+    ResidueLinkageVector GetRotatableBonds();
+
 
     //////////////////////////////////////////////////////////
     //                       FUNCTIONS                      //
     //////////////////////////////////////////////////////////
+
     void AttachGlycan(Assembly glycan, Assembly &glycoprotein);
     double Calculate_bead_overlaps(std::string overlap_type = "total", bool record = true);
     double Calculate_and_print_bead_overlaps();
@@ -93,7 +97,7 @@ public:
 private:
 
     //////////////////////////////////////////////////////////
-    //                       FUNCTIONS                      //
+    //                  PRIVATE FUNCTIONS                   //
     //////////////////////////////////////////////////////////
 
     void Prepare_Glycans_For_Superimposition_To_Particular_Residue(std::string amino_acid_name);
@@ -102,6 +106,10 @@ private:
     double Calculate_bead_overlaps(AtomVector &atomsA, AtomVector &atomsB);
     void SetRotatableBonds(Residue *residue1, Residue *residue2);
     void Rename_Protein_Residue_To_GLYCAM_Nomenclature();
+    // This doesn't belong here:
+   // ResidueLinkageVector FigureOutResidueLinkagesInGlycan();
+    void FigureOutResidueLinkagesInGlycan(Residue *residue1, Residue *residue2, ResidueLinkageVector *residue_linkages);
+    void RecursivelyGetAllNeighboringResidues(Atom* current_atom, ResidueVector* neighbors);
 
     //////////////////////////////////////////////////////////
     //                       ATTRIBUTES                     //
@@ -114,7 +122,8 @@ private:
     AtomVector superimposition_atoms_;               /*!< The 3 atoms used for superimposition of glycan to sidechain >*/
     double glycan_overlap_;
     double protein_overlap_;
-    Residue_linkage rotatable_bonds_; // This should become a vector of residue_linkages?
+    //Residue_linkage residue_linkage_; // This should become a vector of residue_linkages?
+    ResidueLinkageVector all_residue_linkages_;
     AtomVector self_glycan_beads_;
     AtomVector other_glycan_beads_;
     AtomVector protein_beads_;

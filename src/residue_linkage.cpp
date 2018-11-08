@@ -1,4 +1,5 @@
 #include "../includes/residue_linkage.h"
+#include "selections.h"
 
 //////////////////////////////////////////////////////////
 //                    TYPE DEFINITION                   //
@@ -14,6 +15,7 @@ Residue_linkage::Residue_linkage() {} // Do nothin
 
 Residue_linkage::Residue_linkage(Residue *residue1, Residue *residue2)
 {
+    //std::cout << "Pomarius" << std::endl;
     this->InitializeClass(residue1, residue2);
 }
 
@@ -140,6 +142,7 @@ std::ostream& operator<<(std::ostream& os, const Residue_linkage& residue_linkag
 void Residue_linkage::InitializeClass(Residue *residue1, Residue *residue2)
 {
     this->SetResidues(residue1, residue2);
+    //std::cout << "Pomarium" << std::endl;
     this->SetConnectionAtoms(residue1_, residue2_);
     rotatable_bonds_ = this->FindRotatableBondsConnectingResidues(connection_atom1_, connection_atom2_);
     gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector metadata = this->FindMetadata(connection_atom1_, connection_atom2_);

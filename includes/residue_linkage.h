@@ -6,7 +6,6 @@
  * Stores each rotatable bond as a rotatable_dihedral object.
  */
 #include "rotatable_dihedral.h"
-#include "selections.h"
 #include "../../../includes/MolecularMetadata/GLYCAM/dihedralangledata.hpp"
 
 class Residue_linkage
@@ -17,6 +16,7 @@ public:
     //////////////////////////////////////////////////////////
 
     typedef std::vector<Rotatable_dihedral> RotatableDihedralVector;
+    typedef std::vector<Residue_linkage> ResidueLinkageVector;
 
     //////////////////////////////////////////////////////////
     //                       CONSTRUCTOR                    //
