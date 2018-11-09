@@ -165,7 +165,7 @@ double Rotatable_dihedral::RandomizeDihedralAngleWithinRange(double min, double 
 
 //    double random_angle = angle_distribution(eng1);
     double random_angle = angle_distribution(rng);
-    std::cout << "Random angle is: " << random_angle << "\n";
+   // std::cout << "Random angle is: " << random_angle << "\n";
 
     /*******************************************/
     /*               IMPORTANT                 */
@@ -291,7 +291,7 @@ void Rotatable_dihedral::UpdateAtomsIfPsi()
             {
                 if(neighbor->GetName().at(0)=='H')
                 {
-                    std::cout << "Replaced atom4_ with " << neighbor->GetId() << "\n";
+                   // std::cout << "Replaced atom4_ with " << neighbor->GetId() << "\n";
                     atom4_ = neighbor;
                 }
             }

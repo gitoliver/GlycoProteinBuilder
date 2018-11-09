@@ -156,7 +156,7 @@ RotatableDihedralVector Residue_linkage::FindRotatableBondsConnectingResidues(At
     // Search neighbors other than connected atom. Ie search out in both directions, but remain within same residue.
     // Warning, residue may have fused cycles!
     // Will fail for non-protein residues without cycles. As don't have a non-rotatable bond to anchor from. Can code that later (and deal with branches from these residues).
-    std::cout << "Finding rot bonds for " << connection_atom1->GetResidue()->GetId() << " and " << connection_atom2->GetResidue()->GetId() << "\n";
+  //  std::cout << "Finding rot bonds for " << connection_atom1->GetResidue()->GetId() << " and " << connection_atom2->GetResidue()->GetId() << "\n";
 
     AtomVector rotation_points = selection::FindRotationPoints(connection_atom1);
     AtomVector rotation_points2 = selection::FindRotationPoints(connection_atom2);
@@ -187,11 +187,11 @@ RotatableDihedralVector Residue_linkage::FindRotatableBondsConnectingResidues(At
         connecting_atoms.insert(connecting_atoms.begin(), neighbor2);
         connecting_atoms.push_back(neighbor1);
 
-        std::cout << "Updated Path between " << rotation_point1->GetId() << " and " << rotation_point2->GetId() << ":\n";
+       // std::cout << "Updated Path between " << rotation_point1->GetId() << " and " << rotation_point2->GetId() << ":\n";
         for(AtomVector::iterator it1 = connecting_atoms.begin(); it1 != connecting_atoms.end(); ++it1)
         {
             Atom *atom = *it1;
-            std::cout << atom->GetId() << "\n";
+        //    std::cout << atom->GetId() << "\n";
         }
     }
     RotatableDihedralVector rotatable_bonds = this->SplitAtomVectorIntoRotatableBonds(connecting_atoms);
@@ -225,11 +225,11 @@ gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector Residue_linkage::FindMe
 {
     gmml::MolecularMetadata::GLYCAM::DihedralAngleDataContainer DihedralAngleMetadata;
     gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector matching_entries = DihedralAngleMetadata.GetEntriesForLinkage(connection_atom1, connection_atom2);
-    std::cout << "Found these " << matching_entries.size() << " entries:\n";
-    for (const auto& entry : matching_entries)
-    {
-        std::cout << entry.index_ << " : " << entry.atom1_ << ", " << entry.atom2_ << ", " << entry.atom3_ << ", " << entry.atom4_ << ", " << entry.default_angle_value_ << "\n";
-    }
+//    std::cout << "Found these " << matching_entries.size() << " entries:\n";
+//    for (const auto& entry : matching_entries)
+//    {
+//        std::cout << entry.index_ << " : " << entry.atom1_ << ", " << entry.atom2_ << ", " << entry.atom3_ << ", " << entry.atom4_ << ", " << entry.default_angle_value_ << "\n";
+//    }
     return matching_entries;
 }
 
@@ -239,11 +239,11 @@ void Residue_linkage::AddMetadataToRotatableDihedrals(gmml::MolecularMetadata::G
     {
         int bond_number = int (entry.index_); // typecast to an int
         int vector_position = (bond_number - 1); // vectors start at 0.
-        std::cout << "Adding to position: "<< vector_position << " in vector of size: " << rotatable_bonds_.size() << std::endl;
+      //  std::cout << "Adding to position: "<< vector_position << " in vector of size: " << rotatable_bonds_.size() << std::endl;
         if (vector_position <= rotatable_bonds_.size())
         {
             rotatable_bonds_.at(vector_position).AddMetadata(entry);
-            std::cout << "Added " << entry.index_ << " = " << entry.default_angle_value_ << " to: \n";
+       //     std::cout << "Added " << entry.index_ << " = " << entry.default_angle_value_ << " to: \n";
             rotatable_bonds_.at(vector_position).Print();
         }
         else
