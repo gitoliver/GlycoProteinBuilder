@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
     //************************************************//
     // Load Protein PDB file                          //
     //************************************************//
-    std::cout << "Build glycoprotein Structure By Distance" << std::endl;
+    std::cout << "Build protein structure by distance" << std::endl;
     Assembly glycoprotein( (working_Directory + "/" + proteinPDB), gmml::InputFileType::PDB);
     glycoprotein.BuildStructureByDistance(4, 1.6); // 4 threads, 1.91 cutoff to allow C-S in Cys and Met to be bonded. Nope that did bad things
 
@@ -81,9 +81,10 @@ int main(int argc, char* argv[])
     // Fast and stupid:
     if (!resolve_overlaps::dumb_random_walk(glycosites))
     {
-        int max_cycles = 5000;
+        int max_cycles = 500;
         std::cout << "Could not resolve quickly" << std::endl;
         glycoprotein_builder::SetDefaultDihedralAnglesUsingMetadata(glycosites); // Reset to reasonable starting points
+        outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Initial1.pdb");
         resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, max_cycles);
     }
 

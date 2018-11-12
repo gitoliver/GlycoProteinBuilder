@@ -541,7 +541,7 @@ void GlycosylationSite::SetOtherGlycanBeads(AtomVector *beads)
 
 void GlycosylationSite::SetDefaultDihedralAnglesUsingMetadata()
 {
-    for(auto linkage : all_residue_linkages_)
+    for(auto &linkage : all_residue_linkages_)
     {
         linkage.SetDefaultDihedralAnglesUsingMetadata();
     }
@@ -550,7 +550,7 @@ void GlycosylationSite::SetDefaultDihedralAnglesUsingMetadata()
 
 void GlycosylationSite::SetRandomDihedralAnglesUsingMetadata()
 {
-    for(auto linkage : all_residue_linkages_)
+    for(auto &linkage : all_residue_linkages_)
     {
         linkage.SetRandomDihedralAnglesUsingMetadata();
     }
@@ -559,7 +559,7 @@ void GlycosylationSite::SetRandomDihedralAnglesUsingMetadata()
 
 void GlycosylationSite::ResetDihedralAngles()
 {
-    for(auto linkage : all_residue_linkages_)
+    for(auto &linkage : all_residue_linkages_)
     {
         linkage.SetPreviousDihedralAngles();
     }
@@ -568,7 +568,7 @@ void GlycosylationSite::ResetDihedralAngles()
 
 void GlycosylationSite::UpdateAtomsThatMoveInLinkages()
 {
-    for(auto linkage : all_residue_linkages_)
+    for(auto &linkage : all_residue_linkages_)
     {
         linkage.DetermineAtomsThatMove();
     }
@@ -586,7 +586,7 @@ void GlycosylationSite::Print(std::string type)
     {
         std::cout << "Residue ID: " << this->GetResidue()->GetId();
         std::cout << ", overlap: " << this->GetOverlap() << std::endl;
-        std::cout << "Dihedrals: \n";
+        //std::cout << "Dihedrals: \n";
         //this->GetRotatableBonds().Print();
         //rotatable_bonds_.Print();
         std::cout << "\n";
@@ -611,7 +611,7 @@ void GlycosylationSite::Print(std::string type)
 //void GlycosylationSite::FigureOutResidueLinkagesInGlycanOld(Residue *residue1, Residue *residue2, ResidueLinkageVector *residue_linkages)
 //{
 //    std::cout << "Brutus?" << std::endl;
-//    for(auto node : residue2->GetNode()->GetResidueNodeNeighbors())
+//    for(auto &node : residue2->GetNode()->GetResidueNodeNeighbors())
 //    {
 //        Residue *next_residue = node->GetResidue();
 //        if ( next_residue->GetId().compare(residue1->GetId())!=0) // if not the previous residue
@@ -666,7 +666,7 @@ void GlycosylationSite::FigureOutResidueLinkagesInGlycan(Residue *residue1, Resi
 void GlycosylationSite::RecursivelyGetAllNeighboringResidues(Atom* current_atom, ResidueVector* neighbors)
 {
     current_atom->SetDescription("VisitedByRecursivelyGetAllNeighboringResidues");
-    for(auto neighboring_atom : current_atom->GetNode()->GetNodeNeighbors())
+    for(auto &neighboring_atom : current_atom->GetNode()->GetNodeNeighbors())
     {
         unsigned long long neighbor_index = neighboring_atom->GetResidue()->GetIndex();
         if(neighbor_index != current_atom->GetResidue()->GetIndex())

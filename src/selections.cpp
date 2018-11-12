@@ -92,7 +92,7 @@ bool selection::FindRotationPointsForNonCycles(Atom *previous_atom, Atom *curren
 {
     AtomVector neighbors = current_atom->GetNode()->GetNodeNeighbors();
     AtomVector intra_node_neighbors;
-    for (auto neighbor : neighbors)
+    for (auto &neighbor : neighbors)
     { // If not previous atom and not from a different residue
         if ( (neighbor->GetIndex() != previous_atom->GetIndex()) && (current_atom->GetResidue()->GetId().compare(neighbor->GetResidue()->GetId())==0))
         {
@@ -100,11 +100,11 @@ bool selection::FindRotationPointsForNonCycles(Atom *previous_atom, Atom *curren
         }
     }
     bool found_rotation_point = true;
-    for (auto neighbor : intra_node_neighbors)
+    for (auto &neighbor : intra_node_neighbors)
     {
         AtomVector neighbor_neighbors = neighbor->GetNode()->GetNodeNeighbors();
         AtomVector intra_node_neighbor_neighbors;
-        for (auto neighbor_neighbor : neighbor_neighbors)
+        for (auto &neighbor_neighbor : neighbor_neighbors)
         {
             if ( (neighbor_neighbor->GetIndex() != current_atom->GetIndex()) && (current_atom->GetResidue()->GetId().compare(neighbor_neighbor->GetResidue()->GetId())==0))
             {
@@ -122,7 +122,7 @@ bool selection::FindRotationPointsForNonCycles(Atom *previous_atom, Atom *curren
     }
     else // Keep looking for the ends
     {
-        for (auto neighbor : intra_node_neighbors)
+        for (auto &neighbor : intra_node_neighbors)
         {
             selection::FindRotationPointsForNonCycles(current_atom, neighbor, rotation_points);
         }

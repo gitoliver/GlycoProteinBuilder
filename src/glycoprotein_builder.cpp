@@ -1,5 +1,5 @@
 #include "../includes/glycoprotein_builder.h"
-
+#include "../includes/glycosylationsite.h"
 /*******************************************/
 /* Functions                               */
 /*******************************************/
@@ -252,14 +252,14 @@ GlycosylationSitePointerVector glycoprotein_builder::DetermineSitesWithOverlap(G
 {
     GlycosylationSitePointerVector sites_to_return;
     double overlap = 0.0;
-    std::cout << "      Site        |  Total | Protein | Glycan " << std::endl;
+//    std::cout << "      Site        |  Total | Protein | Glycan " << std::endl;
     for (GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end(); ++current_glycosite)
     {
         overlap = current_glycosite->Calculate_bead_overlaps(overlap_type);
         if ( overlap > tolerance)
         {
 //            std::cout << "Site " << current_glycosite->GetResidue()->GetId() << " is over tolerance with " << overlap << "\n";
-            current_glycosite->Print_bead_overlaps();
+//            current_glycosite->Print_bead_overlaps();
             sites_to_return.push_back(&(*current_glycosite));
         }
     }

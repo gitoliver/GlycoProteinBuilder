@@ -122,11 +122,12 @@ void Rotatable_dihedral::SetDihedralAngle(double dihedral_angle)
     this->RecordPreviousDihedralAngle(current_dihedral);
 
     // Yo you should add something here that checks if atoms_that_move_ is set. Yeah you.
-    // std::cout << "Moving: ";
+
+  //  std::cout << "For " << atom1_->GetId() << ":"  << atom2_->GetId() << ":"  << atom3_->GetId() << ":"  << atom4_->GetId() <<  ".\nMoving: ";
     for(AtomVector::iterator it = atoms_that_move_.begin(); it != atoms_that_move_.end(); it++)
     {
         Atom *atom = *it;
-        //  std::cout << ", " << atom->GetName();
+    //    std::cout << ", " << atom->GetId();
         GeometryTopology::Coordinate* atom_coordinate = atom->GetCoordinate();
         GeometryTopology::Coordinate result;
         result.SetX(dihedral_angle_matrix[0][0] * atom_coordinate->GetX() + dihedral_angle_matrix[0][1] * atom_coordinate->GetY() +
@@ -140,7 +141,7 @@ void Rotatable_dihedral::SetDihedralAngle(double dihedral_angle)
         atom->GetCoordinate()->SetY(result.GetY());
         atom->GetCoordinate()->SetZ(result.GetZ());
     }
-    //  std::cout << std::endl;
+ //   std::cout << std::endl;
     return;
 }
 
@@ -198,7 +199,7 @@ double Rotatable_dihedral::RandomizeDihedralAngleWithinRanges(std::vector<std::p
     //std::cout << "Randomly selected range number " << range_selection << "\n";
 
     // create an angle within the selected range
-    return Rotatable_dihedral::RandomizeDihedralAngleWithinRange(ranges.at(range_selection).first, ranges.at(range_selection).second);
+    return this->RandomizeDihedralAngleWithinRange(ranges.at(range_selection).first, ranges.at(range_selection).second);
 }
 
 void Rotatable_dihedral::SetMetadata(gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector metadataVector)
@@ -230,7 +231,7 @@ void Rotatable_dihedral::SetDihedralAngleUsingMetadata(bool use_ranges)
                 lower = (entry.default_angle_value_ - entry.lower_deviation_) ;
                 upper = (entry.default_angle_value_ + entry.upper_deviation_) ;
             }
-            Rotatable_dihedral::RandomizeDihedralAngleWithinRange(lower, upper);
+            this->RandomizeDihedralAngleWithinRange(lower, upper);
         }
     }
     else if(assigned_metadata_.size() >= 2)
@@ -247,7 +248,7 @@ void Rotatable_dihedral::SetDihedralAngleUsingMetadata(bool use_ranges)
             }
             ranges.emplace_back(lower, upper);
         }
-        Rotatable_dihedral::RandomizeDihedralAngleWithinRanges(ranges);
+        this->RandomizeDihedralAngleWithinRanges(ranges);
     }
     return;
 }
@@ -273,6 +274,12 @@ void Rotatable_dihedral::SetAtoms(AtomVector atoms)
 void Rotatable_dihedral::SetAtomsThatMove(AtomVector atoms)
 {
     atoms_that_move_ = atoms;
+    std::cout << "Set the following to move:\n";
+    for (auto &moving_atom : atoms_that_move_)
+    {
+        std::cout << moving_atom->GetId() << ", ";
+    }
+    std::cout << "\n";
 }
 
 void Rotatable_dihedral::RecordPreviousDihedralAngle(double dihedral_angle)

@@ -54,13 +54,14 @@ void resolve_overlaps::weighted_protein_global_overlap_random_descent(Glycosylat
             new_protein_overlap = current_glycosite->Calculate_bead_overlaps("protein", record_overlap);
             if ((new_glycan_overlap + (new_protein_overlap*5)) >= (previous_glycan_overlap + (previous_protein_overlap*5)))
             {
+               // std::cout << "New overlap is " << (new_glycan_overlap + (new_protein_overlap*5)) << ". Old is " << (previous_glycan_overlap + (previous_protein_overlap*5)) << "\n";
                 current_glycosite->ResetDihedralAngles();
 //                current_glycosite->SetChi1Value(previous_chi1);
 //                current_glycosite->SetChi2Value(previous_chi2);
             }
 //            else
 //            {
-//              //  std::cout << "Accepted a change of " << ((new_overlap) - (previous_overlap)) << "\n";
+//                std::cout << "Accepted a change of " << ((new_overlap) - (previous_overlap)) << "\n";
 //            }
         }
         //std::cout << "Updating list of sites with overlaps." << std::endl;
@@ -72,9 +73,10 @@ void resolve_overlaps::weighted_protein_global_overlap_random_descent(Glycosylat
         }
 
         new_global_overlap = glycoprotein_builder::GetGlobalOverlap(glycosites);
-//        std::cout << "Lowest: " << lowest_global_overlap << ", Current: " << new_global_overlap << "\n";
+       // write_pdb_file(glycosites.at(0).GetGlycoprotein(), cycle, "best", new_global_overlap);
         if ( lowest_global_overlap > new_global_overlap + 1 )
         {
+            //   std::cout << "Lowest: " << lowest_global_overlap << ", Current: " << new_global_overlap << "\n";
             write_pdb_file(glycosites.at(0).GetGlycoprotein(), cycle, "best", new_global_overlap);
             lowest_global_overlap = new_global_overlap;
         }
