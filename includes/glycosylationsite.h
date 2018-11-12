@@ -110,6 +110,7 @@ private:
    // ResidueLinkageVector FigureOutResidueLinkagesInGlycan();
     void FigureOutResidueLinkagesInGlycan(Residue *residue1, Residue *residue2, ResidueLinkageVector *residue_linkages);
     void RecursivelyGetAllNeighboringResidues(Atom* current_atom, ResidueVector* neighbors);
+    Atom* GetConnectingProteinAtom(std::string residue_name);
 
     //////////////////////////////////////////////////////////
     //                       ATTRIBUTES                     //

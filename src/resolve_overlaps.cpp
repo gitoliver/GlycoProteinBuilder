@@ -50,6 +50,7 @@ void resolve_overlaps::weighted_protein_global_overlap_random_descent(Glycosylat
 //            previous_chi2 = current_glycosite->GetChi2Value();
 //            current_glycosite->SetChi2Value(RandomAngle_360range());
             bool record_overlap = false;
+            std::cout << "Site: " << current_glycosite->GetResidueNumber() << "\n";
             new_glycan_overlap = current_glycosite->Calculate_bead_overlaps("glycan", record_overlap);
             new_protein_overlap = current_glycosite->Calculate_bead_overlaps("protein", record_overlap);
             if ((new_glycan_overlap + (new_protein_overlap*5)) >= (previous_glycan_overlap + (previous_protein_overlap*5)))

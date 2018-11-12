@@ -345,4 +345,3 @@ Atom* selection::FindCyclePointNeighbor(const AtomVector atom_path, Atom *cycle_
 //}
 
 
-

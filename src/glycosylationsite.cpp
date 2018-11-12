@@ -236,30 +236,40 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
 void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_residue)
 {
     // Get the 3 target atoms from protein residue.
-    AtomVector protein_atoms = glycosite_residue->GetAtoms();
+    //AtomVector protein_atoms = glycosite_residue->GetAtoms();
     AtomVector target_atoms;
     //AtomVector super_atoms = superimposition_atoms_.GetAllAtomsOfAssembly();
   //  Assembly* assemblyTarget = new Assembly();
    // Residue* residueTarget = new Residue();
-    Atom* last_protein_atom;
+    //Atom* last_protein_atom;
     // superimposition_atoms_ points to three atoms that were added to the glycan. Based on their names e.g. CG, ND2, we will superimpose them onto
     // the correspoinding "target" atoms in the protein residue (glycosite_residue).
-    for(AtomVector::iterator it1 = protein_atoms.begin(); it1 != protein_atoms.end(); ++it1)
+    for (auto &superimposition_atom : superimposition_atoms_)
     {
-        Atom *protein_atom = (*it1);
-        for(AtomVector::iterator it2 = superimposition_atoms_.begin(); it2 != superimposition_atoms_.end(); ++it2)
+        for(auto &protein_atom : glycosite_residue->GetAtoms())
         {
-            Atom *super_atom = (*it2);
-            if (protein_atom->GetName() == super_atom->GetName())
+            if (protein_atom->GetName() == superimposition_atom->GetName())
             {
                 target_atoms.push_back(protein_atom);
-                if (super_atom == superimposition_atoms_.back()) // Convention is that the last atom will be the one connecting to the glycan
-                {
-                    last_protein_atom = protein_atom; // To set the bonding correctly later.
-                }
             }
         }
     }
+//    for(AtomVector::iterator it1 = protein_atoms.begin(); it1 != protein_atoms.end(); ++it1)
+//    {
+//        Atom *protein_atom = (*it1);
+//        for(AtomVector::iterator it2 = superimposition_atoms_.begin(); it2 != superimposition_atoms_.end(); ++it2)
+//        {
+//            Atom *super_atom = (*it2);
+//            if (protein_atom->GetName() == super_atom->GetName())
+//            {
+//                target_atoms.push_back(protein_atom);
+//                if (super_atom == superimposition_atoms_.back()) // Convention is that the last atom will be the one connecting to the glycan
+//                {
+//                    last_protein_atom = protein_atom; // To set the bonding correctly later.
+//                }
+//            }
+//        }
+//    }
 
     AtomVector glycan_atoms = glycan_.GetAllAtomsOfAssembly();
 
@@ -278,8 +288,9 @@ void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_resid
        }
     }
     //Connect the glycan and protein atoms to each other.
-    last_protein_atom->GetNode()->AddNodeNeighbor(atomC1);
-    atomC1->GetNode()->AddNodeNeighbor(last_protein_atom);
+    Atom *protein_connection_atom = this->GetConnectingProteinAtom(glycosite_residue->GetName());
+    protein_connection_atom->GetNode()->AddNodeNeighbor(atomC1);
+    atomC1->GetNode()->AddNodeNeighbor(protein_connection_atom);
     //Delete the atoms used to superimpose the glycan onto the protein. Remove the residue.
     Residue *superimposition_residue = glycan_.GetAllResiduesOfAssembly().at(0);
     glycan_.RemoveResidue(superimposition_residue);
@@ -402,7 +413,7 @@ double GlycosylationSite::Calculate_bead_overlaps(std::string overlap_type, bool
 double GlycosylationSite::Calculate_bead_overlaps(AtomVector &atomsA, AtomVector &atomsB)
 {
     double radius = 3.0; //Using same radius for all beads.
-    double distance = 0.0, overlap = 0.0;
+    double distance = 0.0, overlap = 0.0, current_overlap = 0.0;
   //  std::cout << "About to check " << atomsA.size() << " atoms vs " << atomsB.size() << " atoms" << std::endl;
     for(AtomVector::iterator it1 = atomsA.begin(); it1 != atomsA.end(); ++it1)
     {
@@ -415,7 +426,10 @@ double GlycosylationSite::Calculate_bead_overlaps(AtomVector &atomsA, AtomVector
                 distance = atomA->GetDistanceToAtom(atomB);
                 if ( ( distance < (radius + radius) ) && ( distance > 0.0 ) ) //Close enough to overlap, but not the same atom
                 {
-                    overlap += gmml::CalculateAtomicOverlaps(atomA, atomB, radius, radius); // This calls the version with radius values
+
+                    current_overlap = gmml::CalculateAtomicOverlaps(atomA, atomB, radius, radius); // This calls the version with radius values
+                    overlap += current_overlap;
+                    std::cout << atomA->GetId() << " overlaping with " << atomB->GetId() << ": " << current_overlap << "\n";
                 }
             }
         }
@@ -680,6 +694,28 @@ void GlycosylationSite::RecursivelyGetAllNeighboringResidues(Atom* current_atom,
             RecursivelyGetAllNeighboringResidues(neighboring_atom, neighbors);
         }
     }
+}
+
+Atom* GlycosylationSite::GetConnectingProteinAtom(std::string residue_name)
+{
+    Atom *returned_atom;
+    if(residue_name.compare("NLN") || residue_name.compare("ASN"))
+    {
+        returned_atom = residue_->GetAtom("ND2");
+    }
+    if(residue_name.compare("OLT") || residue_name.compare("THR"))
+    {
+        returned_atom = residue_->GetAtom("OG1");
+    }
+    if(residue_name.compare("OLS") || residue_name.compare("SER"))
+    {
+        returned_atom = residue_->GetAtom("OG");
+    }
+    if(residue_name.compare("OLY") || residue_name.compare("TYR"))
+    {
+        returned_atom = residue_->GetAtom("OH");
+    }
+    return returned_atom;
 }
 
 
