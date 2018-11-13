@@ -274,12 +274,12 @@ void Rotatable_dihedral::SetAtoms(AtomVector atoms)
 void Rotatable_dihedral::SetAtomsThatMove(AtomVector atoms)
 {
     atoms_that_move_ = atoms;
-    std::cout << "Set the following to move:\n";
-    for (auto &moving_atom : atoms_that_move_)
-    {
-        std::cout << moving_atom->GetId() << ", ";
-    }
-    std::cout << "\n";
+//    std::cout << "Set the following to move:\n";
+//    for (auto &moving_atom : atoms_that_move_)
+//    {
+//        std::cout << moving_atom->GetId() << ", ";
+//    }
+//    std::cout << "\n";
 }
 
 void Rotatable_dihedral::RecordPreviousDihedralAngle(double dihedral_angle)

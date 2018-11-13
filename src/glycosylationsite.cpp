@@ -429,7 +429,7 @@ double GlycosylationSite::Calculate_bead_overlaps(AtomVector &atomsA, AtomVector
 
                     current_overlap = gmml::CalculateAtomicOverlaps(atomA, atomB, radius, radius); // This calls the version with radius values
                     overlap += current_overlap;
-                    std::cout << atomA->GetId() << " overlaping with " << atomB->GetId() << ": " << current_overlap << "\n";
+                    //std::cout << atomA->GetId() << " overlaping with " << atomB->GetId() << ": " << current_overlap << "\n";
                 }
             }
         }
