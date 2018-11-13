@@ -5,8 +5,8 @@ Glycans:
 glycans/
 
 Protein Residue, Glycan Name:
-A_24,Biantennary-
-A_38,Biantennary-
+A_15,Man9-
+A_44,Man5-
 A_83,Complex-
-A_126,SialylTnAntigen-
+A_100,Man5-
 END
