@@ -35,6 +35,7 @@ public:
     AtomVector GetAtoms() const;
     AtomVector GetAtomsThatMove();
     double GetPreviousDihedralAngle();
+    gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector GetMetadata();
 
     //////////////////////////////////////////////////////////
     //                       FUNCTIONS                      //

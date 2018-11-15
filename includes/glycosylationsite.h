@@ -60,6 +60,7 @@ public:
     double Calculate_and_print_bead_overlaps();
     void UpdateAtomsThatMoveInLinkages();
     void Rename_Protein_Residue_From_GLYCAM_To_Standard();
+    void Wiggle(int *temp_id, int interval=5);
 
     //////////////////////////////////////////////////////////
     //                       MUTATOR                        //
@@ -76,6 +77,7 @@ public:
     void SetOtherGlycanBeads(AtomVector *beads);
     void SetDefaultDihedralAnglesUsingMetadata();
     void SetRandomDihedralAnglesUsingMetadata();
+    void SetRandomDihedralAnglesUsingMetadataForNthLinkage(int linkage_number);
     void ResetDihedralAngles();
 
     //////////////////////////////////////////////////////////
@@ -108,7 +110,7 @@ private:
     void Rename_Protein_Residue_To_GLYCAM_Nomenclature();
     // This doesn't belong here:
    // ResidueLinkageVector FigureOutResidueLinkagesInGlycan();
-    void FigureOutResidueLinkagesInGlycan(Residue *residue1, Residue *residue2, ResidueLinkageVector *residue_linkages);
+    void FigureOutResidueLinkagesInGlycan(Residue *from_this_residue1, Residue *to_this_residue2, ResidueLinkageVector *residue_linkages);
     void RecursivelyGetAllNeighboringResidues(Atom* current_atom, ResidueVector* neighbors);
     Atom* GetConnectingProteinAtom(std::string residue_name);
 

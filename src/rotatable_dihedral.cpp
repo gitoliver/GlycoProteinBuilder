@@ -79,6 +79,11 @@ double Rotatable_dihedral::GetPreviousDihedralAngle()
     return previous_dihedral_angle_;
 }
 
+gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector Rotatable_dihedral::GetMetadata()
+{
+    return assigned_metadata_;
+}
+
 //////////////////////////////////////////////////////////
 //                       MUTATOR                        //
 //////////////////////////////////////////////////////////

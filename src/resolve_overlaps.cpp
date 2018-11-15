@@ -35,8 +35,8 @@ void resolve_overlaps::weighted_protein_global_overlap_random_descent(Glycosylat
     glycoprotein_builder::PrintDihedralAnglesAndOverlapOfGlycosites(glycosites);
     while ( (cycle < max_cycles) && (stop == false) )
     {
-        ++cycle;
         std::cout << "Cycle " << cycle << " of " << max_cycles << std::endl;
+        ++cycle;
         std::random_shuffle (sites_with_overlaps.begin(), sites_with_overlaps.end());
         for(GlycosylationSitePointerVector::iterator it1 = sites_with_overlaps.begin(); it1 != sites_with_overlaps.end(); ++it1)
         {
@@ -74,7 +74,7 @@ void resolve_overlaps::weighted_protein_global_overlap_random_descent(Glycosylat
         }
 
         new_global_overlap = glycoprotein_builder::GetGlobalOverlap(glycosites);
-       // write_pdb_file(glycosites.at(0).GetGlycoprotein(), cycle, "best", new_global_overlap);
+        write_pdb_file(glycosites.at(0).GetGlycoprotein(), cycle, "current", new_global_overlap);
         if ( lowest_global_overlap > new_global_overlap + 1 )
         {
             //   std::cout << "Lowest: " << lowest_global_overlap << ", Current: " << new_global_overlap << "\n";
@@ -86,6 +86,27 @@ void resolve_overlaps::weighted_protein_global_overlap_random_descent(Glycosylat
     std::cout << "Finished torsions and overlaps:\n";
     glycoprotein_builder::PrintDihedralAnglesAndOverlapOfGlycosites(glycosites);
     DeleteSitesIterativelyWithOverlapAboveTolerance(glycosites, loose_tolerance);
+}
+
+void resolve_overlaps::wiggle(GlycosylationSiteVector &glycosites, int max_cycles)
+{
+    std::cout << "Wiggling\n";
+    int temp_id = 0;
+    double strict_tolerance = 0.1, loose_tolerance = 1.0;
+    GlycosylationSitePointerVector sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance, "total");
+    int cycle = 0;
+    bool stop = false;
+    while ( (cycle < max_cycles) && (stop == false) )
+    {
+        ++cycle;
+        std::random_shuffle (sites_with_overlaps.begin(), sites_with_overlaps.end());
+        for(auto &glycosite : sites_with_overlaps)
+        {
+            std::cout << "Wiggling " << glycosite->GetResidueNumber() << " with id at " << temp_id << "\n";
+            glycosite->Wiggle(&temp_id);
+        }
+    }
+
 }
 
 //void resolve_overlaps::weighted_protein_global_overlap_monte_carlo(GlycosylationSiteVector &glycosites, int max_cycles)

@@ -22,6 +22,7 @@
 namespace resolve_overlaps
 {
 void weighted_protein_global_overlap_random_descent(GlycosylationSiteVector &glycosites, int max_cycles = 500);
+void wiggle(GlycosylationSiteVector &glycosites, int max_cycles = 500);
 void weighted_protein_global_overlap_monte_carlo(GlycosylationSiteVector &glycosites, int max_cycles = 500);
 void Resolve_Overlaps_Random_Walk_Scaled_To_Overlap(GlycosylationSiteVector &glycosites, std::string type = "protein", int max_cycles = 500, double strict_tolerance = 0.1, double loose_tolerance = 1.0);
 void protein_first_random_walk_scaled_to_overlap(GlycosylationSiteVector &glycosites);

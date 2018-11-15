@@ -79,14 +79,18 @@ int main(int argc, char* argv[])
     //************************************************//
 
     // Fast and stupid:
-    if (!resolve_overlaps::dumb_random_walk(glycosites))
-    {
-        int max_cycles = 500;
-        std::cout << "Could not resolve quickly" << std::endl;
-        glycoprotein_builder::SetDefaultDihedralAnglesUsingMetadata(glycosites); // Reset to reasonable starting points
-        outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Initial1.pdb");
-        resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, max_cycles);
-    }
+//    if (!resolve_overlaps::dumb_random_walk(glycosites))
+//    {
+//        int max_cycles = 500;
+//        std::cout << "Could not resolve quickly" << std::endl;
+//        glycoprotein_builder::SetDefaultDihedralAnglesUsingMetadata(glycosites); // Reset to reasonable starting points
+//        outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Initial1.pdb");
+//        resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, max_cycles);
+//    }
+
+    // wiggle
+    glycoprotein_builder::SetDefaultDihedralAnglesUsingMetadata(glycosites); // Reset to reasonable starting points
+    resolve_overlaps::wiggle(glycosites, 1);
 
 //    // Testing algorithms:
 ////    glycoprotein_builder::SetRandomChi1Chi2Values(glycosites);
