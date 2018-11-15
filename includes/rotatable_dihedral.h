@@ -4,8 +4,8 @@
  * This class stores the four atoms that define a dihedral angle, the atoms that move when it is rotated
  * and, if moved, the previous dihedral angle, which allows me to reset easily.
  */
-#include "../../../includes/gmml.hpp"
-//#include "gmml.hpp"
+//#include "../../../includes/gmml.hpp"
+#include "gmml.hpp"
 
 using namespace MolecularModeling;
 
