@@ -60,7 +60,7 @@ double Rotatable_dihedral::CalculateDihedralAngle() const
 
     double current_dihedral_angle = atan2(b1_m_b2n.DotProduct(b2xb3), b1xb2.DotProduct(b2xb3));
 
-    return current_dihedral_angle;
+    return (current_dihedral_angle * (180 / gmml::PI_RADIAN) ); // Convert to degrees
 }
 
 AtomVector Rotatable_dihedral::GetAtoms() const
@@ -90,19 +90,21 @@ gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector Rotatable_dihedral::Get
 
 void Rotatable_dihedral::DetermineAtomsThatMove()
 {
+    // In keeping with giving residues as GlcNAc1-4Gal, and wanting the moving atoms to be in the opposite direction:
     AtomVector atoms_that_move;
-    atoms_that_move.push_back(atom2_);
-    atom3_->FindConnectedAtoms(atoms_that_move);
+    atoms_that_move.push_back(atom3_);
+    atom2_->FindConnectedAtoms(atoms_that_move);
     this->SetAtomsThatMove(atoms_that_move);
 }
 
 
+// Only this function uses radians. Everything else, in and out, should be degrees.
 void Rotatable_dihedral::SetDihedralAngle(double dihedral_angle)
 {
-    GeometryTopology::Coordinate* a1 = atom1_->GetCoordinate();
-    GeometryTopology::Coordinate* a2 = atom2_->GetCoordinate();
-    GeometryTopology::Coordinate* a3 = atom3_->GetCoordinate();
-    GeometryTopology::Coordinate* a4 = atom4_->GetCoordinate();
+    GeometryTopology::Coordinate* a1 = atom4_->GetCoordinate();
+    GeometryTopology::Coordinate* a2 = atom3_->GetCoordinate();
+    GeometryTopology::Coordinate* a3 = atom2_->GetCoordinate();
+    GeometryTopology::Coordinate* a4 = atom1_->GetCoordinate();
 
     GeometryTopology::Coordinate b1 = a2;
     b1.operator -(*a1);
@@ -124,11 +126,11 @@ void Rotatable_dihedral::SetDihedralAngle(double dihedral_angle)
 
     double current_dihedral = atan2(b1_m_b2n.DotProduct(b2xb3), b1xb2.DotProduct(b2xb3));
     double** dihedral_angle_matrix = gmml::GenerateRotationMatrix(&b4, a2, current_dihedral - gmml::ConvertDegree2Radian(dihedral_angle));
-    this->RecordPreviousDihedralAngle(current_dihedral);
+    this->RecordPreviousDihedralAngle(gmml::ConvertRadian2Degree(current_dihedral));
 
     // Yo you should add something here that checks if atoms_that_move_ is set. Yeah you.
 
-  //  std::cout << "For " << atom1_->GetId() << ":"  << atom2_->GetId() << ":"  << atom3_->GetId() << ":"  << atom4_->GetId() <<  ".\nMoving: ";
+    //std::cout << "For " << atom1_->GetId() << ":"  << atom2_->GetId() << ":"  << atom3_->GetId() << ":"  << atom4_->GetId() <<  ".\nMoving: ";
     for(AtomVector::iterator it = atoms_that_move_.begin(); it != atoms_that_move_.end(); it++)
     {
         Atom *atom = *it;
@@ -146,12 +148,12 @@ void Rotatable_dihedral::SetDihedralAngle(double dihedral_angle)
         atom->GetCoordinate()->SetY(result.GetY());
         atom->GetCoordinate()->SetZ(result.GetZ());
     }
- //   std::cout << std::endl;
+    //std::cout << std::endl;
     return;
 }
 
 
-void Rotatable_dihedral::SetPreviousDihedralAngle()
+void Rotatable_dihedral::SetDihedralAngleToPrevious()
 {
     this->SetDihedralAngle(this->GetPreviousDihedralAngle());
 }
@@ -303,7 +305,9 @@ void Rotatable_dihedral::UpdateAtomsIfPsi()
             {
                 if(neighbor->GetName().at(0)=='H')
                 {
-                   // std::cout << "Replaced atom4_ with " << neighbor->GetId() << "\n";
+                    std::cout << "In ";
+                    this->Print();
+                    std::cout << "Replaced atom4_ with " << neighbor->GetId() << "\n";
                     atom4_ = neighbor;
                 }
             }
@@ -319,7 +323,7 @@ void Rotatable_dihedral::UpdateAtomsIfPsi()
 
 void Rotatable_dihedral::Print()
 {
-    std::cout << atom1_->GetName() << ", " << atom2_->GetName() << ", " << atom3_->GetName() << ", " << atom4_->GetName() << ": " << (this->CalculateDihedralAngle() * (180 / gmml::PI_RADIAN) ) << ".\n";
+    std::cout << atom1_->GetName() << ", " << atom2_->GetName() << ", " << atom3_->GetName() << ", " << atom4_->GetName() << ": " << this->CalculateDihedralAngle()  << ".\n";
 //    for(AtomVector::iterator it1 = atoms_that_move_.begin(); it1 != atoms_that_move_.end(); ++it1)
 //    {
 //        Atom *atom = *it1;

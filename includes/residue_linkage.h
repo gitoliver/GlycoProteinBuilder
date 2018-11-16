@@ -44,7 +44,7 @@ public:
     void SetDefaultDihedralAnglesUsingMetadata();
     void SetRandomDihedralAnglesUsingMetadata();
     void SetCustomDihedralAngles(std::vector <double> dihedral_angles);
-    void SetPreviousDihedralAngles();
+    void SetDihedralAnglesToPrevious();
     void SetRandomDihedralAngles();
     void DetermineAtomsThatMove();
 

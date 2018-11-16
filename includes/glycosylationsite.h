@@ -8,6 +8,7 @@
 #include <algorithm> //  std::erase, std::remove
 
 typedef std::vector<Residue_linkage> ResidueLinkageVector;
+typedef std::vector<Rotatable_dihedral> RotatableDihedralVector;
 
 
 using namespace MolecularModeling;

@@ -51,7 +51,7 @@ public:
     // Sets the dihedral angle by rotating the bond between atom2 and atom3, moving atom4 and connected.
     void SetDihedralAngle(double dihedral_angle);
     // Sets the dihedral to previous dihedral angle
-    void SetPreviousDihedralAngle();
+    void SetDihedralAngleToPrevious();
     // Randomly sets dihedral angle values between 0 and 360
     double RandomizeDihedralAngle();
     // Takes in a set of ranges, e.g. 10 to 30, 45-55 etc. Randomly selects a range and randomly sets value within that range.

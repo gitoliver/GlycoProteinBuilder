@@ -82,11 +82,11 @@ void Residue_linkage::SetCustomDihedralAngles(std::vector <double> dihedral_angl
     }
 }
 
-void Residue_linkage::SetPreviousDihedralAngles()
+void Residue_linkage::SetDihedralAnglesToPrevious()
 {
     for(RotatableDihedralVector::iterator rotatable_bond = rotatable_bonds_.begin(); rotatable_bond != rotatable_bonds_.end(); ++rotatable_bond)
     {
-        rotatable_bond->SetPreviousDihedralAngle();
+        rotatable_bond->SetDihedralAngleToPrevious();
     }
 }
 

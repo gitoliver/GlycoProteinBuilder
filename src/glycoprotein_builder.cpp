@@ -188,7 +188,9 @@ double glycoprotein_builder::GetGlobalOverlap(GlycosylationSiteVector &glycosite
 void glycoprotein_builder::write_pdb_file(Assembly *glycoprotein, int cycle, std::string summary_filename, double overlap)
 {
     std::stringstream ss;
-    ss << summary_filename << "_cycle_" << cycle << "overlap_" << overlap << ".pdb";
+   // ss << summary_filename << "_cycle_" << cycle << "overlap_" << overlap << ".pdb";
+    ss << cycle << "_cycle_" << ".pdb";
+
     PdbFileSpace::PdbFile *outputPdbFile = glycoprotein->BuildPdbFileStructureFromAssembly(-1,0);
     outputPdbFile->Write(ss.str());
 }
