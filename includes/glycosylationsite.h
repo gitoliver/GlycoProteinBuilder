@@ -60,9 +60,11 @@ public:
     void AttachGlycan(Assembly glycan, Assembly &glycoprotein);
     double Calculate_bead_overlaps(std::string overlap_type = "total", bool record = true);
     double Calculate_and_print_bead_overlaps();
+    double CalculateAtomicOverlaps();
     void UpdateAtomsThatMoveInLinkages();
     void Rename_Protein_Residue_From_GLYCAM_To_Standard();
     void Wiggle(int *output_pdb_id, double tolerance = 0.1, int interval = 5);
+    void WiggleFirstLinkage(int *output_pdb_id, double tolerance = 0.1, int interval = 5);
 
     //////////////////////////////////////////////////////////
     //                       MUTATOR                        //
@@ -113,6 +115,7 @@ private:
     void FigureOutResidueLinkagesInGlycan(Residue *from_this_residue1, Residue *to_this_residue2, ResidueLinkageVector *residue_linkages);
     void RecursivelyGetAllNeighboringResidues(Atom* current_atom, ResidueVector* neighbors);
     Atom* GetConnectingProteinAtom(std::string residue_name);
+    void WiggleOneLinkage(Residue_linkage &linkage, int *output_pdb_id, double tolerance = 0.1, int interval = 5);
 
     //////////////////////////////////////////////////////////
     //                       ATTRIBUTES                     //

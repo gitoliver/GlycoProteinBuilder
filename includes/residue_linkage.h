@@ -31,7 +31,7 @@ public:
 
     ResidueVector GetResidues();
     RotatableDihedralVector GetRotatableDihedrals() const;
-    int GetNumberOfRotatableBonds();
+    int GetNumberOfRotatableDihedrals();
 
     //////////////////////////////////////////////////////////
     //                       MUTATOR                        //
@@ -65,10 +65,10 @@ private:
     //////////////////////////////////////////////////////////
 
     void InitializeClass(Residue *from_this_residue1, Residue *to_this_residue2);
-    RotatableDihedralVector FindRotatableBondsConnectingResidues(Atom *from_this_connection_atom1, Atom *to_this_connection_atom2);
+    RotatableDihedralVector FindRotatableDihedralsConnectingResidues(Atom *from_this_connection_atom1, Atom *to_this_connection_atom2);
     // Previous function generates a list of linearly connected atoms that define the rotatable bonds
     // This function splits that list into groups of 4 and creates rotatable_dihedral objects
-    RotatableDihedralVector SplitAtomVectorIntoRotatableBonds(AtomVector atoms);
+    RotatableDihedralVector SplitAtomVectorIntoRotatableDihedrals(AtomVector atoms);
     gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector FindMetadata(Atom *from_this_connection_atom1, Atom *to_this_connection_atom2);
     void AddMetadataToRotatableDihedrals(gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector metadata);
     void SetResidues(Residue *residue1, Residue *residue2);

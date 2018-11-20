@@ -88,9 +88,14 @@ int main(int argc, char* argv[])
 //        resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, max_cycles);
 //    }
 
-    // wiggle
+    // Wiggle
     glycoprotein_builder::SetDefaultDihedralAnglesUsingMetadata(glycosites); // Reset to reasonable starting points
-    resolve_overlaps::wiggle(glycosites, 1);
+    resolve_overlaps::wiggle(glycosites, 100);
+
+    double loose_overlap_tolerance = 1.0;
+    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
+    glycoprotein_builder::DeleteSitesIterativelyWithOverlapAboveTolerance(glycosites, loose_overlap_tolerance);
+
 
 //    // Testing algorithms:
 ////    glycoprotein_builder::SetRandomChi1Chi2Values(glycosites);

@@ -362,6 +362,21 @@ double GlycosylationSite::Calculate_and_print_bead_overlaps()
     return overlap;
 }
 
+double GlycosylationSite::CalculateAtomicOverlaps()
+{
+    double overlap = 0.0;
+    AtomVector glycan_atoms = glycan_.GetAllAtomsOfAssembly();
+    for(auto &protein_bead : protein_beads_)
+    {
+        overlap += gmml::CalculateAtomicOverlaps(protein_bead->GetResidue()->GetAtoms(), glycan_atoms);
+    }
+    for(auto &other_glycan_bead : other_glycan_beads_)
+    {
+        overlap += gmml::CalculateAtomicOverlaps(other_glycan_bead->GetResidue()->GetAtoms(), glycan_atoms);
+    }
+    return overlap;
+}
+
 void GlycosylationSite::Print_bead_overlaps()
 {
     std::cout << std::fixed; // Formating ouput
@@ -465,59 +480,23 @@ double GlycosylationSite::CalculateTorsionAngle(AtomVector atoms)
 
 }
 
+void GlycosylationSite::WiggleFirstLinkage(int *output_pdb_id, double tolerance, int interval)
+{
+    //Residue_linkage *linkage = all_residue_linkages_.front();
+    this->WiggleOneLinkage(all_residue_linkages_.front(), output_pdb_id, tolerance, interval);
+    return;
+}
+
 void GlycosylationSite::Wiggle(int *output_pdb_id, double tolerance, int interval)
 { // I want to find the lowest overlap as close to each bonds default as possibe. So code is a bit more complicated.
-    for(auto & linkage : all_residue_linkages_)
+    for(auto &linkage : all_residue_linkages_)
     {
-        double current_overlap = this->Calculate_bead_overlaps();
-        double lowest_overlap = current_overlap;
-        // Reverse as convention is Glc1-4Gal and I want to wiggle in opposite direction i.e. from first rotatable bond in Asn outwards
-        RotatableDihedralVector reversed_rotatable_bond_vector = linkage.GetRotatableDihedrals();
-        std::reverse(reversed_rotatable_bond_vector.begin(), reversed_rotatable_bond_vector.end());
-        for(auto &rotatable_dihedral : reversed_rotatable_bond_vector)
-        {
-            double best_dihedral_angle = rotatable_dihedral.CalculateDihedralAngle();
-            std::cout << "Starting new linkage with best angle as " << best_dihedral_angle << "\n";
-            gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector metadata_entries = rotatable_dihedral.GetMetadata();
-            for(auto &metadata : metadata_entries)
-            {
-                double lower_bound = (metadata.default_angle_value_ - metadata.lower_deviation_);
-                double upper_bound = (metadata.default_angle_value_ + metadata.upper_deviation_);
-                double current_dihedral = lower_bound;
-                while(current_dihedral <= upper_bound )
-                {
-                    rotatable_dihedral.SetDihedralAngle(current_dihedral);
-                    glycoprotein_builder::write_pdb_file(this->GetGlycoprotein(), *output_pdb_id, "wiggle", lowest_overlap);
-                    ++(*output_pdb_id);
-                    current_overlap = this->Calculate_bead_overlaps();
-                    std::cout << "Current dihedral-overlap " << current_dihedral << " : " << current_overlap << ". Best dihedral-overlap: " << best_dihedral_angle << " : "<< lowest_overlap << "\n";
-                    if (lowest_overlap >= (current_overlap + 0.01)) // 0.01 otherwise rounding errors
-                    {
-                        std::cout << "Setting id " << *output_pdb_id << " index: " << metadata.index_ << ": ";
-                        rotatable_dihedral.Print();
-                        lowest_overlap = current_overlap;
-//                        glycoprotein_builder::write_pdb_file(this->GetGlycoprotein(), *temp_id, "wiggle", lowest_overlap);
-//                        ++(*temp_id);
-                        best_dihedral_angle = current_dihedral;
-                        std::cout << "Best angle is now " << best_dihedral_angle << "\n";
-                    }
-                    // Perfer angles closer to default.
-                    else if ( (lowest_overlap == current_overlap) &&
-                              (abs(metadata.default_angle_value_ - best_dihedral_angle ) > abs(metadata.default_angle_value_ - current_dihedral)) )
-                    {
-                        best_dihedral_angle = current_dihedral;
-                    }
-                    current_dihedral += interval; // increment
-                }
-            }
-            std::cout << "Setting best angle as " << best_dihedral_angle << "\n";
-            rotatable_dihedral.SetDihedralAngle(best_dihedral_angle);
-            // std::cout << "\n";
-            if(lowest_overlap <= tolerance) return;
-        }
+        this->WiggleOneLinkage(linkage, output_pdb_id, tolerance, interval);
     }
-    return; // Note possibility of different return above
+    return;
 }
+
+
 
 //////////////////////////////////////////////////////////
 //                       MUTATOR                        //
@@ -757,6 +736,57 @@ Atom* GlycosylationSite::GetConnectingProteinAtom(std::string residue_name)
         returned_atom = residue_->GetAtom("OH");
     }
     return returned_atom;
+}
+
+void GlycosylationSite::WiggleOneLinkage(Residue_linkage &linkage, int *output_pdb_id, double tolerance, int interval)
+{
+    double current_overlap = this->Calculate_bead_overlaps();
+    double lowest_overlap = current_overlap;
+    // Reverse as convention is Glc1-4Gal and I want to wiggle in opposite direction i.e. from first rotatable bond in Asn outwards
+    RotatableDihedralVector reversed_rotatable_bond_vector = linkage.GetRotatableDihedrals();
+    std::reverse(reversed_rotatable_bond_vector.begin(), reversed_rotatable_bond_vector.end());
+    for(auto &rotatable_dihedral : reversed_rotatable_bond_vector)
+    {
+        double best_dihedral_angle = rotatable_dihedral.CalculateDihedralAngle();
+       // std::cout << "Starting new linkage with best angle as " << best_dihedral_angle << "\n";
+        gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector metadata_entries = rotatable_dihedral.GetMetadata();
+        for(auto &metadata : metadata_entries)
+        {
+            double lower_bound = (metadata.default_angle_value_ - metadata.lower_deviation_);
+            double upper_bound = (metadata.default_angle_value_ + metadata.upper_deviation_);
+            double current_dihedral = lower_bound;
+            while(current_dihedral <= upper_bound )
+            {
+                rotatable_dihedral.SetDihedralAngle(current_dihedral);
+                //glycoprotein_builder::write_pdb_file(this->GetGlycoprotein(), *output_pdb_id, "wiggle", lowest_overlap);
+                //++(*output_pdb_id);
+                current_overlap = this->Calculate_bead_overlaps();
+               // std::cout << "Current dihedral-overlap " << current_dihedral << " : " << current_overlap << ". Best dihedral-overlap: " << best_dihedral_angle << " : "<< lowest_overlap << "\n";
+                if (lowest_overlap >= (current_overlap + 0.01)) // 0.01 otherwise rounding errors
+                {
+                  //  std::cout << "Setting id " << *output_pdb_id << " index: " << metadata.index_ << ": ";
+                    rotatable_dihedral.Print();
+                    lowest_overlap = current_overlap;
+                    //                        glycoprotein_builder::write_pdb_file(this->GetGlycoprotein(), *output_pdb_id, "wiggle", lowest_overlap);
+                    //                        ++(*output_pdb_id);
+                    best_dihedral_angle = current_dihedral;
+              //      std::cout << "Best angle is now " << best_dihedral_angle << "\n";
+                }
+                // Perfer angles closer to default.
+                else if ( (lowest_overlap == current_overlap) &&
+                          (abs(metadata.default_angle_value_ - best_dihedral_angle ) > abs(metadata.default_angle_value_ - current_dihedral)) )
+                {
+                    best_dihedral_angle = current_dihedral;
+                }
+                current_dihedral += interval; // increment
+            }
+        }
+        //std::cout << "Setting best angle as " << best_dihedral_angle << "\n";
+        rotatable_dihedral.SetDihedralAngle(best_dihedral_angle);
+        // std::cout << "\n";
+        if(lowest_overlap <= tolerance) return;
+    }
+    return; // Note possibility of earlier return above
 }
 
 
