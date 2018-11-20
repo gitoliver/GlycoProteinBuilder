@@ -1,3 +1,4 @@
+tests/GlycoProtein_Resolved.pdb
 build/*.o
 test1eer/
 best_cycles/
