@@ -17,3 +17,5 @@ plot.pdf
 large_scale_testing
 animatepdbs.tcl
 clean_output_pdbs.sh
+src/cinclude2dot.pl
+src/source.dot

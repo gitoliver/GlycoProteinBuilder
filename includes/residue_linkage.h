@@ -82,7 +82,7 @@ private:
     Residue* to_this_residue2_;
     Atom* from_this_connection_atom1_;
     Atom* to_this_connection_atom2_;
-    RotatableDihedralVector rotatable_bonds_;
+    RotatableDihedralVector rotatable_dihedrals_;
     //gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector metadata_;
 };
 

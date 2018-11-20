@@ -3,6 +3,9 @@
 
 #include <cmath>
 #include <stdio.h>
+#include <random>
+#include "../includes/pcg_random.hpp"
+
 
 namespace monte_carlo
 {
@@ -10,10 +13,17 @@ namespace monte_carlo
 inline double get_random_acceptance_probability()
 {
     // I did this when testing and calling multiple times, as time wasn't progressing between calls. So Fast!
-    srand ((time(NULL) + rand())); // initialise a random seed for rand(). Otherwise it's always the same.
+    //srand ((time(NULL) + rand())); // initialise a random seed for rand(). Otherwise it's always the same.
     //std::cout << (rand() % 100) << "rand()\n";
-    double r = (rand() % 100); // get a number between 1 and 100
-    return (r / 100); // get it between 0 and 1
+    //double r = (rand() % 100); // get a number between 1 and 100
+    //return (r / 100); // get it between 0 and 1
+
+    // Seed with a real random value, if available
+    pcg_extras::seed_seq_from<std::random_device> metropolis_seed_source;
+    // Make a random number engine
+    pcg32 rng_engine(metropolis_seed_source);
+    std::uniform_real_distribution<> angle_distribution(0, 1); // define the range
+    return angle_distribution(rng_engine);
 }
 
 inline bool accept_via_metropolis_criterion(double change_in_overlap)

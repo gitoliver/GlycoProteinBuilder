@@ -2,6 +2,7 @@
 #include "../includes/glycosylationsite.h"
 #include "../includes/glycoprotein_builder.h"
 //#include "../includes/residue_linkage.h"
+#include "../includes/selections.h"
 
 constexpr auto PI = 3.14159265358979323846;
 
@@ -155,31 +156,18 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
     //Dear future self, the order that you add the atoms to the residue matters for superimposition ie N, CA, CB , not CB, CA, N.
     // Want: assembly.FindResidueByTag("reducing-residue");
     Residue* reducing_Residue = glycan_.GetAllResiduesOfAssembly().at(1); // I assume I assumed something stupid here.
-    AtomVector reducing_Atoms = reducing_Residue->GetAtoms();
-
-    Atom* atomC5;
-    Atom* atomO5;
-    Atom* atomC1;
-
-    // Want: residue.FindAtom(string Name);
     // Want: residue.FindAtomByTag("anomeric-carbon"); The below is risky as it uses atoms names, i.e. would break for Sialic acid.
-    for(AtomVector::iterator it = reducing_Atoms.begin(); it != reducing_Atoms.end(); ++it)
-    {
-       Atom* atom = *it;
-       if(atom->GetName().compare("C5")==0)
-           atomC5 = atom;
-       if(atom->GetName().compare("O5")==0)
-           atomO5 = atom;
-       if(atom->GetName().compare("C1")==0)
-           atomC1 = atom;
-    }
+    Atom *atomC5 = reducing_Residue->GetAtom("C5");
+    Atom *atomO5 = reducing_Residue->GetAtom("O5");
+    Atom *atomC1 = reducing_Residue->GetAtom("C1");
+
     // Delete aglycon atoms from glycan.
     Residue * aglycon = glycan_.GetAllResiduesOfAssembly().at(0); // Oh jeez these assumptions are really building up.
     AtomVector aglycon_Atoms = aglycon->GetAtoms();
     for(AtomVector::iterator it = aglycon_Atoms.begin(); it != aglycon_Atoms.end(); ++it)
     {
        Atom* atom = *it;
-       aglycon->RemoveAtom(atom);
+       aglycon->RemoveAtom(atom); // Note only removes from residue. Atoms still exist and can be found through AtomNodes. They aren't written out in a PDB file though.
     }
 
     // Ok so going to set it so that the new "superimposition residue" is the old aglycon residue i.e. .at(0)
@@ -477,12 +465,13 @@ double GlycosylationSite::CalculateTorsionAngle(AtomVector atoms)
 
 }
 
-void GlycosylationSite::Wiggle(int *temp_id, int interval)
-{
+void GlycosylationSite::Wiggle(int *output_pdb_id, double tolerance, int interval)
+{ // I want to find the lowest overlap as close to each bonds default as possibe. So code is a bit more complicated.
     for(auto & linkage : all_residue_linkages_)
     {
         double current_overlap = this->Calculate_bead_overlaps();
         double lowest_overlap = current_overlap;
+        // Reverse as convention is Glc1-4Gal and I want to wiggle in opposite direction i.e. from first rotatable bond in Asn outwards
         RotatableDihedralVector reversed_rotatable_bond_vector = linkage.GetRotatableDihedrals();
         std::reverse(reversed_rotatable_bond_vector.begin(), reversed_rotatable_bond_vector.end());
         for(auto &rotatable_dihedral : reversed_rotatable_bond_vector)
@@ -498,13 +487,13 @@ void GlycosylationSite::Wiggle(int *temp_id, int interval)
                 while(current_dihedral <= upper_bound )
                 {
                     rotatable_dihedral.SetDihedralAngle(current_dihedral);
-                    glycoprotein_builder::write_pdb_file(this->GetGlycoprotein(), *temp_id, "wiggle", lowest_overlap);
-                    ++(*temp_id);
+                    glycoprotein_builder::write_pdb_file(this->GetGlycoprotein(), *output_pdb_id, "wiggle", lowest_overlap);
+                    ++(*output_pdb_id);
                     current_overlap = this->Calculate_bead_overlaps();
                     std::cout << "Current dihedral-overlap " << current_dihedral << " : " << current_overlap << ". Best dihedral-overlap: " << best_dihedral_angle << " : "<< lowest_overlap << "\n";
-                    if (lowest_overlap >= (current_overlap + 0.1))
+                    if (lowest_overlap >= (current_overlap + 0.01)) // 0.01 otherwise rounding errors
                     {
-                        std::cout << "Setting id " << *temp_id << " index: " << metadata.index_ << ": ";
+                        std::cout << "Setting id " << *output_pdb_id << " index: " << metadata.index_ << ": ";
                         rotatable_dihedral.Print();
                         lowest_overlap = current_overlap;
 //                        glycoprotein_builder::write_pdb_file(this->GetGlycoprotein(), *temp_id, "wiggle", lowest_overlap);
@@ -512,15 +501,22 @@ void GlycosylationSite::Wiggle(int *temp_id, int interval)
                         best_dihedral_angle = current_dihedral;
                         std::cout << "Best angle is now " << best_dihedral_angle << "\n";
                     }
-
+                    // Perfer angles closer to default.
+                    else if ( (lowest_overlap == current_overlap) &&
+                              (abs(metadata.default_angle_value_ - best_dihedral_angle ) > abs(metadata.default_angle_value_ - current_dihedral)) )
+                    {
+                        best_dihedral_angle = current_dihedral;
+                    }
                     current_dihedral += interval; // increment
                 }
             }
             std::cout << "Setting best angle as " << best_dihedral_angle << "\n";
             rotatable_dihedral.SetDihedralAngle(best_dihedral_angle);
             // std::cout << "\n";
+            if(lowest_overlap <= tolerance) return;
         }
     }
+    return; // Note possibility of different return above
 }
 
 //////////////////////////////////////////////////////////
