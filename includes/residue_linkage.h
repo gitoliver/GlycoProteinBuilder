@@ -6,7 +6,7 @@
  * Stores each rotatable bond as a rotatable_dihedral object.
  */
 #include "rotatable_dihedral.h"
-#include "../../../includes/MolecularMetadata/GLYCAM/dihedralangledata.hpp"
+// #include "../../../includes/MolecularMetadata/GLYCAM/dihedralangledata.hpp"
 
 class Residue_linkage
 {
