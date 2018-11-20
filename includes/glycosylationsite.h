@@ -1,13 +1,15 @@
 #ifndef GLYCOSYLATIONSITE_H
 #define GLYCOSYLATIONSITE_H
 
-#include "gmml.hpp"
-#include "residue_linkage.h"
-#include "selections.h"
+
 #include <iomanip> // For setting precision and formating in std::cout 
 #include <algorithm> //  std::erase, std::remove
 
+#include "gmml.hpp"
+#include "residue_linkage.h"
+
 typedef std::vector<Residue_linkage> ResidueLinkageVector;
+typedef std::vector<Rotatable_dihedral> RotatableDihedralVector;
 
 
 using namespace MolecularModeling;
@@ -58,8 +60,11 @@ public:
     void AttachGlycan(Assembly glycan, Assembly &glycoprotein);
     double Calculate_bead_overlaps(std::string overlap_type = "total", bool record = true);
     double Calculate_and_print_bead_overlaps();
+    double CalculateAtomicOverlaps();
     void UpdateAtomsThatMoveInLinkages();
     void Rename_Protein_Residue_From_GLYCAM_To_Standard();
+    void Wiggle(int *output_pdb_id, double tolerance = 0.1, int interval = 5);
+    void WiggleFirstLinkage(int *output_pdb_id, double tolerance = 0.1, int interval = 5);
 
     //////////////////////////////////////////////////////////
     //                       MUTATOR                        //
@@ -76,6 +81,7 @@ public:
     void SetOtherGlycanBeads(AtomVector *beads);
     void SetDefaultDihedralAnglesUsingMetadata();
     void SetRandomDihedralAnglesUsingMetadata();
+    void SetRandomDihedralAnglesUsingMetadataForNthLinkage(int linkage_number);
     void ResetDihedralAngles();
 
     //////////////////////////////////////////////////////////
@@ -106,11 +112,10 @@ private:
     double Calculate_bead_overlaps(AtomVector &atomsA, AtomVector &atomsB);
     void SetRotatableBonds(Residue *residue1, Residue *residue2);
     void Rename_Protein_Residue_To_GLYCAM_Nomenclature();
-    // This doesn't belong here:
-   // ResidueLinkageVector FigureOutResidueLinkagesInGlycan();
-    void FigureOutResidueLinkagesInGlycan(Residue *residue1, Residue *residue2, ResidueLinkageVector *residue_linkages);
+    void FigureOutResidueLinkagesInGlycan(Residue *from_this_residue1, Residue *to_this_residue2, ResidueLinkageVector *residue_linkages);
     void RecursivelyGetAllNeighboringResidues(Atom* current_atom, ResidueVector* neighbors);
     Atom* GetConnectingProteinAtom(std::string residue_name);
+    void WiggleOneLinkage(Residue_linkage &linkage, int *output_pdb_id, double tolerance = 0.1, int interval = 5);
 
     //////////////////////////////////////////////////////////
     //                       ATTRIBUTES                     //

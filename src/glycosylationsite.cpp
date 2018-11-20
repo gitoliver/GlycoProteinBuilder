@@ -1,4 +1,8 @@
+#include "algorithm"
 #include "../includes/glycosylationsite.h"
+#include "../includes/glycoprotein_builder.h"
+//#include "../includes/residue_linkage.h"
+#include "../includes/selections.h"
 
 constexpr auto PI = 3.14159265358979323846;
 
@@ -152,31 +156,18 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
     //Dear future self, the order that you add the atoms to the residue matters for superimposition ie N, CA, CB , not CB, CA, N.
     // Want: assembly.FindResidueByTag("reducing-residue");
     Residue* reducing_Residue = glycan_.GetAllResiduesOfAssembly().at(1); // I assume I assumed something stupid here.
-    AtomVector reducing_Atoms = reducing_Residue->GetAtoms();
-
-    Atom* atomC5;
-    Atom* atomO5;
-    Atom* atomC1;
-
-    // Want: residue.FindAtom(string Name);
     // Want: residue.FindAtomByTag("anomeric-carbon"); The below is risky as it uses atoms names, i.e. would break for Sialic acid.
-    for(AtomVector::iterator it = reducing_Atoms.begin(); it != reducing_Atoms.end(); ++it)
-    {
-       Atom* atom = *it;
-       if(atom->GetName().compare("C5")==0)
-           atomC5 = atom;
-       if(atom->GetName().compare("O5")==0)
-           atomO5 = atom;
-       if(atom->GetName().compare("C1")==0)
-           atomC1 = atom;
-    }
+    Atom *atomC5 = reducing_Residue->GetAtom("C5");
+    Atom *atomO5 = reducing_Residue->GetAtom("O5");
+    Atom *atomC1 = reducing_Residue->GetAtom("C1");
+
     // Delete aglycon atoms from glycan.
     Residue * aglycon = glycan_.GetAllResiduesOfAssembly().at(0); // Oh jeez these assumptions are really building up.
     AtomVector aglycon_Atoms = aglycon->GetAtoms();
     for(AtomVector::iterator it = aglycon_Atoms.begin(); it != aglycon_Atoms.end(); ++it)
     {
        Atom* atom = *it;
-       aglycon->RemoveAtom(atom);
+       aglycon->RemoveAtom(atom); // Note only removes from residue. Atoms still exist and can be found through AtomNodes. They aren't written out in a PDB file though.
     }
 
     // Ok so going to set it so that the new "superimposition residue" is the old aglycon residue i.e. .at(0)
@@ -371,6 +362,21 @@ double GlycosylationSite::Calculate_and_print_bead_overlaps()
     return overlap;
 }
 
+double GlycosylationSite::CalculateAtomicOverlaps()
+{
+    double overlap = 0.0;
+    AtomVector glycan_atoms = glycan_.GetAllAtomsOfAssembly();
+    for(auto &protein_bead : protein_beads_)
+    {
+        overlap += gmml::CalculateAtomicOverlaps(protein_bead->GetResidue()->GetAtoms(), glycan_atoms);
+    }
+    for(auto &other_glycan_bead : other_glycan_beads_)
+    {
+        overlap += gmml::CalculateAtomicOverlaps(other_glycan_bead->GetResidue()->GetAtoms(), glycan_atoms);
+    }
+    return overlap;
+}
+
 void GlycosylationSite::Print_bead_overlaps()
 {
     std::cout << std::fixed; // Formating ouput
@@ -474,6 +480,24 @@ double GlycosylationSite::CalculateTorsionAngle(AtomVector atoms)
 
 }
 
+void GlycosylationSite::WiggleFirstLinkage(int *output_pdb_id, double tolerance, int interval)
+{
+    //Residue_linkage *linkage = all_residue_linkages_.front();
+    this->WiggleOneLinkage(all_residue_linkages_.front(), output_pdb_id, tolerance, interval);
+    return;
+}
+
+void GlycosylationSite::Wiggle(int *output_pdb_id, double tolerance, int interval)
+{ // I want to find the lowest overlap as close to each bonds default as possibe. So code is a bit more complicated.
+    for(auto &linkage : all_residue_linkages_)
+    {
+        this->WiggleOneLinkage(linkage, output_pdb_id, tolerance, interval);
+    }
+    return;
+}
+
+
+
 //////////////////////////////////////////////////////////
 //                       MUTATOR                        //
 //////////////////////////////////////////////////////////
@@ -571,11 +595,19 @@ void GlycosylationSite::SetRandomDihedralAnglesUsingMetadata()
     //residue_linkage_.SetRandomDihedralAnglesUsingMetadata();
 }
 
+void GlycosylationSite::SetRandomDihedralAnglesUsingMetadataForNthLinkage(int linkage_number)
+{
+    if(linkage_number < all_residue_linkages_.size())
+    {
+        all_residue_linkages_.at(linkage_number).SetRandomDihedralAnglesUsingMetadata();
+    }
+}
+
 void GlycosylationSite::ResetDihedralAngles()
 {
     for(auto &linkage : all_residue_linkages_)
     {
-        linkage.SetPreviousDihedralAngles();
+        linkage.SetDihedralAnglesToPrevious();
     }
     //residue_linkage_.SetPreviousDihedralAngles();
 }
@@ -642,39 +674,27 @@ void GlycosylationSite::Print(std::string type)
 
 // These functions do not fit here. Also, as ResidueNodes are not set, they are overly complex (nested recursive functions anyone?).
 // They traverse the residues. I want to ignore the algycon for now.
-void GlycosylationSite::FigureOutResidueLinkagesInGlycan(Residue *residue1, Residue *residue2, ResidueLinkageVector *residue_linkages)
+void GlycosylationSite::FigureOutResidueLinkagesInGlycan(Residue *from_this_residue1, Residue *to_this_residue2, ResidueLinkageVector *residue_linkages)
 {
-    Atom *start_atom = residue2->GetAtoms().at(0); // Need to start somewhere.
+    Atom *start_atom = to_this_residue2->GetAtoms().at(0); // Need to start somewhere.
     ResidueVector neighbors;
     RecursivelyGetAllNeighboringResidues(start_atom, &neighbors);
     ResidueVector glycan_residues = glycan_.GetResidues();
-//    for(auto &neighbor : neighbors)
-//    {
-//        auto it = std::find(glycan_residues.begin(), glycan_residues.end(), neighbor);
-//        if (it != glycan_residues.end())
-//        {
-//            std::cout << neighbor->GetId() << " is in glycan_residues\n";
-//        }
-//        else
-//        {
-//            std::cout << neighbor->GetId() << " is NOT in glycan_residues\n";
-//        }
-//    }
     for(auto &neighbor : neighbors)
     {
-        if( (neighbor->GetIndex() != residue1->GetIndex()) && (std::find(glycan_residues.begin(), glycan_residues.end(), neighbor) != glycan_residues.end())  )
+        if( (neighbor->GetIndex() != from_this_residue1->GetIndex()) && (std::find(glycan_residues.begin(), glycan_residues.end(), neighbor) != glycan_residues.end())  )
         {
-            //std::cout << "Setting linkages for " << neighbor->GetId() << "->" << residue2->GetId() << "\n";
-            residue_linkages->emplace_back(neighbor, residue2);
+            residue_linkages->emplace_back(neighbor, to_this_residue2);
         }
     }
     for(auto &neighbor : neighbors)
     {
-        if( (neighbor->GetIndex() != residue1->GetIndex()) && (std::find(glycan_residues.begin(), glycan_residues.end(), neighbor) != glycan_residues.end())  )
+        if( (neighbor->GetIndex() != from_this_residue1->GetIndex()) && (std::find(glycan_residues.begin(), glycan_residues.end(), neighbor) != glycan_residues.end())  )
         {
-            FigureOutResidueLinkagesInGlycan(residue2, neighbor, residue_linkages);
+            this->FigureOutResidueLinkagesInGlycan(to_this_residue2, neighbor, residue_linkages);
         }
     }
+    return;
 }
 
 void GlycosylationSite::RecursivelyGetAllNeighboringResidues(Atom* current_atom, ResidueVector* neighbors)
@@ -691,7 +711,7 @@ void GlycosylationSite::RecursivelyGetAllNeighboringResidues(Atom* current_atom,
         }
         else if (neighboring_atom->GetDescription().compare("VisitedByRecursivelyGetAllNeighboringResidues")!=0)
         { // If in current residue, and not visited already:
-            RecursivelyGetAllNeighboringResidues(neighboring_atom, neighbors);
+            this->RecursivelyGetAllNeighboringResidues(neighboring_atom, neighbors);
         }
     }
 }
@@ -716,6 +736,57 @@ Atom* GlycosylationSite::GetConnectingProteinAtom(std::string residue_name)
         returned_atom = residue_->GetAtom("OH");
     }
     return returned_atom;
+}
+
+void GlycosylationSite::WiggleOneLinkage(Residue_linkage &linkage, int *output_pdb_id, double tolerance, int interval)
+{
+    double current_overlap = this->Calculate_bead_overlaps();
+    double lowest_overlap = current_overlap;
+    // Reverse as convention is Glc1-4Gal and I want to wiggle in opposite direction i.e. from first rotatable bond in Asn outwards
+    RotatableDihedralVector reversed_rotatable_bond_vector = linkage.GetRotatableDihedrals();
+    std::reverse(reversed_rotatable_bond_vector.begin(), reversed_rotatable_bond_vector.end());
+    for(auto &rotatable_dihedral : reversed_rotatable_bond_vector)
+    {
+        double best_dihedral_angle = rotatable_dihedral.CalculateDihedralAngle();
+       // std::cout << "Starting new linkage with best angle as " << best_dihedral_angle << "\n";
+        gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector metadata_entries = rotatable_dihedral.GetMetadata();
+        for(auto &metadata : metadata_entries)
+        {
+            double lower_bound = (metadata.default_angle_value_ - metadata.lower_deviation_);
+            double upper_bound = (metadata.default_angle_value_ + metadata.upper_deviation_);
+            double current_dihedral = lower_bound;
+            while(current_dihedral <= upper_bound )
+            {
+                rotatable_dihedral.SetDihedralAngle(current_dihedral);
+                //glycoprotein_builder::write_pdb_file(this->GetGlycoprotein(), *output_pdb_id, "wiggle", lowest_overlap);
+                //++(*output_pdb_id);
+                current_overlap = this->Calculate_bead_overlaps();
+               // std::cout << "Current dihedral-overlap " << current_dihedral << " : " << current_overlap << ". Best dihedral-overlap: " << best_dihedral_angle << " : "<< lowest_overlap << "\n";
+                if (lowest_overlap >= (current_overlap + 0.01)) // 0.01 otherwise rounding errors
+                {
+                  //  std::cout << "Setting id " << *output_pdb_id << " index: " << metadata.index_ << ": ";
+                    //rotatable_dihedral.Print();
+                    lowest_overlap = current_overlap;
+                    //                        glycoprotein_builder::write_pdb_file(this->GetGlycoprotein(), *output_pdb_id, "wiggle", lowest_overlap);
+                    //                        ++(*output_pdb_id);
+                    best_dihedral_angle = current_dihedral;
+              //      std::cout << "Best angle is now " << best_dihedral_angle << "\n";
+                }
+                // Perfer angles closer to default.
+                else if ( (lowest_overlap == current_overlap) &&
+                          (abs(metadata.default_angle_value_ - best_dihedral_angle ) > abs(metadata.default_angle_value_ - current_dihedral)) )
+                {
+                    best_dihedral_angle = current_dihedral;
+                }
+                current_dihedral += interval; // increment
+            }
+        }
+        //std::cout << "Setting best angle as " << best_dihedral_angle << "\n";
+        rotatable_dihedral.SetDihedralAngle(best_dihedral_angle);
+        // std::cout << "\n";
+        if(lowest_overlap <= tolerance) return;
+    }
+    return; // Note possibility of earlier return above
 }
 
 

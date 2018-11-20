@@ -26,6 +26,7 @@ void PrintDihedralAnglesAndOverlapOfGlycosites(GlycosylationSiteVector &glycosit
 void SetDefaultDihedralAnglesUsingMetadata(GlycosylationSiteVector &glycosites);
 void SetRandomDihedralAnglesUsingMetadata(GlycosylationSiteVector &glycosites);
 void CalculateOverlaps(GlycosylationSiteVector &glycosites);
+double CalculateAtomicOverlaps(GlycosylationSiteVector &glycosites);
 double GetGlobalOverlap(GlycosylationSiteVector &glycosites);
 //double RandomAngle_360range();
 //double RandomAngle_range(int min, int max);

@@ -17,7 +17,7 @@ bool FindCyclePoint(Atom *previous_atom, Atom *current_atom, AtomVector *atom_pa
 bool FindPathBetweenTwoAtoms(Atom *current_atom, Atom *target_atom, AtomVector *atom_path, bool *found);
 //bool CheckIfCycle(Atom *previous_atom, Atom *current_atom, AtomVector *atom_path);
 void ClearAtomDescriptions(Residue *residue);
-AtomVector FindRotationPoints(Atom *atom);
+AtomVector FindCyclePoints(Atom *atom);
 bool FindRotationPointsForNonCycles(Atom *previous_atom, Atom *current_atom, AtomVector *rotation_points);
 Atom* FindCyclePointNeighbor(const AtomVector atom_path, Atom *cycle_point);
 Atom* FindAtomNeighborThatMatchesQuery(Atom *atom, std::string query);

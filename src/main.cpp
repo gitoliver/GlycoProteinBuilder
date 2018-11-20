@@ -79,14 +79,23 @@ int main(int argc, char* argv[])
     //************************************************//
 
     // Fast and stupid:
-    if (!resolve_overlaps::dumb_random_walk(glycosites))
-    {
-        int max_cycles = 500;
-        std::cout << "Could not resolve quickly" << std::endl;
-        glycoprotein_builder::SetDefaultDihedralAnglesUsingMetadata(glycosites); // Reset to reasonable starting points
-        outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Initial1.pdb");
-        resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, max_cycles);
-    }
+//    if (!resolve_overlaps::dumb_random_walk(glycosites))
+//    {
+//        int max_cycles = 500;
+//        std::cout << "Could not resolve quickly" << std::endl;
+//        glycoprotein_builder::SetDefaultDihedralAnglesUsingMetadata(glycosites); // Reset to reasonable starting points
+//        outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Initial1.pdb");
+//        resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, max_cycles);
+//    }
+
+    // Wiggle
+    glycoprotein_builder::SetDefaultDihedralAnglesUsingMetadata(glycosites); // Reset to reasonable starting points
+    resolve_overlaps::wiggle(glycosites, 100);
+
+    double loose_overlap_tolerance = 1.0;
+    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
+    glycoprotein_builder::DeleteSitesIterativelyWithOverlapAboveTolerance(glycosites, loose_overlap_tolerance);
+
 
 //    // Testing algorithms:
 ////    glycoprotein_builder::SetRandomChi1Chi2Values(glycosites);

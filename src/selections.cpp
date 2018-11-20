@@ -181,7 +181,7 @@ __/  \__/  \__
         \__ Res4
  Res2 __/
 */
-AtomVector selection::FindRotationPoints(Atom *atom)
+AtomVector selection::FindCyclePoints(Atom *atom)
 {
     AtomVector rotation_points;
     AtomVector atom_path;
