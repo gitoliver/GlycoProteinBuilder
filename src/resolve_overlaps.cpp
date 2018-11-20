@@ -95,6 +95,7 @@ void resolve_overlaps::wiggle(GlycosylationSiteVector &glycosites, int max_cycle
     while ( (cycle < max_cycles) && (stop == false) )
     {
         ++cycle;
+        std::cout << "Cycle " << cycle << " of " << max_cycles << "\n";
         std::random_shuffle (sites_with_overlaps.begin(), sites_with_overlaps.end());
         for(auto &glycosite : sites_with_overlaps)
         {

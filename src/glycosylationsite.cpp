@@ -765,7 +765,7 @@ void GlycosylationSite::WiggleOneLinkage(Residue_linkage &linkage, int *output_p
                 if (lowest_overlap >= (current_overlap + 0.01)) // 0.01 otherwise rounding errors
                 {
                   //  std::cout << "Setting id " << *output_pdb_id << " index: " << metadata.index_ << ": ";
-                    rotatable_dihedral.Print();
+                    //rotatable_dihedral.Print();
                     lowest_overlap = current_overlap;
                     //                        glycoprotein_builder::write_pdb_file(this->GetGlycoprotein(), *output_pdb_id, "wiggle", lowest_overlap);
                     //                        ++(*output_pdb_id);
