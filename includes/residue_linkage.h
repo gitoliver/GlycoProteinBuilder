@@ -5,8 +5,11 @@
  * Starts/ends at the CA atoms in proteins. Looks for cycles (as they aren't rotatable).
  * Stores each rotatable bond as a rotatable_dihedral object.
  */
+#include "gmml.hpp"
 #include "rotatable_dihedral.h"
 // #include "../../../includes/MolecularMetadata/GLYCAM/dihedralangledata.hpp"
+
+typedef std::vector<Rotatable_dihedral> RotatableDihedralVector;
 
 class Residue_linkage
 {
@@ -15,8 +18,8 @@ public:
     //                    TYPE DEFINITION                   //
     //////////////////////////////////////////////////////////
 
-    typedef std::vector<Rotatable_dihedral> RotatableDihedralVector;
-    typedef std::vector<Residue_linkage> ResidueLinkageVector;
+//    typedef std::vector<Rotatable_dihedral> RotatableDihedralVector;
+//    typedef std::vector<Residue_linkage> ResidueLinkageVector;
 
     //////////////////////////////////////////////////////////
     //                       CONSTRUCTOR                    //

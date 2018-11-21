@@ -1,3 +1,4 @@
+tests/one_site/GlycoProtein_Resolved.pdb
 tests/GlycoProtein_Resolved.pdb
 build/*.o
 test1eer/

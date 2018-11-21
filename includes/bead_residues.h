@@ -1,9 +1,8 @@
 #ifndef BEAD_RESIDUES_H
 #define BEAD_RESIDUES_H
 
+#include "gmml.hpp"
 #include "glycosylationsite.h"
-#include "selections.h"
-#include "glycoprotein_builder.h"
 
 typedef std::vector<GlycosylationSite> GlycosylationSiteVector;
 typedef std::vector<GlycosylationSite*> GlycosylationSitePointerVector;

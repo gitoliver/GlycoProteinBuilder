@@ -1,8 +1,8 @@
 #include "algorithm"
 #include "../includes/glycosylationsite.h"
-#include "../includes/glycoprotein_builder.h"
+//#include "../includes/glycoprotein_builder.h"
 //#include "../includes/residue_linkage.h"
-#include "../includes/selections.h"
+//#include "../includes/selections.h"
 
 constexpr auto PI = 3.14159265358979323846;
 

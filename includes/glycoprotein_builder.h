@@ -8,9 +8,7 @@
 //#include <sys/types.h>
 //#include <stdlib.h>     /* getenv */
 //#include <fstream>      // std::ifstream
-#include "io.h"
 #include "glycosylationsite.h"
-#include "bead_residues.h"
 
 typedef std::vector<GlycosylationSite> GlycosylationSiteVector;
 typedef std::vector<GlycosylationSite*> GlycosylationSitePointerVector;
@@ -32,7 +30,7 @@ double GetGlobalOverlap(GlycosylationSiteVector &glycosites);
 //double RandomAngle_range(int min, int max);
 //double RandomAngle_PlusMinusX(double start_point, int max_step_size);
 //double GetNewAngleScaledToDegreeOfOverlap(double current_angle, double overlap, int number_of_atoms);
-void write_pdb_file(Assembly *glycoprotein, int cycle, std::string summary_filename, double overlap);
+void write_pdb_file(MolecularModeling::Assembly *glycoprotein, int cycle, std::string summary_filename, double overlap);
 void PrintOverlaps(GlycosylationSiteVector &glycosites);
 void PrintOverlaps(GlycosylationSitePointerVector &glycosites);
 void CalculateAndPrintOverlaps(GlycosylationSiteVector &glycosites);
