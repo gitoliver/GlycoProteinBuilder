@@ -1,8 +1,4 @@
 #include "../includes/resolve_overlaps.h"
-#include "../includes/metropolis_criterion.h"
-#include "../includes/glycoprotein_builder.h"
-#include "../includes/bead_residues.h"
-#include "../includes/glycosylationsite.h"
 
 typedef std::vector<GlycosylationSite*> GlycosylationSitePointerVector;
 

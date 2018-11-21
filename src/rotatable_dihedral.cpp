@@ -1,6 +1,4 @@
 #include "../includes/rotatable_dihedral.h"
-#include <random>
-#include "../includes/pcg_random.hpp"
 
 // Seed with a real random value, if available
 static pcg_extras::seed_seq_from<std::random_device> seed_source;

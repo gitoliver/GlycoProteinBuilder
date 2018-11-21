@@ -1,7 +1,4 @@
 #include "../includes/glycoprotein_builder.h"
-#include "../includes/glycosylationsite.h"
-#include "../includes/bead_residues.h"
-#include "../includes/io.h"
 
 /*******************************************/
 /* Functions                               */
