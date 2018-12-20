@@ -7,7 +7,7 @@
  */
 #include "gmml.hpp"
 #include "rotatable_dihedral.h"
-// #include "../../../includes/MolecularMetadata/GLYCAM/dihedralangledata.hpp"
+#include "selections.h"
 
 typedef std::vector<Rotatable_dihedral> RotatableDihedralVector;
 

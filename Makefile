@@ -56,7 +56,7 @@ $(BIN)/gp_builder: \
 $(BUILD)/bead_residues.o: $(SRC)/bead_residues.cpp \
 		$(INC)/bead_residues.h \
 		$(INC)/glycosylationsite.h \
-		$(INC)/selections.h \
+		$(INC)/selections.h
 	$(COMPILE) $(SRC)/bead_residues.cpp -o $(BUILD)/bead_residues.o
 
 $(BUILD)/glycoprotein_builder.o: $(SRC)/glycoprotein_builder.cpp \
@@ -69,6 +69,7 @@ $(BUILD)/glycoprotein_builder.o: $(SRC)/glycoprotein_builder.cpp \
 $(BUILD)/glycosylationsite.o: $(SRC)/glycosylationsite.cpp \
 		$(INC)/glycosylationsite.h \
 		$(INC)/residue_linkage.h \
+		$(INC)/rotatable_dihedral.h
 	$(COMPILE) $(SRC)/glycosylationsite.cpp -o $(BUILD)/glycosylationsite.o
 
 $(BUILD)/io.o: $(SRC)/io.cpp \
@@ -101,7 +102,8 @@ $(BUILD)/resolve_overlaps.o: $(SRC)/resolve_overlaps.cpp \
 	$(COMPILE) $(SRC)/resolve_overlaps.cpp -o $(BUILD)/resolve_overlaps.o
 
 $(BUILD)/rotatable_dihedral.o: $(SRC)/rotatable_dihedral.cpp \
-		$(INC)/rotatable_dihedral.h
+		$(INC)/rotatable_dihedral.h \
+		$(INC)/pcg_random.hpp
 	$(COMPILE) $(SRC)/rotatable_dihedral.cpp -o $(BUILD)/rotatable_dihedral.o
 
 $(BUILD)/selections.o: $(SRC)/selections.cpp \

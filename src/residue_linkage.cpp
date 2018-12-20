@@ -1,5 +1,4 @@
 #include "../includes/residue_linkage.h"
-#include "../includes/selections.h"
 
 //////////////////////////////////////////////////////////
 //                    TYPE DEFINITION                   //

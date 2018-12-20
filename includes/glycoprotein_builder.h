@@ -9,6 +9,8 @@
 //#include <stdlib.h>     /* getenv */
 //#include <fstream>      // std::ifstream
 #include "glycosylationsite.h"
+#include "bead_residues.h"
+#include "io.h"
 
 typedef std::vector<GlycosylationSite> GlycosylationSiteVector;
 typedef std::vector<GlycosylationSite*> GlycosylationSitePointerVector;

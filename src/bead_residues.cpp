@@ -1,5 +1,4 @@
 #include "../includes/bead_residues.h"
-#include "../includes/selections.h"
 
 void beads::Add_Beads(MolecularModeling::Assembly &glycoprotein, GlycosylationSiteVector &glycosites)
 {
