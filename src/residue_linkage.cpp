@@ -140,7 +140,7 @@ std::ostream& operator<<(std::ostream& os, const Residue_linkage& residue_linkag
 void Residue_linkage::InitializeClass(Residue *from_this_residue1, Residue *to_this_residue2)
 {
     this->SetResidues(from_this_residue1, to_this_residue2);
-    //std::cout << "Pomarium" << std::endl;
+    std::cout << "Finding connection between " << from_this_residue1->GetId() << " :: " << to_this_residue2->GetId() << std::endl;
     this->SetConnectionAtoms(from_this_residue1_, to_this_residue2_);
     rotatable_dihedrals_ = this->FindRotatableDihedralsConnectingResidues(from_this_connection_atom1_, to_this_connection_atom2_);
     gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector metadata = this->FindMetadata(from_this_connection_atom1_, to_this_connection_atom2_);
@@ -224,11 +224,11 @@ gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector Residue_linkage::FindMe
 {
     gmml::MolecularMetadata::GLYCAM::DihedralAngleDataContainer DihedralAngleMetadata;
     gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector matching_entries = DihedralAngleMetadata.GetEntriesForLinkage(from_this_connection_atom1, to_this_connection_atom2);
-//    std::cout << "Found these " << matching_entries.size() << " entries:\n";
-//    for (const auto& entry : matching_entries)
-//    {
-//        std::cout << entry.index_ << " : " << entry.atom1_ << ", " << entry.atom2_ << ", " << entry.atom3_ << ", " << entry.atom4_ << ", " << entry.default_angle_value_ << "\n";
-//    }
+    std::cout << "Found these " << matching_entries.size() << " entries:\n";
+    for (const auto& entry : matching_entries)
+    {
+        std::cout << entry.index_ << " : " << entry.atom1_ << ", " << entry.atom2_ << ", " << entry.atom3_ << ", " << entry.atom4_ << ", " << entry.default_angle_value_ << "\n";
+    }
     return matching_entries;
 }
 
@@ -242,8 +242,8 @@ void Residue_linkage::AddMetadataToRotatableDihedrals(gmml::MolecularMetadata::G
         if (vector_position <= rotatable_dihedrals_.size())
         {
             rotatable_dihedrals_.at(vector_position).AddMetadata(entry);
-       //     std::cout << "Added " << entry.index_ << " = " << entry.default_angle_value_ << " to: \n";
-            //rotatable_dihedrals_.at(vector_position).Print();
+            std::cout << "Added " << entry.index_ << " = " << entry.default_angle_value_ << " to: \n";
+            rotatable_dihedrals_.at(vector_position).Print();
         }
         else
         {
