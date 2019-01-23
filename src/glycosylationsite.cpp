@@ -1,3 +1,4 @@
+
 #include "../includes/glycosylationsite.h"
 
 constexpr auto PI = 3.14159265358979323846;
@@ -201,9 +202,9 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
 
     if (amino_acid_name.compare("ASN")==0)
     {
-        Atom *atomND2 = new Atom(superimposition_residue, "ND2", (gmml::get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 109.3, 180, 1.53)));
-        Atom *atomCG = new Atom(superimposition_residue, "CG", (gmml::get_cartesian_point_from_internal_coords(atomO5, atomC1, atomND2, 109.3, 261, 1.325)));
-        Atom *atomOD1 = new Atom(superimposition_residue, "OD1", (gmml::get_cartesian_point_from_internal_coords(atomC1, atomND2, atomCG, 126, 0, 1.22)));
+        Atom *atomND2 = new Atom(superimposition_residue, "ND2", (atomND2->get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 109.3, 180, 1.53)));
+        Atom *atomCG = new Atom(superimposition_residue, "CG", (atomCG->get_cartesian_point_from_internal_coords(atomO5, atomC1, atomND2, 109.3, 261, 1.325)));
+        Atom *atomOD1 = new Atom(superimposition_residue, "OD1", (atomOD1->get_cartesian_point_from_internal_coords(atomC1, atomND2, atomCG, 126, 0, 1.22)));
 
         superimposition_residue->AddAtom(atomCG);
         superimposition_residue->AddAtom(atomOD1);
@@ -212,9 +213,9 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
     }
     else if (amino_acid_name.compare("THR")==0 || amino_acid_name.compare("SER")==0)
     {
-        Atom *atomOG1 = new Atom(superimposition_residue, "OG", (gmml::get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
-        Atom *atomCB = new Atom(superimposition_residue, "CB", (gmml::get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOG1, 109.3, 75, 1.53)));
-        Atom *atomCA = new Atom(superimposition_residue, "CA", (gmml::get_cartesian_point_from_internal_coords(atomC1, atomOG1, atomCB, 109.3, 125, 1.53)));
+        Atom *atomOG1 = new Atom(superimposition_residue, "OG", (atomOG1->get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
+        Atom *atomCB = new Atom(superimposition_residue, "CB", (atomCB->get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOG1, 109.3, 75, 1.53)));
+        Atom *atomCA = new Atom(superimposition_residue, "CA", (atomCA->get_cartesian_point_from_internal_coords(atomC1, atomOG1, atomCB, 109.3, 125, 1.53)));
 
         superimposition_residue->AddAtom(atomCA);
         superimposition_residue->AddAtom(atomCB);
@@ -228,9 +229,9 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
     }
     else if (amino_acid_name.compare("TYR")==0)
     {
-        Atom *atomOH = new Atom(superimposition_residue, "OH", (gmml::get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
-        Atom *atomCZ = new Atom(superimposition_residue, "CZ", (gmml::get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOH, 117, 60, 1.35)));
-        Atom *atomCE1 = new Atom(superimposition_residue, "CE1", (gmml::get_cartesian_point_from_internal_coords(atomC1, atomOH, atomCZ, 120, 180, 1.37)));
+        Atom *atomOH = new Atom(superimposition_residue, "OH", (atomOH->get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
+        Atom *atomCZ = new Atom(superimposition_residue, "CZ", (atomCZ->get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOH, 117, 60, 1.35)));
+        Atom *atomCE1 = new Atom(superimposition_residue, "CE1", (atomCE1->get_cartesian_point_from_internal_coords(atomC1, atomOH, atomCZ, 120, 180, 1.37)));
 
         superimposition_residue->AddAtom(atomCE1);
         superimposition_residue->AddAtom(atomCZ);
