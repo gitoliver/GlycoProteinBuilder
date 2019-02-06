@@ -89,11 +89,33 @@ int main(int argc, char* argv[])
 //    }
 
     // Wiggle
-    glycoprotein_builder::SetDefaultDihedralAnglesUsingMetadata(glycosites); // Reset to reasonable starting points
-    resolve_overlaps::wiggle(glycosites, 100);
-
-    double loose_overlap_tolerance = 1.0;
+    bool use_monte_carlo = true;
+    glycoprotein_builder::SetDefaultDihedralAnglesUsingMetadata(glycosites); // Reset to reasonable starting points 
+    resolve_overlaps::wiggleFirstLinkages(glycosites, 100);
     std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
+    resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, 100, use_monte_carlo);
+    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
+    resolve_overlaps::wiggle(glycosites, 100);
+    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
+
+    resolve_overlaps::wiggleFirstLinkages(glycosites, 100);
+    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
+    resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, 100, use_monte_carlo);
+    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
+    resolve_overlaps::wiggle(glycosites, 100);
+    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
+
+    resolve_overlaps::wiggleFirstLinkages(glycosites, 100);
+    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
+    resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, 100, use_monte_carlo);
+    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
+    resolve_overlaps::wiggle(glycosites, 100);
+    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
+
+    resolve_overlaps::wiggle(glycosites, 300);
+    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
+
+  //  double loose_overlap_tolerance = 1.0;
     outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_All_Resolved.pdb");
     //glycoprotein_builder::DeleteSitesIterativelyWithOverlapAboveTolerance(glycosites, loose_overlap_tolerance);
 

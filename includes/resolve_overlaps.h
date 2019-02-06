@@ -21,7 +21,7 @@
 
 namespace resolve_overlaps
 {
-void weighted_protein_global_overlap_random_descent(GlycosylationSiteVector &glycosites, int max_cycles = 500);
+void weighted_protein_global_overlap_random_descent(GlycosylationSiteVector &glycosites, int max_cycles = 500, bool monte_carlo = false);
 void wiggle(GlycosylationSiteVector &glycosites, int max_cycles = 500);
 void wiggleFirstLinkages(GlycosylationSiteVector &glycosites, int max_cycles = 500);
 void monte_carlo_with_wiggle(GlycosylationSiteVector &glycosites, int max_cycles = 500);

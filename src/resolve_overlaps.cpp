@@ -18,15 +18,17 @@ Note: Chi1 is 180,-60,60 +/- 30 degrees. Want a function that keeps the values w
 Note: Need to save best structure.
 */
 
-void resolve_overlaps::weighted_protein_global_overlap_random_descent(GlycosylationSiteVector &glycosites, int max_cycles)
+void resolve_overlaps::weighted_protein_global_overlap_random_descent(GlycosylationSiteVector &glycosites, int max_cycles, bool monte_carlo)
 {
     int cycle = 1;
     bool stop = false;
+    bool record_overlap = false;
 //    double previous_chi1;
 //    double previous_chi2;
     double previous_glycan_overlap, new_glycan_overlap, previous_protein_overlap, new_protein_overlap;
     double lowest_global_overlap = glycoprotein_builder::GetGlobalOverlap(glycosites);
     double new_global_overlap;
+    double overlap_difference = 0.0;
     double strict_tolerance = 0.1, loose_tolerance = 1.0;
 
     GlycosylationSitePointerVector sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance, "total");
@@ -48,21 +50,22 @@ void resolve_overlaps::weighted_protein_global_overlap_random_descent(Glycosylat
 //            current_glycosite->SetChi1Value(RandomAngle_360range());
 //            previous_chi2 = current_glycosite->GetChi2Value();
 //            current_glycosite->SetChi2Value(RandomAngle_360range());
-            bool record_overlap = false;
             std::cout << "Site: " << current_glycosite->GetResidueNumber() << "\n";
             new_glycan_overlap = current_glycosite->Calculate_bead_overlaps("glycan", record_overlap);
             new_protein_overlap = current_glycosite->Calculate_bead_overlaps("protein", record_overlap);
-            if ((new_glycan_overlap + (new_protein_overlap*5)) >= (previous_glycan_overlap + (previous_protein_overlap*5)))
+            overlap_difference = (new_glycan_overlap + (new_protein_overlap*5)) - (previous_glycan_overlap + (previous_protein_overlap*5));
+            if (overlap_difference >= 0.0) // if the change made it worse
             {
-               // std::cout << "New overlap is " << (new_glycan_overlap + (new_protein_overlap*5)) << ". Old is " << (previous_glycan_overlap + (previous_protein_overlap*5)) << "\n";
                 current_glycosite->ResetDihedralAngles();
-//                current_glycosite->SetChi1Value(previous_chi1);
-//                current_glycosite->SetChi2Value(previous_chi2);
             }
-//            else
-//            {
-//                std::cout << "Accepted a change of " << ((new_overlap) - (previous_overlap)) << "\n";
-//            }
+            else if ( (monte_carlo) && (! monte_carlo::accept_via_metropolis_criterion(overlap_difference)) )
+            {
+                current_glycosite->ResetDihedralAngles();
+            }
+            else
+            {
+                std::cout << "Accepted a change of " << overlap_difference << "\n";
+            }
         }
         //std::cout << "Updating list of sites with overlaps." << std::endl;
         sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance); // Moved glycans may clash with other glycans. Need to check.
