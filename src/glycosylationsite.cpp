@@ -416,6 +416,7 @@ double GlycosylationSite::Calculate_bead_overlaps(AtomVector &atomsA, AtomVector
 {
     double radius = 3.0; //Using same radius for all beads.
     double distance = 0.0, overlap = 0.0, current_overlap = 0.0;
+ //   std::cout << "Glycosite" << this->GetResidueNumber() << "\n";
   //  std::cout << "About to check " << atomsA.size() << " atoms vs " << atomsB.size() << " atoms" << std::endl;
     for(AtomVector::iterator it1 = atomsA.begin(); it1 != atomsA.end(); ++it1)
     {
@@ -431,7 +432,7 @@ double GlycosylationSite::Calculate_bead_overlaps(AtomVector &atomsA, AtomVector
 
                     current_overlap = gmml::CalculateAtomicOverlaps(atomA, atomB, radius, radius); // This calls the version with radius values
                     overlap += current_overlap;
-                    //std::cout << atomA->GetId() << " overlaping with " << atomB->GetId() << ": " << current_overlap << "\n";
+                    //std::cout << atomA->GetResidue()->GetId() << " overlaping with " << atomB->GetResidue()->GetId() << ": " << current_overlap << "\n";
                 }
             }
         }
@@ -626,12 +627,14 @@ void GlycosylationSite::Print(std::string type)
 {
     if (type.compare("All")==0)
     {
-        std::cout << "Residue ID: " << this->GetResidue()->GetId();
-        std::cout << ", overlap: " << this->GetOverlap() << std::endl;
+        std::cout << "Residue ID: " << this->GetResidue()->GetId()
+                  << ", overlap: " << this->GetOverlap()
+                  << ", Gly--Pro " << this->GetGlycanOverlap() << "--" << this->GetProteinOverlap()
+                  << std::endl;
         //std::cout << "Dihedrals: \n";
         //this->GetRotatableBonds().Print();
         //rotatable_bonds_.Print();
-        std::cout << "\n";
+        //std::cout << "\n";
     }
 }
 

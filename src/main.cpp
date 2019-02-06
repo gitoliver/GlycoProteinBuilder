@@ -94,7 +94,8 @@ int main(int argc, char* argv[])
 
     double loose_overlap_tolerance = 1.0;
     std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
-    glycoprotein_builder::DeleteSitesIterativelyWithOverlapAboveTolerance(glycosites, loose_overlap_tolerance);
+    outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_All_Resolved.pdb");
+    //glycoprotein_builder::DeleteSitesIterativelyWithOverlapAboveTolerance(glycosites, loose_overlap_tolerance);
 
 
 //    // Testing algorithms:

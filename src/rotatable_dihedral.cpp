@@ -227,7 +227,7 @@ void Rotatable_dihedral::SetDihedralAngleUsingMetadata(bool use_ranges)
     }
     else if(assigned_metadata_.size() == 1)
     {
-        for (const auto& entry : assigned_metadata_) // Yes, there is only one.
+        for (const auto& entry : assigned_metadata_) // Some dihedral angles have only one rotamer i.e. one angle with a set of ranges. e.g 60 +/- 20.
         {
             double lower = entry.default_angle_value_;
             double upper = entry.default_angle_value_;
@@ -239,7 +239,7 @@ void Rotatable_dihedral::SetDihedralAngleUsingMetadata(bool use_ranges)
             this->RandomizeDihedralAngleWithinRange(lower, upper);
         }
     }
-    else if(assigned_metadata_.size() >= 2)
+    else if(assigned_metadata_.size() >= 2) // Some dihedral angles have multiple rotamers, thus mulitple ranges to select from. e.g -60, 60, 180
     {
         std::vector<std::pair<double,double>> ranges;
         for (const auto& entry : assigned_metadata_)
@@ -253,7 +253,7 @@ void Rotatable_dihedral::SetDihedralAngleUsingMetadata(bool use_ranges)
             }
             ranges.emplace_back(lower, upper);
         }
-        this->RandomizeDihedralAngleWithinRanges(ranges);
+        this->RandomizeDihedralAngleWithinRanges(ranges); // Pass all of the ranges into the function. It will randomly select an angle from within the ranges.
     }
     return;
 }
