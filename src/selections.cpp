@@ -229,7 +229,6 @@ AtomVector selection::FindCyclePoints(Atom *atom)
 // Oh gawd this code is horrible.
 // The logic for selecting the atom to define a dihedral is messy.
 // Comparing strings is messy when I really care about the number of e.g. C2 Vs O5, but need to factor in a C2 vs O comparision
-// Ok so: If cycle_point name is "CA", then set "N" atom always. Otherwise highest numbered or random
 Atom* selection::FindCyclePointNeighbor(const AtomVector atom_path, Atom *cycle_point)
 {
     Atom *selected_neighbor;
