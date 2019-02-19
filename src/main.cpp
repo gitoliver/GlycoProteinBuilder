@@ -27,6 +27,7 @@ using namespace MolecularModeling;
 int main(int argc, char* argv[])
 {
     std::string working_Directory = Find_Program_Working_Directory(); // Default behaviour.
+    std::string installation_Directory = Find_Program_Installation_Directory();
     if (argc == 2)
     {
         working_Directory = argv[1];
@@ -37,9 +38,9 @@ int main(int argc, char* argv[])
     // Read input file                                //
     //************************************************//
 
-    //std::string installation_Directory = Find_Program_Installation_Directory();
     GlycosylationSiteVector glycosites;
-    std::string proteinPDB, glycanDirectory;
+    std::string proteinPDB, glycanDirectory = installation_Directory + "/../glycans/"; // Default behaviour
+    std::cout << "glycanDirectory: " << glycanDirectory << std::endl;
     std::cout << "Read_Input_File\n";
     glycoprotein_builder::Read_Input_File(glycosites, proteinPDB, glycanDirectory, working_Directory);
 

@@ -50,7 +50,7 @@ void glycoprotein_builder::AttachGlycansToGlycosites(MolecularModeling::Assembly
 //        }
 //    }
     // Load glycan files from directory
-    //std::cout << "Glycan directory: " << glycanDirectory << std::endl;
+    std::cout << "Glycan directory: " << glycanDirectory << std::endl;
     std::string filepath;
     DIR *dp; // A directory stream
     struct dirent *dirp; // Contains file serial number and name (char d_name[])
@@ -70,7 +70,7 @@ void glycoprotein_builder::AttachGlycansToGlycosites(MolecularModeling::Assembly
         if (S_ISDIR( filestat.st_mode ))         continue; // Is it a directory?
         for (GlycosylationSiteVector::iterator glycosite = glycosites.begin(); glycosite != glycosites.end(); ++glycosite)
         {
-            //std::cout << "Glycan is " << glycosite->GetGlycanName() << ". d_name is " << dirp->d_name << std::endl;
+            std::cout << "Glycan is " << glycosite->GetGlycanName() << ". d_name is " << dirp->d_name << std::endl;
             if (glycosite->GetGlycanName().compare(0, glycosite->GetGlycanName().size(), dirp->d_name, 0, glycosite->GetGlycanName().size()) == 0 )
             {
                 MolecularModeling::Assembly input_glycan(filepath, gmml::InputFileType::PDB);

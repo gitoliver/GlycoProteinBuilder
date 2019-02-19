@@ -235,8 +235,8 @@ void Residue_linkage::AddMetadataToRotatableDihedrals(gmml::MolecularMetadata::G
 {
     for (const auto& entry : metadata)
     {
-        int bond_number = int (entry.index_); // typecast to an int
-        int vector_position = (bond_number - 1); // vectors start at 0.
+//        int bond_number = int (entry.number_of_bonds_from_anomeric_carbon_); // typecast to an int
+        int vector_position = (entry.number_of_bonds_from_anomeric_carbon_ - 1); // vectors start at 0.
         std::cout << "Adding to position: "<< vector_position << " in vector of size: " << rotatable_dihedrals_.size() << std::endl;
         if (vector_position <= rotatable_dihedrals_.size())
         {

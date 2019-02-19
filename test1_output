@@ -1,0 +1,23 @@
+Working directory is tests/simple
+glycanDirectory: /home/oliver/Programs/gems/gmml/programs/GlycoproteinBuilder/bin/../glycans/
+Read_Input_File
+Build protein structure by distance
+Building assembly from pdb file ...
+Opening PDB file ...
+End of file
+Building structure by distance ...
+AttachGlycansToGlycosites
+glycosite id:ASN_A_24_?_?_1
+glycosite id:ASN_A_38_?_?_1
+glycosite id:ASN_A_83_?_?_1
+Glycan directory: /home/oliver/Programs/gems/gmml/programs/GlycoproteinBuilder/bin/../glycans/
+Glycan is ComplexBiantennary-. d_name is Complex-.pdb
+Glycan is ComplexBiantennary-. d_name is Complex-.pdb
+Glycan is Complex-. d_name is Complex-.pdb
+Building assembly from pdb file ...
+Opening PDB file ...
+End of file
+Building structure by distance ...
+Glycan set
+
+Super impose prep done

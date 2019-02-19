@@ -111,7 +111,7 @@ private:
     void Superimpose_Glycan_To_Glycosite(Residue *glycosite_residue);
     double CalculateTorsionAngle(AtomVector atoms);
     double Calculate_bead_overlaps(AtomVector &atomsA, AtomVector &atomsB);
-    void SetRotatableBonds(Residue *residue1, Residue *residue2);
+    //void SetRotatableBonds(Residue *residue1, Residue *residue2);
     void Rename_Protein_Residue_To_GLYCAM_Nomenclature();
     void FigureOutResidueLinkagesInGlycan(Residue *from_this_residue1, Residue *to_this_residue2, ResidueLinkageVector *residue_linkages);
     void RecursivelyGetAllNeighboringResidues(Atom* current_atom, ResidueVector* neighbors);

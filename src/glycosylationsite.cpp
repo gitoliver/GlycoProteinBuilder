@@ -130,10 +130,15 @@ ResidueLinkageVector GlycosylationSite::GetRotatableBonds()
 void GlycosylationSite::AttachGlycan(Assembly glycan, Assembly &glycoprotein)
 {
     this->SetGlycan(glycan);
+    std::cout << "Glycan set\n" << std::endl;
     this->Prepare_Glycans_For_Superimposition_To_Particular_Residue(residue_->GetName());
+    std::cout << "Super impose prep done" << std::endl;
     this->Superimpose_Glycan_To_Glycosite(residue_);
+    std::cout << "Suerpimposed" << std::endl;
     this->Rename_Protein_Residue_To_GLYCAM_Nomenclature();
     glycoprotein.MergeAssembly(&glycan_); // Add glycan to glycoprotein assembly, allows SetDihedral later. May not be necessary anymore with new Rotatable Dihedral class.
+    std::cout << "Merge done" << std::endl;
+
     //this->SetRotatableBonds(glycan_.GetResidues().at(0), residue_);
   // ResidueLinkageVector temp;
     all_residue_linkages_.emplace_back(glycan_.GetResidues().at(0), residue_);
@@ -176,20 +181,26 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
     // I put both the regular name and the O/N-linked glycam name here, as I'm not sure when it will be renamed.
     if ( (amino_acid_name.compare("ASN")==0) || (amino_acid_name.compare("NLN")==0) )
     {
-        Atom *atomND2 = new Atom(superimposition_residue, "ND2", (gmml::get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 109.3, 180, 1.53)));
-        Atom *atomCG = new Atom(superimposition_residue, "CG", (gmml::get_cartesian_point_from_internal_coords(atomO5, atomC1, atomND2, 109.3, 261, 1.325)));
-        Atom *atomOD1 = new Atom(superimposition_residue, "OD1", (gmml::get_cartesian_point_from_internal_coords(atomC1, atomND2, atomCG, 126, 0, 1.22)));
+        GeometryTopology::Coordinate temp = atomC1->get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 109.3, 180, 1.53);
+        temp.Print();
+        Atom *atomND2 = new Atom(superimposition_residue, "ND2", (temp));
+        atomND2->GetCoordinate()->Print();
+        Atom *atomCG = new Atom(superimposition_residue, "CG", (atomC1->get_cartesian_point_from_internal_coords(atomO5, atomC1, atomND2, 109.3, 261, 1.325)));
+        atomCG->GetCoordinate()->Print();
+        Atom *atomOD1 = new Atom(superimposition_residue, "OD1", (atomC1->get_cartesian_point_from_internal_coords(atomC1, atomND2, atomCG, 126, 0, 1.22)));
+        atomOD1->GetCoordinate()->Print();
 
         superimposition_residue->AddAtom(atomCG);
         superimposition_residue->AddAtom(atomOD1);
         superimposition_residue->AddAtom(atomND2);
         superimposition_atoms_ = superimposition_residue->GetAtoms();
+
     }
     else if ( (amino_acid_name.compare("THR")==0) || (amino_acid_name.compare("SER")==0) || (amino_acid_name.compare("OLT")==0) || (amino_acid_name.compare("OLS")==0) )
     {
-        Atom *atomOG1 = new Atom(superimposition_residue, "OG", (gmml::get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
-        Atom *atomCB = new Atom(superimposition_residue, "CB", (gmml::get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOG1, 109.3, 75, 1.53)));
-        Atom *atomCA = new Atom(superimposition_residue, "CA", (gmml::get_cartesian_point_from_internal_coords(atomC1, atomOG1, atomCB, 109.3, 125, 1.53)));
+        Atom *atomOG1 = new Atom(superimposition_residue, "OG", (atomC1->get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
+        Atom *atomCB = new Atom(superimposition_residue, "CB", (atomC1->get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOG1, 109.3, 75, 1.53)));
+        Atom *atomCA = new Atom(superimposition_residue, "CA", (atomC1->get_cartesian_point_from_internal_coords(atomC1, atomOG1, atomCB, 109.3, 125, 1.53)));
 
         superimposition_residue->AddAtom(atomCA);
         superimposition_residue->AddAtom(atomCB);
@@ -203,9 +214,9 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
     }
     else if ( (amino_acid_name.compare("TYR")==0) || (amino_acid_name.compare("OLY")==0) )
     {
-        Atom *atomOH = new Atom(superimposition_residue, "OH", (gmml::get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
-        Atom *atomCZ = new Atom(superimposition_residue, "CZ", (gmml::get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOH, 117, 60, 1.35)));
-        Atom *atomCE1 = new Atom(superimposition_residue, "CE1", (gmml::get_cartesian_point_from_internal_coords(atomC1, atomOH, atomCZ, 120, 180, 1.37)));
+        Atom *atomOH = new Atom(superimposition_residue, "OH", (atomC1->get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
+        Atom *atomCZ = new Atom(superimposition_residue, "CZ", (atomC1->get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOH, 117, 60, 1.35)));
+        Atom *atomCE1 = new Atom(superimposition_residue, "CE1", (atomC1->get_cartesian_point_from_internal_coords(atomC1, atomOH, atomCZ, 120, 180, 1.37)));
 
         superimposition_residue->AddAtom(atomCE1);
         superimposition_residue->AddAtom(atomCZ);
@@ -238,6 +249,7 @@ void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_resid
             if (protein_atom->GetName() == superimposition_atom->GetName())
             {
                 target_atoms.push_back(protein_atom);
+                std::cout << "Target acquired is " << protein_atom->GetName() << std::endl;
             }
         }
     }
@@ -263,7 +275,7 @@ void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_resid
     gmml::Superimpose(superimposition_atoms_, target_atoms, glycan_atoms);
 
     Residue* reducing_Residue = glycan_.GetResidues().at(1); // I assume I assumed something stupid here.
-    //std::cout << "Reducing residue is " << reducing_Residue->GetName() << std::endl;
+    std::cout << "Reducing residue is " << reducing_Residue->GetName() << std::endl;
     AtomVector reducing_Atoms = reducing_Residue->GetAtoms();
     Atom* atomC1;
     for(AtomVector::iterator it = reducing_Atoms.begin(); it != reducing_Atoms.end(); it++)
@@ -272,22 +284,31 @@ void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_resid
        if(atom->GetName().compare("C1")==0)
        {
            atomC1 = atom;
+           std::cout << "DUN" << std::endl;
        }
     }
     //Connect the glycan and protein atoms to each other.
     Atom *protein_connection_atom = this->GetConnectingProteinAtom(glycosite_residue->GetName());
+    std::cout << "DUN1 " <<  std::endl;
+    std::cout << protein_connection_atom->GetId() << std::endl;
+    std::cout << "DUN1.1 " <<  std::endl;
+
     protein_connection_atom->GetNode()->AddNodeNeighbor(atomC1);
+    std::cout << "DUN2" << std::endl;
+
     atomC1->GetNode()->AddNodeNeighbor(protein_connection_atom);
     //Delete the atoms used to superimpose the glycan onto the protein. Remove the residue.
+    std::cout << "DUN3" << std::endl;
+
     Residue *superimposition_residue = glycan_.GetAllResiduesOfAssembly().at(0);
     glycan_.RemoveResidue(superimposition_residue);
-//    std::cout << "glycan_ now contains: ";
-//    ResidueVector residues = glycan_.GetResidues();
-//    for (ResidueVector::iterator it = residues.begin(); it != residues.end(); ++it)
-//    {
-//        std::cout << (*it)->GetName() << ", ";
-//    }
-//    std::cout << std::endl;
+    std::cout << "glycan_ now contains: ";
+    ResidueVector residues = glycan_.GetResidues();
+    for (ResidueVector::iterator it = residues.begin(); it != residues.end(); ++it)
+    {
+        std::cout << (*it)->GetName() << ", ";
+    }
+    std::cout << std::endl;
 }
 
 // This is a dumb way to do it. Need dihedral class but in a rush. Fix later.
@@ -717,24 +738,27 @@ void GlycosylationSite::RecursivelyGetAllNeighboringResidues(Atom* current_atom,
 
 Atom* GlycosylationSite::GetConnectingProteinAtom(std::string residue_name)
 {
-    Atom *returned_atom;
     if(residue_name.compare("NLN") || residue_name.compare("ASN"))
     {
-        returned_atom = residue_->GetAtom("ND2");
+        return residue_->GetAtom("ND2");
     }
-    if(residue_name.compare("OLT") || residue_name.compare("THR"))
+    else if(residue_name.compare("OLT") || residue_name.compare("THR"))
     {
-        returned_atom = residue_->GetAtom("OG1");
+        return residue_->GetAtom("OG1");
     }
-    if(residue_name.compare("OLS") || residue_name.compare("SER"))
+    else if(residue_name.compare("OLS") || residue_name.compare("SER"))
     {
-        returned_atom = residue_->GetAtom("OG");
+        return residue_->GetAtom("OG");
     }
-    if(residue_name.compare("OLY") || residue_name.compare("TYR"))
+    else if(residue_name.compare("OLY") || residue_name.compare("TYR"))
     {
-        returned_atom = residue_->GetAtom("OH");
+        return residue_->GetAtom("OH");
     }
-    return returned_atom;
+    else
+    {
+        std::cout << "In GlycosylationSite::GetConectinProteinAtom you passed in a residue that isn't ON THE LIST. Exiting early: " << std::endl;
+        exit(1);
+    }
 }
 
 void GlycosylationSite::WiggleOneLinkage(Residue_linkage &linkage, int *output_pdb_id, double tolerance, int interval)
