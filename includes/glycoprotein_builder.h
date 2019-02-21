@@ -8,9 +8,9 @@
 //#include <sys/types.h>
 //#include <stdlib.h>     /* getenv */
 //#include <fstream>      // std::ifstream
-#include "io.h"
 #include "glycosylationsite.h"
 #include "bead_residues.h"
+#include "io.h"
 
 typedef std::vector<GlycosylationSite> GlycosylationSiteVector;
 typedef std::vector<GlycosylationSite*> GlycosylationSitePointerVector;
@@ -23,26 +23,29 @@ namespace glycoprotein_builder
 void Read_Input_File(GlycosylationSiteVector &glycosites, std::string &proteinPDB, std::string &glycanDirectory, const std::string working_Directory);
 void AttachGlycansToGlycosites(MolecularModeling::Assembly &glycoprotein, GlycosylationSiteVector &glycosites, const std::string glycanDirectory);
 void PrintDihedralAnglesAndOverlapOfGlycosites(GlycosylationSiteVector &glycosites);
-void SetReasonableChi1Chi2Values(GlycosylationSiteVector &glycosites);
-void SetRandomChi1Chi2Values(GlycosylationSiteVector &glycosites);
+void SetDefaultDihedralAnglesUsingMetadata(GlycosylationSiteVector &glycosites);
+void SetRandomDihedralAnglesUsingMetadata(GlycosylationSiteVector &glycosites);
 void CalculateOverlaps(GlycosylationSiteVector &glycosites);
+double CalculateAtomicOverlaps(GlycosylationSiteVector &glycosites);
 double GetGlobalOverlap(GlycosylationSiteVector &glycosites);
-double RandomAngle_360range();
-double RandomAngle_range(int min, int max);
-double RandomAngle_PlusMinusX(double start_point, int max_step_size);
-double GetNewAngleScaledToDegreeOfOverlap(double current_angle, double overlap, int number_of_atoms);
-void write_pdb_file(Assembly *glycoprotein, int cycle, std::string summary_filename, double score);
+//double RandomAngle_360range();
+//double RandomAngle_range(int min, int max);
+//double RandomAngle_PlusMinusX(double start_point, int max_step_size);
+//double GetNewAngleScaledToDegreeOfOverlap(double current_angle, double overlap, int number_of_atoms);
+void write_pdb_file(MolecularModeling::Assembly *glycoprotein, int cycle, std::string summary_filename, double overlap);
 void PrintOverlaps(GlycosylationSiteVector &glycosites);
 void PrintOverlaps(GlycosylationSitePointerVector &glycosites);
 void CalculateAndPrintOverlaps(GlycosylationSiteVector &glycosites);
-void SetBestChi1Chi2(GlycosylationSitePointerVector &glycosites, std::string overlap_type = "total");
+//void SetBestChi1Chi2(GlycosylationSitePointerVector &glycosites, std::string overlap_type = "total");
 GlycosylationSitePointerVector DetermineSitesWithOverlap(GlycosylationSiteVector &glycosites, double tolerance, std::string overlap_type = "total");
 GlycosylationSitePointerVector GetSitesWithOverlap(GlycosylationSiteVector &glycosites, double tolerance);
-GlycosylationSitePointerVector DeleteSitesWithOverlaps(GlycosylationSiteVector &glycosites, double tolerance, std::string overlap_type = "total");
-void DeleteSitesWithOverlapRecordsAboveTolerance(GlycosylationSiteVector &glycosites, double tolerance, std::string overlap_type = "total");
+//GlycosylationSitePointerVector DeleteSitesWithOverlaps(GlycosylationSiteVector &glycosites, double tolerance, std::string overlap_type = "total");
+//void DeleteSitesWithOverlapRecordsAboveTolerance(GlycosylationSiteVector &glycosites, double tolerance, std::string overlap_type = "total");
 void DeleteSitesIterativelyWithOverlapAboveTolerance(GlycosylationSiteVector &glycosites, double tolerance);
-void Overlap_Weighted_Adjust_Torsions_For_X_Cycles(GlycosylationSitePointerVector &sites, GlycosylationSiteVector &glycosites, int max_cycles, double tolerance, std::string overlap_type);
-void Overlap_Weighted_Adjust_Torsions(GlycosylationSitePointerVector &sites);
+void UpdateAtomsThatMoveInLinkages(GlycosylationSiteVector &glycosites);
+
+//void Overlap_Weighted_Adjust_Torsions_For_X_Cycles(GlycosylationSitePointerVector &sites, GlycosylationSiteVector &glycosites, int max_cycles, double tolerance, std::string overlap_type);
+//void Overlap_Weighted_Adjust_Torsions(GlycosylationSitePointerVector &sites);
 }
 
 #endif // GLYCOPROTEIN_BUILDER_H

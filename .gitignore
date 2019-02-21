@@ -1,3 +1,7 @@
+tests/one_site/GlycoProtein_Resolved.pdb
+tests/simple/GlycoProtein_Resolved.pdb
+tests/simple/GlycoProtein_All_Resolved.pdb
+test1_output
 build/*.o
 test1eer/
 best_cycles/
@@ -15,3 +19,7 @@ test1/
 test2/
 plot.pdf
 large_scale_testing
+animatepdbs.tcl
+clean_output_pdbs.sh
+src/cinclude2dot.pl
+src/source.dot
