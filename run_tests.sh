@@ -10,7 +10,7 @@ echo "Testing Glycoprotein Builder..."
 ./bin/gp_builder tests/simple > test1_output
 #DIFF=$(diff test1_output tests/simple/output.txt)
 #if [ "$DIFF" != "" ]; then
-if grep -q "Program got to end ok" test1_output && grep -q "Fail now" tests/simple/GlycoProtein_Resolved.pdb  ; then
+if grep -q "Program got to end ok" test1_output && grep -q "0SA" tests/simple/GlycoProtein_Resolved.pdb  ; then
     echo "Test passed."
     ((tests_passed++))
     rm test1_output
