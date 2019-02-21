@@ -120,7 +120,6 @@ ResidueLinkageVector GlycosylationSite::GetRotatableBonds()
     return all_residue_linkages_;
 }
 
-
 //////////////////////////////////////////////////////////
 //                       FUNCTIONS                      //
 //////////////////////////////////////////////////////////
@@ -130,11 +129,11 @@ ResidueLinkageVector GlycosylationSite::GetRotatableBonds()
 void GlycosylationSite::AttachGlycan(Assembly glycan, Assembly &glycoprotein)
 {
     this->SetGlycan(glycan);
-    std::cout << "Glycan set\n" << std::endl;
+  //  std::cout << "Glycan set\n" << std::endl;
     this->Prepare_Glycans_For_Superimposition_To_Particular_Residue(residue_->GetName());
-    std::cout << "Super impose prep done" << std::endl;
+   // std::cout << "Superimpose prep done" << std::endl;
     this->Superimpose_Glycan_To_Glycosite(residue_);
-    std::cout << "Suerpimposed" << std::endl;
+  //  std::cout << "Suerpimposed" << std::endl;
     this->Rename_Protein_Residue_To_GLYCAM_Nomenclature();
     glycoprotein.MergeAssembly(&glycan_); // Add glycan to glycoprotein assembly, allows SetDihedral later. May not be necessary anymore with new Rotatable Dihedral class.
     std::cout << "Merge done" << std::endl;
@@ -181,32 +180,23 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
     // I put both the regular name and the O/N-linked glycam name here, as I'm not sure when it will be renamed.
     if ( (amino_acid_name.compare("ASN")==0) || (amino_acid_name.compare("NLN")==0) )
     {
-        GeometryTopology::Coordinate temp = atomC1->get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 109.3, 180, 1.53);
-        temp.Print();
-        Atom *atomND2 = new Atom(superimposition_residue, "ND2", (temp));
-        atomND2->GetCoordinate()->Print();
-        Atom *atomCG = new Atom(superimposition_residue, "CG", (atomC1->get_cartesian_point_from_internal_coords(atomO5, atomC1, atomND2, 109.3, 261, 1.325)));
-        atomCG->GetCoordinate()->Print();
-        Atom *atomOD1 = new Atom(superimposition_residue, "OD1", (atomC1->get_cartesian_point_from_internal_coords(atomC1, atomND2, atomCG, 126, 0, 1.22)));
-        atomOD1->GetCoordinate()->Print();
-
+        Atom *atomND2 = new Atom(superimposition_residue, "ND2", (GeometryTopology::get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 109.3, 180, 1.53)));
+        Atom *atomCG = new Atom(superimposition_residue, "CG", (GeometryTopology::get_cartesian_point_from_internal_coords(atomO5, atomC1, atomND2, 109.3, 261, 1.325)));
+        Atom *atomOD1 = new Atom(superimposition_residue, "OD1", (GeometryTopology::get_cartesian_point_from_internal_coords(atomC1, atomND2, atomCG, 126, 0, 1.22)));
         superimposition_residue->AddAtom(atomCG);
         superimposition_residue->AddAtom(atomOD1);
         superimposition_residue->AddAtom(atomND2);
         superimposition_atoms_ = superimposition_residue->GetAtoms();
-
     }
     else if ( (amino_acid_name.compare("THR")==0) || (amino_acid_name.compare("SER")==0) || (amino_acid_name.compare("OLT")==0) || (amino_acid_name.compare("OLS")==0) )
     {
-        Atom *atomOG1 = new Atom(superimposition_residue, "OG", (atomC1->get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
-        Atom *atomCB = new Atom(superimposition_residue, "CB", (atomC1->get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOG1, 109.3, 75, 1.53)));
-        Atom *atomCA = new Atom(superimposition_residue, "CA", (atomC1->get_cartesian_point_from_internal_coords(atomC1, atomOG1, atomCB, 109.3, 125, 1.53)));
-
+        Atom *atomOG1 = new Atom(superimposition_residue, "OG", (GeometryTopology::get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
+        Atom *atomCB = new Atom(superimposition_residue, "CB", (GeometryTopology::get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOG1, 109.3, 75, 1.53)));
+        Atom *atomCA = new Atom(superimposition_residue, "CA", (GeometryTopology::get_cartesian_point_from_internal_coords(atomC1, atomOG1, atomCB, 109.3, 125, 1.53)));
         superimposition_residue->AddAtom(atomCA);
         superimposition_residue->AddAtom(atomCB);
         superimposition_residue->AddAtom(atomOG1);
         superimposition_atoms_ = superimposition_residue->GetAtoms();
-
         if ( (amino_acid_name.compare("THR")==0) || (amino_acid_name.compare("OLT")==0) )
         {
             atomOG1->SetName("OG1"); // It's OG in Ser.
@@ -214,10 +204,9 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
     }
     else if ( (amino_acid_name.compare("TYR")==0) || (amino_acid_name.compare("OLY")==0) )
     {
-        Atom *atomOH = new Atom(superimposition_residue, "OH", (atomC1->get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
-        Atom *atomCZ = new Atom(superimposition_residue, "CZ", (atomC1->get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOH, 117, 60, 1.35)));
-        Atom *atomCE1 = new Atom(superimposition_residue, "CE1", (atomC1->get_cartesian_point_from_internal_coords(atomC1, atomOH, atomCZ, 120, 180, 1.37)));
-
+        Atom *atomOH = new Atom(superimposition_residue, "OH", (GeometryTopology::get_cartesian_point_from_internal_coords(atomC5, atomO5, atomC1, 112, 68, 1.46)));
+        Atom *atomCZ = new Atom(superimposition_residue, "CZ", (GeometryTopology::get_cartesian_point_from_internal_coords(atomO5, atomC1, atomOH, 117, 60, 1.35)));
+        Atom *atomCE1 = new Atom(superimposition_residue, "CE1", (GeometryTopology::get_cartesian_point_from_internal_coords(atomC1, atomOH, atomCZ, 120, 180, 1.37)));
         superimposition_residue->AddAtom(atomCE1);
         superimposition_residue->AddAtom(atomCZ);
         superimposition_residue->AddAtom(atomOH);
@@ -284,21 +273,16 @@ void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_resid
        if(atom->GetName().compare("C1")==0)
        {
            atomC1 = atom;
-           std::cout << "DUN" << std::endl;
        }
     }
     //Connect the glycan and protein atoms to each other.
     Atom *protein_connection_atom = this->GetConnectingProteinAtom(glycosite_residue->GetName());
-    std::cout << "DUN1 " <<  std::endl;
     std::cout << protein_connection_atom->GetId() << std::endl;
-    std::cout << "DUN1.1 " <<  std::endl;
 
     protein_connection_atom->GetNode()->AddNodeNeighbor(atomC1);
-    std::cout << "DUN2" << std::endl;
 
     atomC1->GetNode()->AddNodeNeighbor(protein_connection_atom);
     //Delete the atoms used to superimpose the glycan onto the protein. Remove the residue.
-    std::cout << "DUN3" << std::endl;
 
     Residue *superimposition_residue = glycan_.GetAllResiduesOfAssembly().at(0);
     glycan_.RemoveResidue(superimposition_residue);

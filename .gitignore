@@ -1,5 +1,7 @@
 tests/one_site/GlycoProtein_Resolved.pdb
-tests/GlycoProtein_Resolved.pdb
+tests/simple/GlycoProtein_Resolved.pdb
+tests/simple/GlycoProtein_All_Resolved.pdb
+test1_output
 build/*.o
 test1eer/
 best_cycles/
