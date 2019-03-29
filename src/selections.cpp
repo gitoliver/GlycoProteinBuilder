@@ -42,45 +42,52 @@ void selection::FindAtomsConnectingResidues(Atom *current_atom, Residue *second_
 // Will not ignore fused rings. Explores everything to find all cycle points. Looks for cycle point closest to start atom.
 bool selection::FindCyclePoint(Atom *previous_atom, Atom *current_atom, AtomVector *atom_path, bool *found_cycle_point, Atom *&cycle_point)
 {
-    // Need this to explore everything. It will find same cycle point more than once, but that doesn't matter.
-    current_atom->SetDescription("VisitedByFindCyclePoint");
-    //std::cout << "Checking neighbors of " << current_atom->GetName() << "\n";
-
-    atom_path->push_back(current_atom);
-    AtomVector neighbors = current_atom->GetNode()->GetNodeNeighbors();
-    for(AtomVector::iterator it1 = neighbors.begin(); it1 != neighbors.end(); ++it1)
+    // I wish there was a more solid way to check element type. But here we go, I definitely don't want cycles involving hydrogens (they only every form one bond, unless
+    // bond by distance has bonded them).
+    if ( current_atom->GetName().at(0) != 'H')
     {
-        MolecularModeling::Atom *neighbor = *it1;
-        // If not previous atom and not from a different residue
-        if ( (neighbor->GetIndex() != previous_atom->GetIndex()) && (current_atom->GetResidue()->GetId().compare(neighbor->GetResidue()->GetId())==0))
-        //if ( neighbor->GetIndex() != previous_atom->GetIndex() ) // Good for testing multiple cycles
+        // Need this to explore everything. It will find same cycle point more than once, but that doesn't matter.
+        current_atom->SetDescription("VisitedByFindCyclePoint");
+        std::cout << "Checking neighbors of " << current_atom->GetName() << "\n";
+        std::cout << "Found cycle points is currently: " << std::boolalpha << *found_cycle_point << std::endl;
+
+        atom_path->push_back(current_atom);
+        AtomVector neighbors = current_atom->GetNode()->GetNodeNeighbors();
+        for(AtomVector::iterator it1 = neighbors.begin(); it1 != neighbors.end(); ++it1)
         {
-           // std::cout << "Coming from previous atom " << previous_atom->GetName() << " we see bonding: " << current_atom->GetName() << "->" << neighbor->GetName() << "\n";
-            if ( std::find(atom_path->begin(), atom_path->end(), neighbor) != atom_path->end() ) // If we've been at this atom before
+            MolecularModeling::Atom *neighbor = *it1;
+            // If not previous atom and not from a different residue
+            if ( (neighbor->GetIndex() != previous_atom->GetIndex()) && (current_atom->GetResidue()->GetId().compare(neighbor->GetResidue()->GetId())==0))
+                //if ( neighbor->GetIndex() != previous_atom->GetIndex() ) // Good for testing multiple cycles
             {
-              //  std::cout << "Found a cycle point!" << std::endl;
-                if(*found_cycle_point) // If there are more than one cycle points
+                std::cout << "Coming from previous atom " << previous_atom->GetName() << " we see bonding: " << current_atom->GetName() << "->" << neighbor->GetName() << "\n";
+                if ( std::find(atom_path->begin(), atom_path->end(), neighbor) != atom_path->end() ) // If we've been at this atom before
                 {
-                    // Finds position of atoms in atom_path. Want earliest possible cycle point i.e. closest to start atom
-                    std::ptrdiff_t new_cycle_position = std::distance(atom_path->begin(), std::find(atom_path->begin(), atom_path->end(), neighbor));
-                    std::ptrdiff_t current_cycle_position = std::distance(atom_path->begin(), std::find(atom_path->begin(), atom_path->end(), cycle_point));
-                    if (new_cycle_position < current_cycle_position)
+                    std::cout << "Found a potential cycle point! Found cycle point already is: " << std::boolalpha << *found_cycle_point << std::endl;
+                    if(*found_cycle_point) // If there are more than one cycle points
                     {
-                //        std::cout << "Updating cycle point to be: " << neighbor->GetId() << std::endl;
+                        // Finds position of atoms in atom_path. Want earliest possible cycle point i.e. closest to start atom
+                        std::ptrdiff_t new_cycle_position = std::distance(atom_path->begin(), std::find(atom_path->begin(), atom_path->end(), neighbor));
+                        std::ptrdiff_t current_cycle_position = std::distance(atom_path->begin(), std::find(atom_path->begin(), atom_path->end(), cycle_point));
+                        if (new_cycle_position < current_cycle_position)
+                        {
+                            std::cout << "Updating cycle point to be: " << neighbor->GetId() << std::endl;
+                            cycle_point = neighbor;
+                        }
+                    }
+                    else
+                    {
+                        *found_cycle_point = true;
                         cycle_point = neighbor;
+                        std::cout << "Found the cycle point to be: " << cycle_point->GetId() << "\n";
                     }
                 }
-                else
+                if(neighbor->GetDescription().compare("VisitedByFindCyclePoint")!=0) // Don't look back!
                 {
-                    *found_cycle_point = true;
-                    cycle_point = neighbor;
-             //       std::cout << "Found the cycle point to be: " << cycle_point->GetId() << "\n";
+                    //std::cout << "DEEPER STILL\n";
+                    std::cout << "Going one deeper with found cycle set as " << std::boolalpha << *found_cycle_point << std::endl;
+                    selection::FindCyclePoint(current_atom, neighbor, atom_path, found_cycle_point, cycle_point);
                 }
-            }
-            if(neighbor->GetDescription().compare("VisitedByFindCyclePoint")!=0) // Don't look back!
-            {
-                //std::cout << "DEEPER STILL\n";
-                selection::FindCyclePoint(current_atom, neighbor, atom_path, found_cycle_point, cycle_point);
             }
         }
     }
@@ -183,6 +190,7 @@ __/  \__/  \__
 */
 AtomVector selection::FindCyclePoints(Atom *atom)
 {
+    std::cout << "Entered FindCyclePoints with " << atom->GetId() << std::endl;
     AtomVector rotation_points;
     AtomVector atom_path;
     bool found = false;
@@ -193,6 +201,7 @@ AtomVector selection::FindCyclePoints(Atom *atom)
         Atom *cycle_point;
         found = false;
         atom_path.clear();
+        // This should only find cycles in Tyr, Trp etc. Not Asn, Ser, Thr as there aren't any unless bonding is messed up.
         if(selection::FindCyclePoint(atom, atom, &atom_path, &found, cycle_point))
         {
             rotation_points.push_back(cycle_point);
@@ -200,6 +209,7 @@ AtomVector selection::FindCyclePoints(Atom *atom)
             atom_path.clear();
             //Want residue.clearAtomDescriptions
             selection::ClearAtomDescriptions(atom->GetResidue());
+            std::cout << "       >............." << std::endl;
             selection::FindCyclePoint(caAtom, caAtom, &atom_path, &found, cycle_point);
             rotation_points.push_back(cycle_point);
         }
@@ -254,13 +264,18 @@ Atom* selection::FindCyclePointNeighbor(const AtomVector atom_path, Atom *cycle_
             Atom *neighbor = *it1;
             if ( ! (std::find(atom_path.begin(), atom_path.end(), neighbor) != atom_path.end()) ) // If we've NOT been at this atom on way to cycle point
             {
-                good_neighbors.push_back(neighbor);
+                if ( neighbor->GetName().at(0) != 'H' ) // Don't find hydrogens. Later we swap out to use a hydrogen to define a dihedral, but that's a very specific one.
+                {
+                    good_neighbors.push_back(neighbor);
+                }
             }
         }
-        selected_neighbor = good_neighbors.at(0); // Set to any to start. If there are not good_neighbors then deserve to crash and burn
+        selected_neighbor = good_neighbors.at(0); // Set to any to start. If there are not good_neighbors then you deserve to crash and burn
+        std::cout << "Good neighbors are: ";
         for(AtomVector::iterator it1 = good_neighbors.begin(); it1 != good_neighbors.end(); ++it1)
         {
             Atom *neighbor = *it1;
+            std::cout << neighbor->GetName() << " ,";
             if(selected_neighbor->GetName().size() >= 2)
             {
                 if(neighbor->GetName().size() >= 2) // This is the only time I want to compare and select the larger number
@@ -272,7 +287,9 @@ Atom* selection::FindCyclePointNeighbor(const AtomVector atom_path, Atom *cycle_
                 } // Otherwise any neighbor is ok. Yes I'm comparing char's, but that is fine unless C9 Vs C10, but in that case I don't care again.
             }
         }
+        std::cout << "\n";
     }
+    std::cout << "Returning with neighbor: " << selected_neighbor->GetName() << "\n";
     return selected_neighbor;
 }
 

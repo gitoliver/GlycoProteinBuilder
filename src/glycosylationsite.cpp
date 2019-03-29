@@ -238,7 +238,7 @@ void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_resid
             if (protein_atom->GetName() == superimposition_atom->GetName())
             {
                 target_atoms.push_back(protein_atom);
-                std::cout << "Target acquired is " << protein_atom->GetName() << std::endl;
+                std::cout << "Superimposition target acquired is " << protein_atom->GetName() << std::endl;
             }
         }
     }
@@ -295,7 +295,7 @@ void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_resid
     std::cout << std::endl;
 }
 
-// This is a dumb way to do it. Need dihedral class but in a rush. Fix later.
+// This is a dumb way to do it. Need dihedral class but in a rush. Fix later. // Update, I actually did something I said I would do.
 //void GlycosylationSite::SetChiAtoms(Residue* residue)
 //{
 //    AtomVector atoms = residue->GetAtoms();
@@ -496,6 +496,17 @@ void GlycosylationSite::Wiggle(int *output_pdb_id, double tolerance, int interva
         this->WiggleOneLinkage(linkage, output_pdb_id, tolerance, interval);
     }
     return;
+}
+
+void GlycosylationSite::write_pdb_file(Assembly *glycoprotein, int cycle, std::string summary_filename, double overlap)
+{
+    std::stringstream ss;
+    ss << this->GetResidueNumber() << "_cyc_" << cycle << "ovrlp_" << overlap << ".pdb";
+   // ss << cycle << "_cycle_" << ".pdb";
+
+    PdbFileSpace::PdbFile *outputPdbFile = glycoprotein->BuildPdbFileStructureFromAssembly(-1,0);
+    outputPdbFile->Write(ss.str());
+
 }
 
 
@@ -765,10 +776,10 @@ void GlycosylationSite::WiggleOneLinkage(Residue_linkage &linkage, int *output_p
             while(current_dihedral <= upper_bound )
             {
                 rotatable_dihedral.SetDihedralAngle(current_dihedral);
-                //glycoprotein_builder::write_pdb_file(this->GetGlycoprotein(), *output_pdb_id, "wiggle", lowest_overlap);
+                //GlycosylationSite::write_pdb_file(this->GetGlycoprotein(), *output_pdb_id, "wiggle", lowest_overlap);
                 //++(*output_pdb_id);
                 current_overlap = this->Calculate_bead_overlaps();
-               // std::cout << "Current dihedral-overlap " << current_dihedral << " : " << current_overlap << ". Best dihedral-overlap: " << best_dihedral_angle << " : "<< lowest_overlap << "\n";
+                std::cout << this->GetResidueNumber() << ": current dihedral : overlap " << current_dihedral << " : " << current_overlap << ". Best dihedral : overlap: " << best_dihedral_angle << " : "<< lowest_overlap << "\n";
                 if (lowest_overlap >= (current_overlap + 0.01)) // 0.01 otherwise rounding errors
                 {
                   //  std::cout << "Setting id " << *output_pdb_id << " index: " << metadata.index_ << ": ";
@@ -777,7 +788,8 @@ void GlycosylationSite::WiggleOneLinkage(Residue_linkage &linkage, int *output_p
                     //                        glycoprotein_builder::write_pdb_file(this->GetGlycoprotein(), *output_pdb_id, "wiggle", lowest_overlap);
                     //                        ++(*output_pdb_id);
                     best_dihedral_angle = current_dihedral;
-              //      std::cout << "Best angle is now " << best_dihedral_angle << "\n";
+                //    std::cout << "Best angle is now " << best_dihedral_angle << "\n";
+                    GlycosylationSite::write_pdb_file(this->GetGlycoprotein(), *output_pdb_id, "wiggle", lowest_overlap);
                 }
                 // Perfer angles closer to default.
                 else if ( (lowest_overlap == current_overlap) &&

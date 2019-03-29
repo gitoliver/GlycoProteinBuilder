@@ -156,6 +156,7 @@ RotatableDihedralVector Residue_linkage::FindRotatableDihedralsConnectingResidue
     //std::cout << "Finding rot bonds for " << from_this_connection_atom1->GetResidue()->GetId() << " and " << to_this_connection_atom2->GetResidue()->GetId() << "\n";
 
     AtomVector from_this_residue1_cycle_points = selection::FindCyclePoints(from_this_connection_atom1);
+    std::cout << "Moving onto second residue.\n";
     AtomVector to_this_residue2_cycle_points = selection::FindCyclePoints(to_this_connection_atom2);
     // Need to reverse one of these, so when concatenated, they are ordered ok. This might not be ok.
 //    std::reverse(to_this_residue2_cycle_points.begin(), to_this_residue2_cycle_points.end());
@@ -185,12 +186,12 @@ RotatableDihedralVector Residue_linkage::FindRotatableDihedralsConnectingResidue
         connecting_atoms.insert(connecting_atoms.begin(), neighbor1);
         connecting_atoms.push_back(neighbor2);
 
-//        std::cout << "Updated Path between " << cycle_point1->GetId() << " and " << cycle_point2->GetId() << ":\n";
-//        for(AtomVector::iterator it1 = connecting_atoms.begin(); it1 != connecting_atoms.end(); ++it1)
-//        {
-//            Atom *atom = *it1;
-//            std::cout << atom->GetId() << "\n";
-//        }
+        std::cout << "Updated Path between " << cycle_point1->GetId() << " and " << cycle_point2->GetId() << ":\n";
+        for(AtomVector::iterator it1 = connecting_atoms.begin(); it1 != connecting_atoms.end(); ++it1)
+        {
+            Atom *atom = *it1;
+            std::cout << atom->GetId() << "\n";
+        }
     }
     RotatableDihedralVector rotatable_dihedrals = this->SplitAtomVectorIntoRotatableDihedrals(connecting_atoms);
     return rotatable_dihedrals;
@@ -240,6 +241,7 @@ void Residue_linkage::AddMetadataToRotatableDihedrals(gmml::MolecularMetadata::G
         std::cout << "Adding to position: "<< vector_position << " in vector of size: " << rotatable_dihedrals_.size() << std::endl;
         if (vector_position <= rotatable_dihedrals_.size())
         {
+            // I think that here I need to check for conformers? No wait that's being handled already? Hmm..
             rotatable_dihedrals_.at(vector_position).AddMetadata(entry);
             std::cout << "Added " << entry.index_ << " = " << entry.default_angle_value_ << " to: \n";
             rotatable_dihedrals_.at(vector_position).Print();

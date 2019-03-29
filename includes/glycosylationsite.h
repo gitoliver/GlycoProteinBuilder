@@ -67,6 +67,10 @@ public:
     void Wiggle(int *output_pdb_id, double tolerance = 0.1, int interval = 5);
     void WiggleFirstLinkage(int *output_pdb_id, double tolerance = 0.1, int interval = 5);
 
+    // Do not keep this here:
+    void write_pdb_file(MolecularModeling::Assembly *glycoprotein, int cycle, std::string summary_filename, double overlap);
+
+
     //////////////////////////////////////////////////////////
     //                       MUTATOR                        //
     //////////////////////////////////////////////////////////
