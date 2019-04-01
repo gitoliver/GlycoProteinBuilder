@@ -81,7 +81,7 @@ void glycoprotein_builder::AttachGlycansToGlycosites(MolecularModeling::Assembly
                 std::cout << "Added " << glycosite.GetGlycanName() << " to " << glycosite.GetResidueNumber() << "\n";
             }
         }
-
+        rewinddir(dp);
         if (!found_glycosites_glycan)
         {
             std::cerr << "*\n*\nIn " << __func__ << ", I did not find glycan specified in input file (" << glycosite.GetGlycanName() << ") in the glycan directory:\n" << glycanDirectory << "\n";
