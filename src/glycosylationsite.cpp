@@ -136,7 +136,7 @@ void GlycosylationSite::AttachGlycan(Assembly glycan, Assembly &glycoprotein)
   //  std::cout << "Suerpimposed" << std::endl;
     this->Rename_Protein_Residue_To_GLYCAM_Nomenclature();
     glycoprotein.MergeAssembly(&glycan_); // Add glycan to glycoprotein assembly, allows SetDihedral later. May not be necessary anymore with new Rotatable Dihedral class.
-    std::cout << "Merge done" << std::endl;
+  //  std::cout << "Merge done" << std::endl;
 
     //this->SetRotatableBonds(glycan_.GetResidues().at(0), residue_);
   // ResidueLinkageVector temp;
@@ -264,7 +264,7 @@ void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_resid
     gmml::Superimpose(superimposition_atoms_, target_atoms, glycan_atoms);
 
     Residue* reducing_Residue = glycan_.GetResidues().at(1); // I assume I assumed something stupid here.
-    std::cout << "Reducing residue is " << reducing_Residue->GetName() << std::endl;
+   // std::cout << "Reducing residue is " << reducing_Residue->GetName() << std::endl;
     AtomVector reducing_Atoms = reducing_Residue->GetAtoms();
     Atom* atomC1;
     for(AtomVector::iterator it = reducing_Atoms.begin(); it != reducing_Atoms.end(); it++)
@@ -277,7 +277,7 @@ void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_resid
     }
     //Connect the glycan and protein atoms to each other.
     Atom *protein_connection_atom = this->GetConnectingProteinAtom(glycosite_residue->GetName());
-    std::cout << protein_connection_atom->GetId() << std::endl;
+   // std::cout << protein_connection_atom->GetId() << std::endl;
 
     protein_connection_atom->GetNode()->AddNodeNeighbor(atomC1);
 
@@ -286,13 +286,13 @@ void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_resid
 
     Residue *superimposition_residue = glycan_.GetAllResiduesOfAssembly().at(0);
     glycan_.RemoveResidue(superimposition_residue);
-    std::cout << "glycan_ now contains: ";
-    ResidueVector residues = glycan_.GetResidues();
-    for (ResidueVector::iterator it = residues.begin(); it != residues.end(); ++it)
-    {
-        std::cout << (*it)->GetName() << ", ";
-    }
-    std::cout << std::endl;
+//    std::cout << "glycan_ now contains: ";
+//    ResidueVector residues = glycan_.GetResidues();
+//    for (ResidueVector::iterator it = residues.begin(); it != residues.end(); ++it)
+//    {
+//        std::cout << (*it)->GetName() << ", ";
+//    }
+//    std::cout << std::endl;
 }
 
 // This is a dumb way to do it. Need dihedral class but in a rush. Fix later. // Update, I actually did something I said I would do.

@@ -139,7 +139,7 @@ std::ostream& operator<<(std::ostream& os, const Residue_linkage& residue_linkag
 void Residue_linkage::InitializeClass(Residue *from_this_residue1, Residue *to_this_residue2)
 {
     this->SetResidues(from_this_residue1, to_this_residue2);
-    std::cout << "Finding connection between " << from_this_residue1->GetId() << " :: " << to_this_residue2->GetId() << std::endl;
+    //std::cout << "Finding connection between " << from_this_residue1->GetId() << " :: " << to_this_residue2->GetId() << std::endl;
     this->SetConnectionAtoms(from_this_residue1_, to_this_residue2_);
     rotatable_dihedrals_ = this->FindRotatableDihedralsConnectingResidues(from_this_connection_atom1_, to_this_connection_atom2_);
     gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector metadata = this->FindMetadata(from_this_connection_atom1_, to_this_connection_atom2_);
@@ -156,7 +156,7 @@ RotatableDihedralVector Residue_linkage::FindRotatableDihedralsConnectingResidue
     //std::cout << "Finding rot bonds for " << from_this_connection_atom1->GetResidue()->GetId() << " and " << to_this_connection_atom2->GetResidue()->GetId() << "\n";
 
     AtomVector from_this_residue1_cycle_points = selection::FindCyclePoints(from_this_connection_atom1);
-    std::cout << "Moving onto second residue.\n";
+   // std::cout << "Moving onto second residue.\n";
     AtomVector to_this_residue2_cycle_points = selection::FindCyclePoints(to_this_connection_atom2);
     // Need to reverse one of these, so when concatenated, they are ordered ok. This might not be ok.
 //    std::reverse(to_this_residue2_cycle_points.begin(), to_this_residue2_cycle_points.end());
@@ -186,12 +186,16 @@ RotatableDihedralVector Residue_linkage::FindRotatableDihedralsConnectingResidue
         connecting_atoms.insert(connecting_atoms.begin(), neighbor1);
         connecting_atoms.push_back(neighbor2);
 
-        std::cout << "Updated Path between " << cycle_point1->GetId() << " and " << cycle_point2->GetId() << ":\n";
-        for(AtomVector::iterator it1 = connecting_atoms.begin(); it1 != connecting_atoms.end(); ++it1)
-        {
-            Atom *atom = *it1;
-            std::cout << atom->GetId() << "\n";
-        }
+//        std::cout << "Updated Path between " << cycle_point1->GetId() << " and " << cycle_point2->GetId() << ":\n";
+//        for(AtomVector::iterator it1 = connecting_atoms.begin(); it1 != connecting_atoms.end(); ++it1)
+//        {
+//            Atom *atom = *it1;
+//            std::cout << atom->GetId() << "\n";
+//        }
+//        for (const auto& atom : connecting_atoms)
+//        {
+//            std::cout << atom->GetId() << "\n";
+//        }
     }
     RotatableDihedralVector rotatable_dihedrals = this->SplitAtomVectorIntoRotatableDihedrals(connecting_atoms);
     return rotatable_dihedrals;

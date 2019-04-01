@@ -48,8 +48,8 @@ bool selection::FindCyclePoint(Atom *previous_atom, Atom *current_atom, AtomVect
     {
         // Need this to explore everything. It will find same cycle point more than once, but that doesn't matter.
         current_atom->SetDescription("VisitedByFindCyclePoint");
-        std::cout << "Checking neighbors of " << current_atom->GetName() << "\n";
-        std::cout << "Found cycle points is currently: " << std::boolalpha << *found_cycle_point << std::endl;
+//        std::cout << "Checking neighbors of " << current_atom->GetName() << "\n";
+//        std::cout << "Found cycle points is currently: " << std::boolalpha << *found_cycle_point << std::endl;
 
         atom_path->push_back(current_atom);
         AtomVector neighbors = current_atom->GetNode()->GetNodeNeighbors();
@@ -60,10 +60,10 @@ bool selection::FindCyclePoint(Atom *previous_atom, Atom *current_atom, AtomVect
             if ( (neighbor->GetIndex() != previous_atom->GetIndex()) && (current_atom->GetResidue()->GetId().compare(neighbor->GetResidue()->GetId())==0))
                 //if ( neighbor->GetIndex() != previous_atom->GetIndex() ) // Good for testing multiple cycles
             {
-                std::cout << "Coming from previous atom " << previous_atom->GetName() << " we see bonding: " << current_atom->GetName() << "->" << neighbor->GetName() << "\n";
+//                std::cout << "Coming from previous atom " << previous_atom->GetName() << " we see bonding: " << current_atom->GetName() << "->" << neighbor->GetName() << "\n";
                 if ( std::find(atom_path->begin(), atom_path->end(), neighbor) != atom_path->end() ) // If we've been at this atom before
                 {
-                    std::cout << "Found a potential cycle point! Found cycle point already is: " << std::boolalpha << *found_cycle_point << std::endl;
+//                    std::cout << "Found a potential cycle point! Found cycle point already is: " << std::boolalpha << *found_cycle_point << std::endl;
                     if(*found_cycle_point) // If there are more than one cycle points
                     {
                         // Finds position of atoms in atom_path. Want earliest possible cycle point i.e. closest to start atom
@@ -71,7 +71,7 @@ bool selection::FindCyclePoint(Atom *previous_atom, Atom *current_atom, AtomVect
                         std::ptrdiff_t current_cycle_position = std::distance(atom_path->begin(), std::find(atom_path->begin(), atom_path->end(), cycle_point));
                         if (new_cycle_position < current_cycle_position)
                         {
-                            std::cout << "Updating cycle point to be: " << neighbor->GetId() << std::endl;
+//                            std::cout << "Updating cycle point to be: " << neighbor->GetId() << std::endl;
                             cycle_point = neighbor;
                         }
                     }
@@ -79,13 +79,13 @@ bool selection::FindCyclePoint(Atom *previous_atom, Atom *current_atom, AtomVect
                     {
                         *found_cycle_point = true;
                         cycle_point = neighbor;
-                        std::cout << "Found the cycle point to be: " << cycle_point->GetId() << "\n";
+//                        std::cout << "Found the cycle point to be: " << cycle_point->GetId() << "\n";
                     }
                 }
                 if(neighbor->GetDescription().compare("VisitedByFindCyclePoint")!=0) // Don't look back!
                 {
                     //std::cout << "DEEPER STILL\n";
-                    std::cout << "Going one deeper with found cycle set as " << std::boolalpha << *found_cycle_point << std::endl;
+//                    std::cout << "Going one deeper with found cycle set as " << std::boolalpha << *found_cycle_point << std::endl;
                     selection::FindCyclePoint(current_atom, neighbor, atom_path, found_cycle_point, cycle_point);
                 }
             }
@@ -190,7 +190,7 @@ __/  \__/  \__
 */
 AtomVector selection::FindCyclePoints(Atom *atom)
 {
-    std::cout << "Entered FindCyclePoints with " << atom->GetId() << std::endl;
+//    std::cout << "Entered FindCyclePoints with " << atom->GetId() << std::endl;
     AtomVector rotation_points;
     AtomVector atom_path;
     bool found = false;
@@ -209,7 +209,7 @@ AtomVector selection::FindCyclePoints(Atom *atom)
             atom_path.clear();
             //Want residue.clearAtomDescriptions
             selection::ClearAtomDescriptions(atom->GetResidue());
-            std::cout << "       >............." << std::endl;
+           // std::cout << "       >............." << std::endl;
             selection::FindCyclePoint(caAtom, caAtom, &atom_path, &found, cycle_point);
             rotation_points.push_back(cycle_point);
         }
@@ -271,11 +271,11 @@ Atom* selection::FindCyclePointNeighbor(const AtomVector atom_path, Atom *cycle_
             }
         }
         selected_neighbor = good_neighbors.at(0); // Set to any to start. If there are not good_neighbors then you deserve to crash and burn
-        std::cout << "Good neighbors are: ";
+       // std::cout << "Good neighbors are: ";
         for(AtomVector::iterator it1 = good_neighbors.begin(); it1 != good_neighbors.end(); ++it1)
         {
             Atom *neighbor = *it1;
-            std::cout << neighbor->GetName() << " ,";
+          //  std::cout << neighbor->GetName() << " ,";
             if(selected_neighbor->GetName().size() >= 2)
             {
                 if(neighbor->GetName().size() >= 2) // This is the only time I want to compare and select the larger number
@@ -287,9 +287,9 @@ Atom* selection::FindCyclePointNeighbor(const AtomVector atom_path, Atom *cycle_
                 } // Otherwise any neighbor is ok. Yes I'm comparing char's, but that is fine unless C9 Vs C10, but in that case I don't care again.
             }
         }
-        std::cout << "\n";
+      //  std::cout << "\n";
     }
-    std::cout << "Returning with neighbor: " << selected_neighbor->GetName() << "\n";
+   // std::cout << "Returning with neighbor: " << selected_neighbor->GetName() << "\n";
     return selected_neighbor;
 }
 

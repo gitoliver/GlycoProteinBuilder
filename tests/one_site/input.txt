@@ -1,9 +1,6 @@
 Protein:
 1eer_eop_Asn.pdb
 
-Glycans:
-glycans/
-
 Protein Residue, Glycan Name:
-A_24,Biantennary-
+A_24,ComplexBiantennary-
 END
