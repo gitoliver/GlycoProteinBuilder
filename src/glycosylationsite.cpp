@@ -789,7 +789,7 @@ void GlycosylationSite::WiggleOneLinkage(Residue_linkage &linkage, int *output_p
                     //                        ++(*output_pdb_id);
                     best_dihedral_angle = current_dihedral;
                 //    std::cout << "Best angle is now " << best_dihedral_angle << "\n";
-                    GlycosylationSite::write_pdb_file(this->GetGlycoprotein(), *output_pdb_id, "wiggle", lowest_overlap);
+                //    GlycosylationSite::write_pdb_file(this->GetGlycoprotein(), *output_pdb_id, "wiggle", lowest_overlap);
                 }
                 // Perfer angles closer to default.
                 else if ( (lowest_overlap == current_overlap) &&
