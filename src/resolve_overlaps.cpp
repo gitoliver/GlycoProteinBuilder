@@ -34,7 +34,7 @@ void resolve_overlaps::weighted_protein_global_overlap_random_descent(Glycosylat
     GlycosylationSitePointerVector sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance, "total");
 
     std::cout << "Initial torsions and overlaps:\n";
-    glycoprotein_builder::PrintDihedralAnglesAndOverlapOfGlycosites(glycosites);
+    //glycoprotein_builder::PrintDihedralAnglesAndOverlapOfGlycosites(glycosites);
     while ( (cycle < max_cycles) && (stop == false) )
     {
         std::cout << "Cycle " << cycle << " of " << max_cycles << std::endl;
@@ -75,11 +75,11 @@ void resolve_overlaps::weighted_protein_global_overlap_random_descent(Glycosylat
             stop = true;
         }
         new_global_overlap = glycoprotein_builder::GetGlobalOverlap(glycosites);
-        write_pdb_file(glycosites.at(0).GetGlycoprotein(), cycle, "current", new_global_overlap);
+        //write_pdb_file(glycosites.at(0).GetGlycoprotein(), cycle, "current", new_global_overlap);
         if ( lowest_global_overlap > new_global_overlap + 1 )
         {
             //   std::cout << "Lowest: " << lowest_global_overlap << ", Current: " << new_global_overlap << "\n";
-            write_pdb_file(glycosites.at(0).GetGlycoprotein(), cycle, "best", new_global_overlap);
+           // write_pdb_file(glycosites.at(0).GetGlycoprotein(), cycle, "best", new_global_overlap);
             lowest_global_overlap = new_global_overlap;
         }
     }

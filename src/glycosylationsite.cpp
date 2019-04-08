@@ -779,7 +779,7 @@ void GlycosylationSite::WiggleOneLinkage(Residue_linkage &linkage, int *output_p
                 //GlycosylationSite::write_pdb_file(this->GetGlycoprotein(), *output_pdb_id, "wiggle", lowest_overlap);
                 //++(*output_pdb_id);
                 current_overlap = this->Calculate_bead_overlaps();
-                std::cout << this->GetResidueNumber() << ": current dihedral : overlap " << current_dihedral << " : " << current_overlap << ". Best dihedral : overlap: " << best_dihedral_angle << " : "<< lowest_overlap << "\n";
+              //  std::cout << this->GetResidueNumber() << ": current dihedral : overlap " << current_dihedral << " : " << current_overlap << ". Best dihedral : overlap: " << best_dihedral_angle << " : "<< lowest_overlap << "\n";
                 if (lowest_overlap >= (current_overlap + 0.01)) // 0.01 otherwise rounding errors
                 {
                   //  std::cout << "Setting id " << *output_pdb_id << " index: " << metadata.index_ << ": ";
