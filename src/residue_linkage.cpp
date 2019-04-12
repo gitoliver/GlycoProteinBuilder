@@ -228,11 +228,11 @@ gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector Residue_linkage::FindMe
 {
     gmml::MolecularMetadata::GLYCAM::DihedralAngleDataContainer DihedralAngleMetadata;
     gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector matching_entries = DihedralAngleMetadata.GetEntriesForLinkage(from_this_connection_atom1, to_this_connection_atom2);
-    std::cout << "Found these " << matching_entries.size() << " entries:\n";
-    for (const auto& entry : matching_entries)
-    {
-        std::cout << entry.index_ << " : " << entry.atom1_ << ", " << entry.atom2_ << ", " << entry.atom3_ << ", " << entry.atom4_ << ", " << entry.default_angle_value_ << "\n";
-    }
+//    std::cout << "Found these " << matching_entries.size() << " entries:\n";
+//    for (const auto& entry : matching_entries)
+//    {
+//        std::cout << entry.index_ << " : " << entry.atom1_ << ", " << entry.atom2_ << ", " << entry.atom3_ << ", " << entry.atom4_ << ", " << entry.default_angle_value_ << "\n";
+//    }
     return matching_entries;
 }
 
@@ -242,13 +242,13 @@ void Residue_linkage::AddMetadataToRotatableDihedrals(gmml::MolecularMetadata::G
     {
 //        int bond_number = int (entry.number_of_bonds_from_anomeric_carbon_); // typecast to an int
         int vector_position = (entry.number_of_bonds_from_anomeric_carbon_ - 1); // vectors start at 0.
-        std::cout << "Adding to position: "<< vector_position << " in vector of size: " << rotatable_dihedrals_.size() << std::endl;
+       // std::cout << "Adding to position: "<< vector_position << " in vector of size: " << rotatable_dihedrals_.size() << std::endl;
         if (vector_position <= rotatable_dihedrals_.size())
         {
             // I think that here I need to check for conformers? No wait that's being handled already? Hmm..
             rotatable_dihedrals_.at(vector_position).AddMetadata(entry);
-            std::cout << "Added " << entry.index_ << " = " << entry.default_angle_value_ << " to: \n";
-            rotatable_dihedrals_.at(vector_position).Print();
+         //   std::cout << "Added " << entry.index_ << " = " << entry.default_angle_value_ << " to: \n";
+         //   rotatable_dihedrals_.at(vector_position).Print();
         }
         else
         {

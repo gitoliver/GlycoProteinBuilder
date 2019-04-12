@@ -68,13 +68,14 @@ void resolve_overlaps::weighted_protein_global_overlap_random_descent(Glycosylat
             }
         }
         //std::cout << "Updating list of sites with overlaps." << std::endl;
+        new_global_overlap = glycoprotein_builder::GetGlobalOverlap(glycosites);
         sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance); // Moved glycans may clash with other glycans. Need to check.
         if (sites_with_overlaps.size() == 0)
         {
-            std::cout << "Stopping with all overlaps resolved.\n";
+            std::cout << "Stopping with all overlaps resolved and global overlap is " << new_global_overlap <<  "\n";
             stop = true;
         }
-        new_global_overlap = glycoprotein_builder::GetGlobalOverlap(glycosites);
+
         //write_pdb_file(glycosites.at(0).GetGlycoprotein(), cycle, "current", new_global_overlap);
         if ( lowest_global_overlap > new_global_overlap + 1 )
         {

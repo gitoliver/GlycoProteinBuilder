@@ -238,7 +238,7 @@ void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_resid
             if (protein_atom->GetName() == superimposition_atom->GetName())
             {
                 target_atoms.push_back(protein_atom);
-                std::cout << "Superimposition target acquired is " << protein_atom->GetName() << std::endl;
+               // std::cout << "Superimposition target acquired is " << protein_atom->GetName() << std::endl;
             }
         }
     }
