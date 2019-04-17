@@ -32,7 +32,8 @@ int main(int argc, char* argv[])
     {
         working_Directory = argv[1];
     }
-    std::cout << "Working directory is " << working_Directory << "\n"; // Assumes folder with glycans inside is present.
+    std::cout << "Working directory is " << working_Directory << "\n";
+    std::cout << "Install directory is " << installation_Directory << "\n"; // Assumes folder with glycans inside is present.
 
     //************************************************//
     // Read input file                                //
@@ -114,9 +115,9 @@ int main(int argc, char* argv[])
     std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
 
 
-  //  double loose_overlap_tolerance = 1.0;
     outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_All_Resolved.pdb");
-    //glycoprotein_builder::DeleteSitesIterativelyWithOverlapAboveTolerance(glycosites, loose_overlap_tolerance);
+    double loose_overlap_tolerance = 1.0;
+    glycoprotein_builder::DeleteSitesIterativelyWithOverlapAboveTolerance(glycosites, loose_overlap_tolerance);
 
 
 //    // Testing algorithms:

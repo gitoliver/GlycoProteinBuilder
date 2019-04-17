@@ -1,6 +1,5 @@
 tests/one_site/GlycoProtein_Resolved.pdb
-tests/simple/GlycoProtein_Resolved.pdb
-tests/simple/GlycoProtein_All_Resolved.pdb
+tests/simple/GlycoProtein_*
 test1_output
 build/*.o
 test1eer/
