@@ -20,6 +20,7 @@ Note: Need to save best structure.
 
 void resolve_overlaps::weighted_protein_global_overlap_random_descent(GlycosylationSiteVector &glycosites, int max_cycles, bool monte_carlo)
 {
+    std::cout << "Weighted Protein, Global Overlap with Random Decent for " << max_cycles << " cycles and monte carlo set as " << std::boolalpha << monte_carlo << ".\n";
     int cycle = 1;
     bool stop = false;
     bool record_overlap = false;
@@ -90,7 +91,7 @@ void resolve_overlaps::weighted_protein_global_overlap_random_descent(Glycosylat
 
 void resolve_overlaps::wiggle(GlycosylationSiteVector &glycosites, int max_cycles)
 {
-    std::cout << "Wiggling\n";
+    std::cout << "Wiggling all linkages for " << max_cycles << " cycles.\n";
     int output_pdbfile_id = 0;
     double strict_tolerance = 0.1, loose_tolerance = 1.0;
     GlycosylationSitePointerVector sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance, "total");
@@ -120,7 +121,7 @@ void resolve_overlaps::wiggle(GlycosylationSiteVector &glycosites, int max_cycle
 
 void resolve_overlaps::wiggleFirstLinkages(GlycosylationSiteVector &glycosites, int max_cycles)
 {
-    std::cout << "Everyday I'm Wiggling\n";
+    std::cout << "Wiggling first linkages for " << max_cycles << " cycles.\n";
     int output_pdbfile_id = 0;
     double strict_tolerance = 0.1, loose_tolerance = 1.0;
     GlycosylationSitePointerVector sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance, "total");
