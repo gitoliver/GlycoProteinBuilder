@@ -52,6 +52,7 @@ public:
     AtomVector GetProteinBeads();
     AtomVector GetOtherGlycanBeads();
     ResidueLinkageVector GetRotatableBonds();
+    ResidueLinkageVector GetFirstAnd1_6Linkages();
 
 
     //////////////////////////////////////////////////////////

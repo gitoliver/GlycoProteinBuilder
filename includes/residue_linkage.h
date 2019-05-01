@@ -35,6 +35,10 @@ public:
     ResidueVector GetResidues();
     RotatableDihedralVector GetRotatableDihedrals() const;
     int GetNumberOfRotatableDihedrals();
+    Residue* GetFromThisResidue1();
+    Residue* GetToThisResidue2();
+    Atom* GetFromThisConnectionAtom1();
+    Atom* GetToThisConnectionAtom2();
 
     //////////////////////////////////////////////////////////
     //                       MUTATOR                        //

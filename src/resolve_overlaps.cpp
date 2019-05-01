@@ -18,6 +18,34 @@ Note: Chi1 is 180,-60,60 +/- 30 degrees. Want a function that keeps the values w
 Note: Need to save best structure.
 */
 
+void resolve_overlaps::rotamer_permutator(GlycosylationSiteVector &glycosites)
+{
+    std::cout << "Rotamer Permutator\n";
+    double lowest_global_overlap = glycoprotein_builder::GetGlobalOverlap(glycosites);
+    ResidueLinkageVector allSelectedLinkages;
+    for(auto &current_glycosite : glycosites)
+        //for(GlycosylationSiteVector::iterator site1 = glycosites.begin(); site1 != glycosites.end(); ++site1)
+    {
+        ResidueLinkageVector currentLinkages = current_glycosite.GetFirstAnd1_6Linkages();
+        allSelectedLinkages.insert( allSelectedLinkages.end(), currentLinkages.begin(), currentLinkages.end() );
+        std::cout << "Linkages found:\n";
+        for(auto &linkage : currentLinkages)
+        {
+            std::cout << linkage.GetFromThisResidue1()->GetId() << "-" << linkage.GetToThisResidue2()->GetId() << "\n";
+
+        }
+    }
+    for (ResidueLinkageVector::iterator it1 = allSelectedLinkages.begin(); it1 != allSelectedLinkages.end(); ++it1)
+    {
+        for (ResidueLinkageVector::iterator it2 = it1; it2 != allSelectedLinkages.end(); ++it2)
+        {
+            std::cout << "Permuting " << it1->GetFromThisResidue1()->GetId() << "-" << it1->GetToThisResidue2()->GetId() << " against " << it2->GetFromThisResidue1()->GetId() << "-" << it2->GetToThisResidue2()->GetId() << "\n";
+
+        }
+    }
+}
+
+
 void resolve_overlaps::weighted_protein_global_overlap_random_descent(GlycosylationSiteVector &glycosites, int max_cycles, bool monte_carlo)
 {
     std::cout << "Weighted Protein, Global Overlap with Random Decent for " << max_cycles << " cycles and monte carlo set as " << std::boolalpha << monte_carlo << ".\n";

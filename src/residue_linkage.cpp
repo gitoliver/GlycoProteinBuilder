@@ -37,6 +37,26 @@ int Residue_linkage::GetNumberOfRotatableDihedrals()
     return rotatable_dihedrals_.size();
 }
 
+Residue* Residue_linkage::GetFromThisResidue1()
+{
+    return from_this_residue1_;
+}
+
+Residue* Residue_linkage::GetToThisResidue2()
+{
+    return to_this_residue2_;
+}
+
+Atom* Residue_linkage::GetFromThisConnectionAtom1()
+{
+    return from_this_connection_atom1_;
+}
+
+Atom* Residue_linkage::GetToThisConnectionAtom2()
+{
+    return to_this_connection_atom2_;
+}
+
 //////////////////////////////////////////////////////////
 //                       MUTATOR                        //
 //////////////////////////////////////////////////////////
@@ -76,7 +96,7 @@ void Residue_linkage::SetCustomDihedralAngles(std::vector <double> dihedral_angl
     }
     else
     {   // Really need to figure out this throwing exceptions lark.
-        std::cout << "ERROR; attempted to set dihedral angles for set of dihedrals but with mismatching number of bonds to angles\n" << std::endl;
+        std::cout << "ERROR; attempted to set dihedral angles for set of dihedrals but with mismatching number of bonds to provided angles\n" << std::endl;
     }
 }
 

@@ -120,6 +120,24 @@ ResidueLinkageVector GlycosylationSite::GetRotatableBonds()
     return all_residue_linkages_;
 }
 
+ResidueLinkageVector GlycosylationSite::GetFirstAnd1_6Linkages()
+{
+    ResidueLinkageVector returnedVector;
+    returnedVector.push_back(all_residue_linkages_.front()); // Gives you the Protein-Glycan linkage
+
+    for (auto &residue_linkage : all_residue_linkages_)
+    {
+        std::string residue2Name = residue_linkage.GetToThisResidue2()->GetName();
+        std::string residue2AtomName = residue_linkage.GetToThisConnectionAtom2()->GetName();
+        std::string residue1AtomName = residue_linkage.GetFromThisConnectionAtom1()->GetName();
+        if( (residue2Name.compare(1,2,"MB")==0) && (residue2AtomName.compare("O6")==0) && (residue1AtomName.compare("C1")==0) )
+        {
+            std::cout << "Have found the inner core 1-6 linkage\n";
+            returnedVector.push_back(residue_linkage);
+        }
+    }
+    return returnedVector;
+}
 //////////////////////////////////////////////////////////
 //                       FUNCTIONS                      //
 //////////////////////////////////////////////////////////
