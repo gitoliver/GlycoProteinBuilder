@@ -27,7 +27,6 @@ public:
     Rotatable_dihedral(AtomVector atoms);
     Rotatable_dihedral(AtomVector atoms, AtomVector atoms_that_move);
 
-
     //////////////////////////////////////////////////////////
     //                       ACCESSOR                       //
     //////////////////////////////////////////////////////////
@@ -67,9 +66,9 @@ public:
     void SetMetadata(gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector metadataVector);
     void AddMetadata(gmml::MolecularMetadata::GLYCAM::DihedralAngleData metadata);
 
-    // Set according to default values in metadata
-    void SetDihedralAngleUsingMetadata(bool selectRandom = false);
-    void SetConformerUsingMetadata(bool selectRandom = false, int conformerNumber = 0);
+    // Set according to values in metadata
+    void SetRandomAngleEntryUsingMetadata(bool useRanges = true);
+    void SetSpecificAngleEntryUsingMetadata(bool useRanges = false, int angleEntryNumber = 0);
 
     //////////////////////////////////////////////////////////
     //                       DISPLAY FUNCTION               //

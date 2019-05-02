@@ -9,6 +9,11 @@
 #include "rotatable_dihedral.h"
 #include "selections.h"
 
+// Seed with a real random value, if available
+static pcg_extras::seed_seq_from<std::random_device> seed_source;
+// Make a random number engine
+static pcg32 rng(seed_source);
+
 typedef std::vector<Rotatable_dihedral> RotatableDihedralVector;
 
 class Residue_linkage
@@ -50,8 +55,8 @@ public:
     //////////////////////////////////////////////////////////
 
     void SetDefaultShapeUsingMetadata();
-    void SetSpecificShapeUsingMetadata();
-    void SetRandomShapeUsingMetadata();
+    void SetRandomShapeUsingMetadata(bool useRanges = true);
+    void SetSpecificShapeUsingMetadata(int shapeNumber, bool useRanges = false);
     void SetCustomDihedralAngles(std::vector <double> dihedral_angles);
     void SetShapeToPrevious();
     void SetRandomDihedralAngles();

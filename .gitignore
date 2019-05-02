@@ -1,4 +1,4 @@
-tests/one_site/GlycoProtein_Resolved.pdb
+tests/one_site/GlycoProtein_*
 tests/simple/GlycoProtein_*
 test1_output
 build/*.o

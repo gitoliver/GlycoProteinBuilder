@@ -34,23 +34,28 @@ void resolve_overlaps::rotamer_permutator(GlycosylationSiteVector &glycosites)
             std::cout << linkage.GetFromThisResidue1()->GetId() << "-" << linkage.GetToThisResidue2()->GetId() << "\n";
         }
     }
+    int numberOfPermutations = 1;
     for (ResidueLinkageVector::iterator it1 = allSelectedLinkages.begin(); it1 != allSelectedLinkages.end(); ++it1)
     {
+        numberOfPermutations = ( numberOfPermutations * it1->GetNumberOfShapes() );
         std::cout << it1->GetFromThisResidue1()->GetId() << "-" << it1->GetToThisResidue2()->GetId() << "\n";
-        for (ResidueLinkageVector::iterator it2 = it1; it2 != allSelectedLinkages.end(); ++it2)
+        for (ResidueLinkageVector::iterator it2 = std::next(it1); it2 != allSelectedLinkages.end(); ++it2)
         {
             std::cout << "    " << it2->GetFromThisResidue1()->GetId() << "-" << it2->GetToThisResidue2()->GetId() << "\n";
-            RotatableDihedralVector rotatableBonds = it2->GetRotatableDihedrals();
-            for(auto &currentRotatableBond : rotatableBonds)
-            {
-                int numberOfShapes = currentRotatableBond.GetNumberOfShapes();
-                if (numberOfShapes > 1)
-                {
-                    std::cout << "    Found a bond with " << numberOfShapes << " rotamers\n";
-                }
-            }
+            std::cout << "    Number of shapes: " << it2->GetNumberOfShapes() << "\n";
+
+            //            RotatableDihedralVector rotatableBonds = it2->GetRotatableDihedrals();
+//            for(auto &currentRotatableBond : rotatableBonds)
+//            {
+//                int numberOfShapes = currentRotatableBond.GetNumberOfShapes();
+//                if (numberOfShapes > 1)
+//                {
+//                    std::cout << "    Found a bond with " << numberOfShapes << " rotamers\n";
+//                }
+//            }
         }
     }
+    std::cout << "Number of permutations = " << numberOfPermutations << "\n";
 }
 
 

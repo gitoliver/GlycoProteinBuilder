@@ -232,7 +232,7 @@ void Rotatable_dihedral::AddMetadata(gmml::MolecularMetadata::GLYCAM::DihedralAn
     this->UpdateAtomsIfPsi();
 }
 
-void Rotatable_dihedral::SetDihedralAngleUsingMetadata(bool selectRandom)
+void Rotatable_dihedral::SetRandomAngleEntryUsingMetadata(bool useRanges)
 {
     if (assigned_metadata_.empty())
     {
@@ -243,7 +243,7 @@ void Rotatable_dihedral::SetDihedralAngleUsingMetadata(bool selectRandom)
         const auto& entry = assigned_metadata_.at(0);
         //for (const auto& entry : assigned_metadata_) // Some dihedral angles have only one rotamer i.e. one angle with a set of ranges. e.g 60 +/- 20.
         //{
-        if (selectRandom)
+        if (useRanges)
         {
             double lower = (entry.default_angle_value_ - entry.lower_deviation_) ;
             double upper = (entry.default_angle_value_ + entry.upper_deviation_) ;
@@ -257,36 +257,46 @@ void Rotatable_dihedral::SetDihedralAngleUsingMetadata(bool selectRandom)
     }
     else if(assigned_metadata_.size() >= 2) // Some dihedral angles have multiple rotamers, thus mulitple ranges to select from. e.g -60, 60, 180
     {
-        if (selectRandom)
+        // first randomly pick one of the meta data entries
+        std::uniform_int_distribution<> distr(0, (assigned_metadata_.size() - 1)); // define the range
+        const auto& randomEntry = assigned_metadata_.at(distr(rng));
+        if (useRanges)
         {
-            std::vector<std::pair<double,double>> ranges;
-            for (const auto& entry : assigned_metadata_)
-            {
-                double lower = (entry.default_angle_value_ - entry.lower_deviation_) ;
-                double upper = (entry.default_angle_value_ + entry.upper_deviation_) ;
-                ranges.emplace_back(lower, upper);
-                this->RandomizeDihedralAngleWithinRanges(ranges); // Pass all of the ranges into the function. It will randomly select an angle from within the ranges.
-            }
+            double lower = (randomEntry.default_angle_value_ - randomEntry.lower_deviation_) ;
+            double upper = (randomEntry.default_angle_value_ + randomEntry.upper_deviation_) ;
+            this->RandomizeDihedralAngleWithinRange(lower, upper);
+
+//            std::vector<std::pair<double,double>> ranges;
+//            for (const auto& entry : assigned_metadata_)
+//            {
+//                double lower = (entry.default_angle_value_ - entry.lower_deviation_) ;
+//                double upper = (entry.default_angle_value_ + entry.upper_deviation_) ;
+//                ranges.emplace_back(lower, upper);
+//                this->RandomizeDihedralAngleWithinRanges(ranges); // Pass all of the ranges into the function. It will randomly select an angle from within the ranges.
+//            }
         }
-        else // if not random, set the angle from the first entry.
+        else // if not using ranges
         {
-            const auto& entry = assigned_metadata_.at(0);
-            this->SetDihedralAngle(entry.default_angle_value_);
+            this->SetDihedralAngle(randomEntry.default_angle_value_);
         }
     }
     return;
 }
 
-void Rotatable_dihedral::SetConformerUsingMetadata(bool selectRandom, int conformerNumber)
+void Rotatable_dihedral::SetSpecificAngleEntryUsingMetadata(bool useRanges, int angleEntryNumber)
 {
     if (assigned_metadata_.empty())
     {
-        std::cout << "Error in Rotatable_dihedral::SetDihedralAngleUsingMetadata; no metadata has been set.\n";
+        std::cout << "Error in Rotatable_dihedral::SetSpecificAngleUsingMetadata; no metadata has been set.\n";
+    }
+    else if (assigned_metadata_.size() <= angleEntryNumber)
+    {
+         std::cout << "Error in Rotatable_dihedral::SetSpecificAngleUsingMetadata; angleEntryNumber selected is too large\n";
     }
     else
     {
-        const auto& entry = assigned_metadata_.at(conformerNumber);
-        if (selectRandom)
+        const auto& entry = assigned_metadata_.at(angleEntryNumber);
+        if (useRanges)
         {
             double lower = (entry.default_angle_value_ - entry.lower_deviation_) ;
             double upper = (entry.default_angle_value_ + entry.upper_deviation_) ;

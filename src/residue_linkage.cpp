@@ -37,6 +37,23 @@ int Residue_linkage::GetNumberOfRotatableDihedrals()
     return rotatable_dihedrals_.size();
 }
 
+int Residue_linkage::GetNumberOfShapes() // Can have conformers (sets of rotamers) or permutations of rotamers
+{
+    int numberOfShapes = 1;
+    if (rotatable_dihedrals_.at(0).GetMetadata().at(0).rotamer_type_.compare("permutation")==0)
+    {
+        for (auto &entry : rotatable_dihedrals_)
+        {
+            numberOfShapes = (numberOfShapes * entry.GetNumberOfRotamers());
+        }
+    }
+    else if (rotatable_dihedrals_.at(0).GetMetadata().at(0).rotamer_type_.compare("conformer")==0)
+    {
+        numberOfShapes=rotatable_dihedrals_.size();
+    }
+    return numberOfShapes;
+}
+
 Residue* Residue_linkage::GetFromThisResidue1()
 {
     return from_this_residue1_;
@@ -67,36 +84,38 @@ Atom* Residue_linkage::GetToThisConnectionAtom2()
 
 void Residue_linkage::SetDefaultShapeUsingMetadata()
 {
+    for (auto &entry : rotatable_dihedrals_)
+    {
+        entry.SetSpecificAngleEntryUsingMetadata(); // Default is first entry
+    }
+}
+
+void Residue_linkage::SetRandomShapeUsingMetadata(bool useRanges)
+{
     if (rotatable_dihedrals_.at(0).GetMetadata().at(0).rotamer_type_.compare("permutation")==0)
     {
         for (auto &entry : rotatable_dihedrals_)
         {
-            entry.SetDihedralAngleUsingMetadata();
+            entry.SetRandomAngleEntryUsingMetadata(useRanges);
         }
     }
     else if (rotatable_dihedrals_.at(0).GetMetadata().at(0).rotamer_type_.compare("conformer")==0)
     {
+        int numberOfConformers = rotatable_dihedrals_.at(0).GetMetadata().size();
+        std::uniform_int_distribution<> distr(0, (numberOfConformers - 1)); // define the range
+        int randomlySelectedConformerNumber = distr(rng);
         for (auto &entry : rotatable_dihedrals_)
         {
-            entry.SetConformerUsingMetadata(); // Default will use values from first entry
+            entry.SetSpecificAngleEntryUsingMetadata(useRanges, randomlySelectedConformerNumber);
         }
     }
 }
 
-void Residue_linkage::SetConformerUsingMetadata(bool useRanges, int conformerNumber)
+void Residue_linkage::SetSpecificShapeUsingMetadata(int shapeNumber, bool useRanges)
 {
     for (auto &entry : rotatable_dihedrals_)
     {
-        entry.SetConformerUsingMetadata(useRanges, conformerNumber);
-    }
-}
-
-void Residue_linkage::SetRandomShapeUsingMetadata()
-{
-    for (auto &entry : rotatable_dihedrals_)
-    {
-        bool use_ranges = true;
-        entry.SetDihedralAngleUsingMetadata(use_ranges);
+        entry.SetSpecificAngleEntryUsingMetadata(useRanges, shapeNumber);
     }
 }
 
@@ -309,4 +328,12 @@ void Residue_linkage::SetConnectionAtoms(Residue *residue1, Residue *residue2)
     selection::FindAtomsConnectingResidues(residue1->GetAtoms().at(0), residue2, &connecting_atoms, &found);
     from_this_connection_atom1_ = connecting_atoms.at(0);
     to_this_connection_atom2_ = connecting_atoms.at(1);
+}
+
+void Residue_linkage::SetConformerUsingMetadata(bool useRanges, int conformerNumber)
+{
+    for (auto &entry : rotatable_dihedrals_)
+    {
+        entry.SetSpecificAngleEntryUsingMetadata(useRanges, conformerNumber);
+    }
 }

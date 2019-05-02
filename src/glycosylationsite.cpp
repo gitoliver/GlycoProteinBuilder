@@ -612,7 +612,7 @@ void GlycosylationSite::SetDefaultDihedralAnglesUsingMetadata()
 {
     for(auto &linkage : all_residue_linkages_)
     {
-        linkage.SetDefaultDihedralAnglesUsingMetadata();
+        linkage.SetDefaultShapeUsingMetadata();
     }
     //residue_linkage_.SetDefaultDihedralAnglesUsingMetadata();
 }
@@ -621,7 +621,7 @@ void GlycosylationSite::SetRandomDihedralAnglesUsingMetadata()
 {
     for(auto &linkage : all_residue_linkages_)
     {
-        linkage.SetRandomDihedralAnglesUsingMetadata();
+        linkage.SetRandomShapeUsingMetadata();
     }
     //residue_linkage_.SetRandomDihedralAnglesUsingMetadata();
 }
@@ -630,7 +630,7 @@ void GlycosylationSite::SetRandomDihedralAnglesUsingMetadataForNthLinkage(int li
 {
     if(linkage_number < all_residue_linkages_.size())
     {
-        all_residue_linkages_.at(linkage_number).SetRandomDihedralAnglesUsingMetadata();
+        all_residue_linkages_.at(linkage_number).SetRandomShapeUsingMetadata();
     }
 }
 
@@ -638,7 +638,7 @@ void GlycosylationSite::ResetDihedralAngles()
 {
     for(auto &linkage : all_residue_linkages_)
     {
-        linkage.SetDihedralAnglesToPrevious();
+        linkage.SetShapeToPrevious();
     }
     //residue_linkage_.SetPreviousDihedralAngles();
 }
