@@ -74,6 +74,22 @@ Atom* Residue_linkage::GetToThisConnectionAtom2()
     return to_this_connection_atom2_;
 }
 
+bool Residue_linkage::checkIfConformer()
+{
+    if (rotatable_dihedrals_.empty())
+        std::cout << "Error in Residue_linkage::checkIfConformer as rotatable_dihedrals_.empty()\n";
+    else if (rotatable_dihedrals_.at(0).GetMetadata().empty())
+        std::cout << "Error in Residue_linkage::checkIfConformer as rotatable_dihedrals_.at(0).GetMetadata().empty()\n";
+    else
+    {
+        if (rotatable_dihedrals_.at(0).GetMetadata().at(0).rotamer_type_.compare("permutation")==0)
+            return false;
+        else
+            return true;
+    }
+}
+
+
 //////////////////////////////////////////////////////////
 //                       MUTATOR                        //
 //////////////////////////////////////////////////////////

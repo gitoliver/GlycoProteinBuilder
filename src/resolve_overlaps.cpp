@@ -23,6 +23,9 @@ void resolve_overlaps::rotamer_permutator(GlycosylationSiteVector &glycosites)
     std::cout << "Rotamer Permutator\n";
     double lowest_global_overlap = glycoprotein_builder::GetGlobalOverlap(glycosites);
     ResidueLinkageVector allSelectedLinkages;
+    // Go through each glycosite and select the first and inner 1-6 linkages
+    // SEPARATE FUNCTION:
+    // ResidueLinkageVector allSelectedLinkages = glycoprotein_builder::GetAllFirstAnd1_6Linkages()
     for(auto &current_glycosite : glycosites)
         //for(GlycosylationSiteVector::iterator site1 = glycosites.begin(); site1 != glycosites.end(); ++site1)
     {
@@ -34,17 +37,27 @@ void resolve_overlaps::rotamer_permutator(GlycosylationSiteVector &glycosites)
             std::cout << linkage.GetFromThisResidue1()->GetId() << "-" << linkage.GetToThisResidue2()->GetId() << "\n";
         }
     }
+    // END SEPARATE FUNCTION
+
+    // Sanity check:
     int numberOfPermutations = 1;
     for (ResidueLinkageVector::iterator it1 = allSelectedLinkages.begin(); it1 != allSelectedLinkages.end(); ++it1)
     {
         numberOfPermutations = ( numberOfPermutations * it1->GetNumberOfShapes() );
+    }
+    std::cout << "Number of permutations = " << numberOfPermutations << "\n";
+    // End Sanity check
+    for (ResidueLinkageVector::iterator it1 = allSelectedLinkages.begin(); it1 != allSelectedLinkages.end(); ++it1)
+    {
         std::cout << it1->GetFromThisResidue1()->GetId() << "-" << it1->GetToThisResidue2()->GetId() << "\n";
+
         for (ResidueLinkageVector::iterator it2 = std::next(it1); it2 != allSelectedLinkages.end(); ++it2)
         {
-            std::cout << "    " << it2->GetFromThisResidue1()->GetId() << "-" << it2->GetToThisResidue2()->GetId() << "\n";
-            std::cout << "    Number of shapes: " << it2->GetNumberOfShapes() << "\n";
 
-            //            RotatableDihedralVector rotatableBonds = it2->GetRotatableDihedrals();
+//            std::cout << "    " << it2->GetFromThisResidue1()->GetId() << "-" << it2->GetToThisResidue2()->GetId() << "\n";
+//            std::cout << "    Number of shapes: " << it2->GetNumberOfShapes() << "\n";
+
+//            RotatableDihedralVector rotatableBonds = it2->GetRotatableDihedrals();
 //            for(auto &currentRotatableBond : rotatableBonds)
 //            {
 //                int numberOfShapes = currentRotatableBond.GetNumberOfShapes();
@@ -55,7 +68,6 @@ void resolve_overlaps::rotamer_permutator(GlycosylationSiteVector &glycosites)
 //            }
         }
     }
-    std::cout << "Number of permutations = " << numberOfPermutations << "\n";
 }
 
 
