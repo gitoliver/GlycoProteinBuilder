@@ -37,6 +37,7 @@ public:
     AtomVector GetAtomsThatMove();
     double GetPreviousDihedralAngle();
     gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector GetMetadata();
+    int GetNumberOfRotamers();
 
     //////////////////////////////////////////////////////////
     //                       FUNCTIONS                      //
@@ -67,8 +68,8 @@ public:
     void AddMetadata(gmml::MolecularMetadata::GLYCAM::DihedralAngleData metadata);
 
     // Set according to default values in metadata
-    void SetDihedralAngleUsingMetadata(bool use_ranges = false);
-
+    void SetDihedralAngleUsingMetadata(bool selectRandom = false);
+    void SetConformerUsingMetadata(bool selectRandom = false, int conformerNumber = 0);
 
     //////////////////////////////////////////////////////////
     //                       DISPLAY FUNCTION               //

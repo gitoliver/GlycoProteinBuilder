@@ -82,6 +82,19 @@ gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector Rotatable_dihedral::Get
     return assigned_metadata_;
 }
 
+int Rotatable_dihedral::GetNumberOfRotamers()
+{
+    if (assigned_metadata_.empty())
+    {
+        std::cout << "Error in Rotatable_dihedral::GetNumberOfRotamers; no metadata has been set.\n";
+        return 0;
+    }
+    else
+    {
+        return assigned_metadata_.size();
+    }
+}
+
 //////////////////////////////////////////////////////////
 //                       MUTATOR                        //
 //////////////////////////////////////////////////////////
@@ -219,7 +232,7 @@ void Rotatable_dihedral::AddMetadata(gmml::MolecularMetadata::GLYCAM::DihedralAn
     this->UpdateAtomsIfPsi();
 }
 
-void Rotatable_dihedral::SetDihedralAngleUsingMetadata(bool use_ranges)
+void Rotatable_dihedral::SetDihedralAngleUsingMetadata(bool selectRandom)
 {
     if (assigned_metadata_.empty())
     {
@@ -227,35 +240,63 @@ void Rotatable_dihedral::SetDihedralAngleUsingMetadata(bool use_ranges)
     }
     else if(assigned_metadata_.size() == 1)
     {
-        for (const auto& entry : assigned_metadata_) // Some dihedral angles have only one rotamer i.e. one angle with a set of ranges. e.g 60 +/- 20.
+        const auto& entry = assigned_metadata_.at(0);
+        //for (const auto& entry : assigned_metadata_) // Some dihedral angles have only one rotamer i.e. one angle with a set of ranges. e.g 60 +/- 20.
+        //{
+        if (selectRandom)
         {
-            double lower = entry.default_angle_value_;
-            double upper = entry.default_angle_value_;
-            if (use_ranges)
-            {
-                lower = (entry.default_angle_value_ - entry.lower_deviation_) ;
-                upper = (entry.default_angle_value_ + entry.upper_deviation_) ;
-            }
+            double lower = (entry.default_angle_value_ - entry.lower_deviation_) ;
+            double upper = (entry.default_angle_value_ + entry.upper_deviation_) ;
             this->RandomizeDihedralAngleWithinRange(lower, upper);
         }
+        else
+        {
+            this->SetDihedralAngle(entry.default_angle_value_);
+        }
+        // }
     }
     else if(assigned_metadata_.size() >= 2) // Some dihedral angles have multiple rotamers, thus mulitple ranges to select from. e.g -60, 60, 180
     {
-        std::vector<std::pair<double,double>> ranges;
-        for (const auto& entry : assigned_metadata_)
+        if (selectRandom)
         {
-            double lower = entry.default_angle_value_;
-            double upper = entry.default_angle_value_;
-            if (use_ranges)
+            std::vector<std::pair<double,double>> ranges;
+            for (const auto& entry : assigned_metadata_)
             {
-                lower = (entry.default_angle_value_ - entry.lower_deviation_) ;
-                upper = (entry.default_angle_value_ + entry.upper_deviation_) ;
+                double lower = (entry.default_angle_value_ - entry.lower_deviation_) ;
+                double upper = (entry.default_angle_value_ + entry.upper_deviation_) ;
+                ranges.emplace_back(lower, upper);
+                this->RandomizeDihedralAngleWithinRanges(ranges); // Pass all of the ranges into the function. It will randomly select an angle from within the ranges.
             }
-            ranges.emplace_back(lower, upper);
         }
-        this->RandomizeDihedralAngleWithinRanges(ranges); // Pass all of the ranges into the function. It will randomly select an angle from within the ranges.
+        else // if not random, set the angle from the first entry.
+        {
+            const auto& entry = assigned_metadata_.at(0);
+            this->SetDihedralAngle(entry.default_angle_value_);
+        }
     }
     return;
+}
+
+void Rotatable_dihedral::SetConformerUsingMetadata(bool selectRandom, int conformerNumber)
+{
+    if (assigned_metadata_.empty())
+    {
+        std::cout << "Error in Rotatable_dihedral::SetDihedralAngleUsingMetadata; no metadata has been set.\n";
+    }
+    else
+    {
+        const auto& entry = assigned_metadata_.at(conformerNumber);
+        if (selectRandom)
+        {
+            double lower = (entry.default_angle_value_ - entry.lower_deviation_) ;
+            double upper = (entry.default_angle_value_ + entry.upper_deviation_) ;
+            this->RandomizeDihedralAngleWithinRange(lower, upper);
+        }
+        else
+        {
+            this->SetDihedralAngle(entry.default_angle_value_);
+        }
+    }
 }
 
 //////////////////////////////////////////////////////////

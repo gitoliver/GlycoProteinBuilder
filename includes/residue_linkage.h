@@ -35,6 +35,7 @@ public:
     ResidueVector GetResidues();
     RotatableDihedralVector GetRotatableDihedrals() const;
     int GetNumberOfRotatableDihedrals();
+    int GetNumberOfShapes();
     Residue* GetFromThisResidue1();
     Residue* GetToThisResidue2();
     Atom* GetFromThisConnectionAtom1();
@@ -48,10 +49,11 @@ public:
     //                       FUNCTIONS                      //
     //////////////////////////////////////////////////////////
 
-    void SetDefaultDihedralAnglesUsingMetadata();
-    void SetRandomDihedralAnglesUsingMetadata();
+    void SetDefaultShapeUsingMetadata();
+    void SetSpecificShapeUsingMetadata();
+    void SetRandomShapeUsingMetadata();
     void SetCustomDihedralAngles(std::vector <double> dihedral_angles);
-    void SetDihedralAnglesToPrevious();
+    void SetShapeToPrevious();
     void SetRandomDihedralAngles();
     void DetermineAtomsThatMove();
 
@@ -80,6 +82,8 @@ private:
     void AddMetadataToRotatableDihedrals(gmml::MolecularMetadata::GLYCAM::DihedralAngleDataVector metadata);
     void SetResidues(Residue *residue1, Residue *residue2);
     void SetConnectionAtoms(Residue *residue1, Residue *residue2);
+    void SetConformerUsingMetadata(bool useRanges = false, int conformerNumber = 0);
+
 
     //////////////////////////////////////////////////////////
     //                       ATTRIBUTES                     //

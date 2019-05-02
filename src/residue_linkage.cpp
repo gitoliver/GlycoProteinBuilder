@@ -65,16 +65,33 @@ Atom* Residue_linkage::GetToThisConnectionAtom2()
 //                       FUNCTIONS                      //
 //////////////////////////////////////////////////////////
 
-void Residue_linkage::SetDefaultDihedralAnglesUsingMetadata()
+void Residue_linkage::SetDefaultShapeUsingMetadata()
 {
-    for (auto &entry : rotatable_dihedrals_)
+    if (rotatable_dihedrals_.at(0).GetMetadata().at(0).rotamer_type_.compare("permutation")==0)
     {
-        entry.SetDihedralAngleUsingMetadata();
+        for (auto &entry : rotatable_dihedrals_)
+        {
+            entry.SetDihedralAngleUsingMetadata();
+        }
+    }
+    else if (rotatable_dihedrals_.at(0).GetMetadata().at(0).rotamer_type_.compare("conformer")==0)
+    {
+        for (auto &entry : rotatable_dihedrals_)
+        {
+            entry.SetConformerUsingMetadata(); // Default will use values from first entry
+        }
     }
 }
 
-// Range should be inherent to each dihedral. Should add that to the class.
-void Residue_linkage::SetRandomDihedralAnglesUsingMetadata()
+void Residue_linkage::SetConformerUsingMetadata(bool useRanges, int conformerNumber)
+{
+    for (auto &entry : rotatable_dihedrals_)
+    {
+        entry.SetConformerUsingMetadata(useRanges, conformerNumber);
+    }
+}
+
+void Residue_linkage::SetRandomShapeUsingMetadata()
 {
     for (auto &entry : rotatable_dihedrals_)
     {
@@ -100,7 +117,7 @@ void Residue_linkage::SetCustomDihedralAngles(std::vector <double> dihedral_angl
     }
 }
 
-void Residue_linkage::SetDihedralAnglesToPrevious()
+void Residue_linkage::SetShapeToPrevious()
 {
     for(RotatableDihedralVector::iterator rotatable_dihedral = rotatable_dihedrals_.begin(); rotatable_dihedral != rotatable_dihedrals_.end(); ++rotatable_dihedral)
     {
