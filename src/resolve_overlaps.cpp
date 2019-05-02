@@ -50,22 +50,71 @@ void resolve_overlaps::rotamer_permutator(GlycosylationSiteVector &glycosites)
     for (ResidueLinkageVector::iterator it1 = allSelectedLinkages.begin(); it1 != allSelectedLinkages.end(); ++it1)
     {
         std::cout << it1->GetFromThisResidue1()->GetId() << "-" << it1->GetToThisResidue2()->GetId() << "\n";
+        if(it1->CheckIfConformer())
+        {
+            for(int shapeNumber = 0; shapeNumber < it1->GetNumberOfShapes(); ++shapeNumber)
+            {
+                it1->SetSpecificShapeUsingMetadata(shapeNumber);
+                std::cout << ".it1\n";
+                //CALCULATE OVERLAPS
+            }
+        }
+        else
+        {
+            RotatableDihedralVector rotatableDihedrals = it1->GetRotatableDihedrals();
+            for(RotatableDihedralVector::iterator rd1 = rotatableDihedrals.begin(); rd1 != rotatableDihedrals.end(); ++rd1)
+            {
+                for(int angleEntryNumber = 0; angleEntryNumber < rd1->GetNumberOfRotamers(); ++angleEntryNumber)
+                {
+                    rd1->SetSpecificAngleEntryUsingMetadata(false, angleEntryNumber);
+                    std::cout << "..rd1it1\n";
+                }
+                for(RotatableDihedralVector::iterator rd2 = std::next(rd1); rd1 != rotatableDihedrals.end(); ++rd2)
+                {
+                    for(int angle2EntryNumber = 0; angle2EntryNumber < rd1->GetNumberOfRotamers(); ++angle2EntryNumber)
+                    {
+                        rd2->SetSpecificAngleEntryUsingMetadata(false, angle2EntryNumber);
+                        std::cout << "...rd2it1\n";
+                    }
+                }
+            }
+        }
 
         for (ResidueLinkageVector::iterator it2 = std::next(it1); it2 != allSelectedLinkages.end(); ++it2)
         {
+            std::cout << "    " << it2->GetFromThisResidue1()->GetId() << "-" << it2->GetToThisResidue2()->GetId() << "\n";
+            if(it2->CheckIfConformer())
+            {
+                for(int shapeNumber = 0; shapeNumber < it2->GetNumberOfShapes(); ++shapeNumber)
+                {
+                    it2->SetSpecificShapeUsingMetadata(shapeNumber);
+                    std::cout << ".it2\n";
+                    //CALCULATE OVERLAPS
+                }
+            }
+            else
+            {
+                RotatableDihedralVector rotatableDihedrals = it2->GetRotatableDihedrals();
+                for(RotatableDihedralVector::iterator rd1 = rotatableDihedrals.begin(); rd1 != rotatableDihedrals.end(); ++rd1)
+                {
+                    for(int angleEntryNumber = 0; angleEntryNumber < rd1->GetNumberOfRotamers(); ++angleEntryNumber)
+                    {
+                        rd1->SetSpecificAngleEntryUsingMetadata(false, angleEntryNumber);
+                        std::cout << "..rd1it2\n";
+                    }
+                    for(RotatableDihedralVector::iterator rd2 = std::next(rd1); rd2 != rotatableDihedrals.end(); ++rd2)
+                    {
+                        for(int angle2EntryNumber = 0; angle2EntryNumber < rd2->GetNumberOfRotamers(); ++angle2EntryNumber)
+                        {
+                            rd2->SetSpecificAngleEntryUsingMetadata(false, angle2EntryNumber);
+                            std::cout << "...rd2it2\n";
+                        }
+                    }
+                }
+            }
 
 //            std::cout << "    " << it2->GetFromThisResidue1()->GetId() << "-" << it2->GetToThisResidue2()->GetId() << "\n";
 //            std::cout << "    Number of shapes: " << it2->GetNumberOfShapes() << "\n";
-
-//            RotatableDihedralVector rotatableBonds = it2->GetRotatableDihedrals();
-//            for(auto &currentRotatableBond : rotatableBonds)
-//            {
-//                int numberOfShapes = currentRotatableBond.GetNumberOfShapes();
-//                if (numberOfShapes > 1)
-//                {
-//                    std::cout << "    Found a bond with " << numberOfShapes << " rotamers\n";
-//                }
-//            }
         }
     }
 }

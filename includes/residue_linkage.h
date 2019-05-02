@@ -45,7 +45,7 @@ public:
     Residue* GetToThisResidue2();
     Atom* GetFromThisConnectionAtom1();
     Atom* GetToThisConnectionAtom2();
-    bool checkIfConformer();
+    bool CheckIfConformer();
 
     //////////////////////////////////////////////////////////
     //                       MUTATOR                        //

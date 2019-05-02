@@ -74,7 +74,7 @@ Atom* Residue_linkage::GetToThisConnectionAtom2()
     return to_this_connection_atom2_;
 }
 
-bool Residue_linkage::checkIfConformer()
+bool Residue_linkage::CheckIfConformer()
 {
     if (rotatable_dihedrals_.empty())
         std::cout << "Error in Residue_linkage::checkIfConformer as rotatable_dihedrals_.empty()\n";
