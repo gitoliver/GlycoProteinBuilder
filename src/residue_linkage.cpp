@@ -32,6 +32,19 @@ RotatableDihedralVector Residue_linkage::GetRotatableDihedrals() const
     return rotatable_dihedrals_;
 }
 
+RotatableDihedralVector Residue_linkage::GetRotatableDihedralsWithMultipleRotamers()
+{
+    RotatableDihedralVector returningDihedrals;
+    for (auto &entry : rotatable_dihedrals_)
+    {
+        if (entry.GetNumberOfRotamers() > 1)
+        {
+            returningDihedrals.push_back(entry);
+        }
+    }
+    return returningDihedrals;
+}
+
 int Residue_linkage::GetNumberOfRotatableDihedrals()
 {
     return rotatable_dihedrals_.size();
@@ -98,6 +111,11 @@ bool Residue_linkage::CheckIfConformer()
 //                       FUNCTIONS                      //
 //////////////////////////////////////////////////////////
 
+void Residue_linkage::GenerateAllShapesUsingMetadata()
+{
+
+}
+
 void Residue_linkage::SetDefaultShapeUsingMetadata()
 {
     for (auto &entry : rotatable_dihedrals_)
@@ -127,6 +145,7 @@ void Residue_linkage::SetRandomShapeUsingMetadata(bool useRanges)
     }
 }
 
+// This is dangerous if used by non-conformer linkage. Change it to check.
 void Residue_linkage::SetSpecificShapeUsingMetadata(int shapeNumber, bool useRanges)
 {
     for (auto &entry : rotatable_dihedrals_)

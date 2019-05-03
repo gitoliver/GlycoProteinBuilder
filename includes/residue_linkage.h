@@ -39,6 +39,7 @@ public:
 
     ResidueVector GetResidues();
     RotatableDihedralVector GetRotatableDihedrals() const;
+    RotatableDihedralVector GetRotatableDihedralsWithMultipleRotamers();
     int GetNumberOfRotatableDihedrals();
     int GetNumberOfShapes();
     Residue* GetFromThisResidue1();
@@ -55,6 +56,7 @@ public:
     //                       FUNCTIONS                      //
     //////////////////////////////////////////////////////////
 
+    void GenerateAllShapesUsingMetadata();
     void SetDefaultShapeUsingMetadata();
     void SetRandomShapeUsingMetadata(bool useRanges = true);
     void SetSpecificShapeUsingMetadata(int shapeNumber, bool useRanges = false);
