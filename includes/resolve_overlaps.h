@@ -21,6 +21,8 @@
 
 namespace resolve_overlaps
 {
+void generatePermutationsWithinLinkageRecursively(RotatableDihedralVector::iterator currentRotatableBond, RotatableDihedralVector::iterator rotEnd, ResidueLinkageVector::iterator linkage, ResidueLinkageVector::iterator end);
+//void generatePermutationsWithinLinkageRecursively(RotatableDihedralVector::iterator currentRotatableBond, RotatableDihedralVector::iterator end);
 void generateLinkagePermutationsRecursively(ResidueLinkageVector::iterator linkage, ResidueLinkageVector::iterator end);
 void rotamer_permutator(GlycosylationSiteVector &glycosites);
 void weighted_protein_global_overlap_random_descent(GlycosylationSiteVector &glycosites, int max_cycles = 500, bool monte_carlo = false);

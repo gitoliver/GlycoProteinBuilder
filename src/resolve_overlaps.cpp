@@ -18,23 +18,45 @@ Note: Chi1 is 180,-60,60 +/- 30 degrees. Want a function that keeps the values w
 Note: Need to save best structure.
 */
 
-void resolve_overlaps::generateLinkagePermutationsRecursively(ResidueLinkageVector::iterator linkage, ResidueLinkageVector::iterator end)
+// Lol if you're reading this good luck. I haven't figured out a better way than this mess:
+void resolve_overlaps::generatePermutationsWithinLinkageRecursively(RotatableDihedralVector::iterator currentRotatableBond, RotatableDihedralVector::iterator rotEnd, ResidueLinkageVector::iterator linkage, ResidueLinkageVector::iterator end)
 {
-    // std::cout << "HER" << std::endl;
-    for(int shapeNumber = 0; shapeNumber < linkage->GetNumberOfShapes(); ++shapeNumber)
+    for(int rotamerNumber = 0; rotamerNumber < currentRotatableBond->GetNumberOfRotamers(); ++rotamerNumber)
     {
-        linkage->SetSpecificShapeUsingMetadata(shapeNumber);
-        std::cout << linkage->GetFromThisResidue1()->GetId() << "-" << linkage->GetToThisResidue2()->GetId() << " ";
-        std::cout << shapeNumber << "\n";
+        currentRotatableBond->SetSpecificAngleEntryUsingMetadata(false, rotamerNumber);
+        std::cout << linkage->GetFromThisResidue1()->GetId() << "-" << linkage->GetToThisResidue2()->GetId() << ": " << rotamerNumber <<" \n";
         if(std::next(linkage) != end)
         {
-   //         std::cout << "Distance to end is " << (end - linkage) << std::endl;
-   //         std::cout << "Deeper" << std::endl;
             resolve_overlaps::generateLinkagePermutationsRecursively(std::next(linkage), end);
         }
+        if(std::next(currentRotatableBond) != rotEnd)
+        {
+            resolve_overlaps::generatePermutationsWithinLinkageRecursively(std::next(currentRotatableBond), rotEnd, linkage, end);
+        }
     }
-
 }
+
+void resolve_overlaps::generateLinkagePermutationsRecursively(ResidueLinkageVector::iterator linkage, ResidueLinkageVector::iterator end)
+{
+    if(linkage->CheckIfConformer())
+    {
+        for(int shapeNumber = 0; shapeNumber < linkage->GetNumberOfShapes(); ++shapeNumber)
+        {
+            linkage->SetSpecificShapeUsingMetadata(shapeNumber);
+            std::cout << linkage->GetFromThisResidue1()->GetId() << "-" << linkage->GetToThisResidue2()->GetId() << ": " << shapeNumber << "\n";
+            if(std::next(linkage) != end)
+            {
+                resolve_overlaps::generateLinkagePermutationsRecursively(std::next(linkage), end);
+            }
+        }
+    }
+    else
+    {
+        RotatableDihedralVector rotatableDihedrals = linkage->GetRotatableDihedralsWithMultipleRotamers();
+        resolve_overlaps::generatePermutationsWithinLinkageRecursively(rotatableDihedrals.begin(), rotatableDihedrals.end(), linkage, end);
+    }
+}
+
 
 void resolve_overlaps::rotamer_permutator(GlycosylationSiteVector &glycosites)
 {
@@ -78,11 +100,13 @@ void resolve_overlaps::rotamer_permutator(GlycosylationSiteVector &glycosites)
 
 //    }
 
-   for (ResidueLinkageVector::iterator linkage = allSelectedLinkages.begin(); linkage != allSelectedLinkages.end(); ++linkage)
-   {
-       std::cout << "Going total recurve on " << linkage->GetFromThisResidue1()->GetId() << "-" << linkage->GetToThisResidue2()->GetId() << "\n";
-       resolve_overlaps::generateLinkagePermutationsRecursively(linkage, allSelectedLinkages.end());
-   }
+
+    resolve_overlaps::generateLinkagePermutationsRecursively(allSelectedLinkages.begin(), allSelectedLinkages.end());
+//   for (ResidueLinkageVector::iterator linkage = allSelectedLinkages.begin(); linkage != allSelectedLinkages.end(); ++linkage)
+//   {
+//       std::cout << "Going total recurve on " << linkage->GetFromThisResidue1()->GetId() << "-" << linkage->GetToThisResidue2()->GetId() << "\n";
+//       resolve_overlaps::generateLinkagePermutationsRecursively(linkage, allSelectedLinkages.end());
+//   }
 
 
 //    for (ResidueLinkageVector::iterator it1 = allSelectedLinkages.begin(); it1 != allSelectedLinkages.end(); ++it1)
