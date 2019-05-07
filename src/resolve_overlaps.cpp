@@ -19,7 +19,7 @@ Note: Need to save best structure.
 */
 
 // Lol if you're reading this good luck. I haven't figured out a better way than this mess:
-void resolve_overlaps::generatePermutationsWithinLinkageRecursively(RotatableDihedralVector::iterator currentRotatableBond, RotatableDihedralVector::iterator rotEnd, ResidueLinkageVector::iterator linkage, ResidueLinkageVector::iterator end)
+void resolve_overlaps::generatePermutationsWithinLinkageRecursively(RotatableDihedralVector::iterator currentRotatableBond, RotatableDihedralVector::iterator rotEnd, ResidueLinkageVector::iterator linkage, ResidueLinkageVector::iterator end, GlycosylationSiteVector &glycosites)
 {
     for(int rotamerNumber = 0; rotamerNumber < currentRotatableBond->GetNumberOfRotamers(); ++rotamerNumber)
     {
@@ -27,16 +27,22 @@ void resolve_overlaps::generatePermutationsWithinLinkageRecursively(RotatableDih
         std::cout << linkage->GetFromThisResidue1()->GetId() << "-" << linkage->GetToThisResidue2()->GetId() << ": " << rotamerNumber <<" \n";
         if(std::next(linkage) != end)
         {
-            resolve_overlaps::generateLinkagePermutationsRecursively(std::next(linkage), end);
+            resolve_overlaps::generateLinkagePermutationsRecursively(std::next(linkage), end, glycosites);
         }
         if(std::next(currentRotatableBond) != rotEnd)
         {
-            resolve_overlaps::generatePermutationsWithinLinkageRecursively(std::next(currentRotatableBond), rotEnd, linkage, end);
+            resolve_overlaps::generatePermutationsWithinLinkageRecursively(std::next(currentRotatableBond), rotEnd, linkage, end, glycosites);
+        }
+        if((std::next(linkage) == end) && (std::next(currentRotatableBond) == rotEnd) )
+        {
+            // CALCULATE OVERLAP
+            glycoprotein_builder::CalculateOverlaps(glycosites);
+            std::cout << "Overlap is now " << glycoprotein_builder::GetGlobalOverlap(glycosites) << "\n";
         }
     }
 }
 
-void resolve_overlaps::generateLinkagePermutationsRecursively(ResidueLinkageVector::iterator linkage, ResidueLinkageVector::iterator end)
+void resolve_overlaps::generateLinkagePermutationsRecursively(ResidueLinkageVector::iterator linkage, ResidueLinkageVector::iterator end, GlycosylationSiteVector &glycosites)
 {
     if(linkage->CheckIfConformer())
     {
@@ -46,14 +52,20 @@ void resolve_overlaps::generateLinkagePermutationsRecursively(ResidueLinkageVect
             std::cout << linkage->GetFromThisResidue1()->GetId() << "-" << linkage->GetToThisResidue2()->GetId() << ": " << shapeNumber << "\n";
             if(std::next(linkage) != end)
             {
-                resolve_overlaps::generateLinkagePermutationsRecursively(std::next(linkage), end);
+                resolve_overlaps::generateLinkagePermutationsRecursively(std::next(linkage), end, glycosites);
+            }
+            else // At the end
+            {
+                // CALCULATE OVERLAPS
+                glycoprotein_builder::CalculateOverlaps(glycosites);
+                std::cout << "Overlap is now " << glycoprotein_builder::GetGlobalOverlap(glycosites) << "\n";
             }
         }
     }
     else
     {
         RotatableDihedralVector rotatableDihedrals = linkage->GetRotatableDihedralsWithMultipleRotamers();
-        resolve_overlaps::generatePermutationsWithinLinkageRecursively(rotatableDihedrals.begin(), rotatableDihedrals.end(), linkage, end);
+        resolve_overlaps::generatePermutationsWithinLinkageRecursively(rotatableDihedrals.begin(), rotatableDihedrals.end(), linkage, end, glycosites);
     }
 }
 
@@ -63,17 +75,8 @@ void resolve_overlaps::rotamer_permutator(GlycosylationSiteVector &glycosites)
     std::cout << "Rotamer Permutator\n";
     double lowest_global_overlap = glycoprotein_builder::GetGlobalOverlap(glycosites);
     // Go through each glycosite and select the first and inner 1-6 linkages
-     ResidueLinkageVector allSelectedLinkages = glycoprotein_builder::GetAllFirstAnd1_6Linkages(glycosites);
-    // Sanity check:
-    int numberOfPermutations = 1;
-    for (ResidueLinkageVector::iterator it1 = allSelectedLinkages.begin(); it1 != allSelectedLinkages.end(); ++it1)
-    {
-        numberOfPermutations = ( numberOfPermutations * it1->GetNumberOfShapes() );
-    }
-    std::cout << "Number of permutations = " << numberOfPermutations << "\n";
-    // End Sanity check
-
-    resolve_overlaps::generateLinkagePermutationsRecursively(allSelectedLinkages.begin(), allSelectedLinkages.end());
+    ResidueLinkageVector allSelectedLinkages = glycoprotein_builder::GetAllFirstAnd1_6Linkages(glycosites);
+    resolve_overlaps::generateLinkagePermutationsRecursively(allSelectedLinkages.begin(), allSelectedLinkages.end(), glycosites);
 }
 
 
