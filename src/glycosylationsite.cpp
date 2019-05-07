@@ -49,6 +49,11 @@ GlycosylationSite::~GlycosylationSite()
 //                       ACCESSOR                       //
 //////////////////////////////////////////////////////////
 
+Assembly* GlycosylationSite::GetGlycoprotein()
+{
+    return glycoprotein_;
+}
+
 std::string GlycosylationSite::GetGlycanName()
 {
     return glycan_name_;
@@ -147,6 +152,7 @@ ResidueLinkageVector GlycosylationSite::GetFirstAnd1_6Linkages()
 void GlycosylationSite::AttachGlycan(Assembly glycan, Assembly &glycoprotein)
 {
     this->SetGlycan(glycan);
+    this->SetGlycoprotein(glycoprotein);
   //  std::cout << "Glycan set\n" << std::endl;
     this->Prepare_Glycans_For_Superimposition_To_Particular_Residue(residue_->GetName());
    // std::cout << "Superimpose prep done" << std::endl;
@@ -532,6 +538,11 @@ void GlycosylationSite::write_pdb_file(Assembly *glycoprotein, int cycle, std::s
 //////////////////////////////////////////////////////////
 //                       MUTATOR                        //
 //////////////////////////////////////////////////////////
+
+void GlycosylationSite::SetGlycoprotein(Assembly* glycoprotein)
+{
+    glycoprotein_ = glycoprotein;
+}
 
 void GlycosylationSite::SetGlycanName(std::string glycan_name)
 {

@@ -39,6 +39,7 @@ public:
     //                       ACCESSOR                       //
     //////////////////////////////////////////////////////////
 
+    Assembly* GetGlycoprotein();
     std::string GetGlycanName();
     std::string GetResidueNumber();
     Residue* GetResidue();
@@ -76,6 +77,7 @@ public:
     //                       MUTATOR                        //
     //////////////////////////////////////////////////////////
 
+    void SetGlycoprotein(Assembly* glycoprotein);
     void SetGlycanName(std::string glycan_name);
     void SetResidueNumber(std::string residue_number);
     void SetResidue(Residue* residue);
@@ -127,6 +129,7 @@ private:
     //                       ATTRIBUTES                     //
     //////////////////////////////////////////////////////////
 
+    Assembly* glycoprotein_;
     std::string glycan_name_;
     std::string residue_number_;
     Residue* residue_;                                  /*!< A pointer back to the residue for this glycosite >*/
