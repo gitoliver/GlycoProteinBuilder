@@ -365,9 +365,21 @@ void glycoprotein_builder::UpdateAtomsThatMoveInLinkages(GlycosylationSiteVector
     {
         current_glycosite->UpdateAtomsThatMoveInLinkages();
     }
-
 }
 
+ResidueLinkageVector glycoprotein_builder::GetAllFirstAnd1_6Linkages(GlycosylationSiteVector &glycosites)
+{
+    ResidueLinkageVector selectedLinkages;
+    for(auto &glycosite : glycosites)
+    {
+        ResidueLinkageVector currentLinkages = glycosite.GetFirstAnd1_6Linkages();
+        selectedLinkages.insert( selectedLinkages.end(), currentLinkages.begin(), currentLinkages.end() );
+        std::cout << "Linkages found:\n";
+        for(auto &linkage : currentLinkages)
+            std::cout << linkage.GetFromThisResidue1()->GetId() << "-" << linkage.GetToThisResidue2()->GetId() << "\n";
+    }
+    return selectedLinkages;
+}
 //void glycoprotein_builder::Overlap_Weighted_Adjust_Torsions_For_X_Cycles(GlycosylationSitePointerVector &sites, GlycosylationSiteVector &glycosites, int max_cycles, double tolerance, std::string overlap_type)
 //{
 //    int cycle = 0;

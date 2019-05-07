@@ -60,28 +60,10 @@ void resolve_overlaps::generateLinkagePermutationsRecursively(ResidueLinkageVect
 
 void resolve_overlaps::rotamer_permutator(GlycosylationSiteVector &glycosites)
 {
-
-   // typedef std::vector<Rotamer
-
     std::cout << "Rotamer Permutator\n";
     double lowest_global_overlap = glycoprotein_builder::GetGlobalOverlap(glycosites);
-    ResidueLinkageVector allSelectedLinkages;
     // Go through each glycosite and select the first and inner 1-6 linkages
-    // SEPARATE FUNCTION:
-    // ResidueLinkageVector allSelectedLinkages = glycoprotein_builder::GetAllFirstAnd1_6Linkages()
-    for(auto &current_glycosite : glycosites)
-        //for(GlycosylationSiteVector::iterator site1 = glycosites.begin(); site1 != glycosites.end(); ++site1)
-    {
-        ResidueLinkageVector currentLinkages = current_glycosite.GetFirstAnd1_6Linkages();
-        allSelectedLinkages.insert( allSelectedLinkages.end(), currentLinkages.begin(), currentLinkages.end() );
-        std::cout << "Linkages found:\n";
-        for(auto &linkage : currentLinkages)
-        {
-            std::cout << linkage.GetFromThisResidue1()->GetId() << "-" << linkage.GetToThisResidue2()->GetId() << "\n";
-        }
-    }
-    // END SEPARATE FUNCTION
-
+     ResidueLinkageVector allSelectedLinkages = glycoprotein_builder::GetAllFirstAnd1_6Linkages(glycosites);
     // Sanity check:
     int numberOfPermutations = 1;
     for (ResidueLinkageVector::iterator it1 = allSelectedLinkages.begin(); it1 != allSelectedLinkages.end(); ++it1)
@@ -91,135 +73,7 @@ void resolve_overlaps::rotamer_permutator(GlycosylationSiteVector &glycosites)
     std::cout << "Number of permutations = " << numberOfPermutations << "\n";
     // End Sanity check
 
-//    for (ResidueLinkageVector::iterator it1 = allSelectedLinkages.begin(); std::next(it1) != allSelectedLinkages.end(); ++it1)
-//    {
-//        for(int shapeNumber = 0; shapeNumber < it1->GetNumberOfShapes(); ++shapeNumber)
-//        {
-//            it1->SetSpecificShapeUsingMetadata(shapeNumber);
-//            //
-
-//    }
-
-
     resolve_overlaps::generateLinkagePermutationsRecursively(allSelectedLinkages.begin(), allSelectedLinkages.end());
-//   for (ResidueLinkageVector::iterator linkage = allSelectedLinkages.begin(); linkage != allSelectedLinkages.end(); ++linkage)
-//   {
-//       std::cout << "Going total recurve on " << linkage->GetFromThisResidue1()->GetId() << "-" << linkage->GetToThisResidue2()->GetId() << "\n";
-//       resolve_overlaps::generateLinkagePermutationsRecursively(linkage, allSelectedLinkages.end());
-//   }
-
-
-//    for (ResidueLinkageVector::iterator it1 = allSelectedLinkages.begin(); it1 != allSelectedLinkages.end(); ++it1)
-//    {
-//        std::cout << it1->GetFromThisResidue1()->GetId() << "-" << it1->GetToThisResidue2()->GetId() << "\n";
-//        if(it1->CheckIfConformer())
-//        {
-//            for(int shapeNumber = 0; shapeNumber < it1->GetNumberOfShapes(); ++shapeNumber)
-//            {
-//                it1->SetSpecificShapeUsingMetadata(shapeNumber);
-//                std::cout << ".  .it1 " << shapeNumber << "\n";
-//                //CALCULATE OVERLAPS
-//                for (ResidueLinkageVector::iterator it2 = std::next(it1); it2 != allSelectedLinkages.end(); ++it2)
-//                {
-//                    std::cout << "    " << it2->GetFromThisResidue1()->GetId() << "-" << it2->GetToThisResidue2()->GetId() << "\n";
-//                    if(it2->CheckIfConformer())
-//                    {
-//                        for(int shapeNumber = 0; shapeNumber < it2->GetNumberOfShapes(); ++shapeNumber)
-//                        {
-//                            it2->SetSpecificShapeUsingMetadata(shapeNumber);
-//                            std::cout << ".      .it2 " << shapeNumber << "\n";
-//                            //CALCULATE OVERLAPS
-//                        }
-//                    }
-//                    else
-//                    {
-//                        RotatableDihedralVector rotatableDihedrals = it2->GetRotatableDihedralsWithMultipleRotamers();
-//                        //std::cout << "it2 rotatableDihedrals.size() " << rotatableDihedrals.size() << "\n";
-//                        for(RotatableDihedralVector::iterator rd1 = rotatableDihedrals.begin(); rd1 != rotatableDihedrals.end(); ++rd1)
-//                        {
-//                         //   std::cout << "rd1->GetNumberOfRotamers(): " << rd1->GetNumberOfRotamers() << "\n";
-//                            for(int angleEntryNumber = 0; angleEntryNumber < rd1->GetNumberOfRotamers(); ++angleEntryNumber)
-//                            {
-//                                rd1->SetSpecificAngleEntryUsingMetadata(false, angleEntryNumber);
-//                                std::cout << ".      .rd1it2 " << angleEntryNumber << "\n";
-
-//                                for(RotatableDihedralVector::iterator rd2 = std::next(rd1); rd2 != rotatableDihedrals.end(); ++rd2)
-//                                {
-//                                    std::cout << "rd2->GetNumberOfRotamers() " << rd2->GetNumberOfRotamers() << "\n";
-//                                    for(int angle2EntryNumber = 0; angle2EntryNumber < rd2->GetNumberOfRotamers(); ++angle2EntryNumber)
-//                                    {
-//                                        rd2->SetSpecificAngleEntryUsingMetadata(false, angle2EntryNumber);
-//                                        std::cout << ".          .rd2it2 " << angle2EntryNumber <<  "\n";
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        else
-//        { // if not conformer
-//            RotatableDihedralVector rotatableDihedrals = it1->GetRotatableDihedralsWithMultipleRotamers();
-//            for(RotatableDihedralVector::iterator rd1 = rotatableDihedrals.begin(); rd1 != rotatableDihedrals.end(); ++rd1)
-//            {
-//                for(int angleEntryNumber = 0; angleEntryNumber < rd1->GetNumberOfRotamers(); ++angleEntryNumber)
-//                {
-//                    rd1->SetSpecificAngleEntryUsingMetadata(false, angleEntryNumber);
-//                    std::cout << ".  .rd1it1 " << angleEntryNumber << "\n";
-
-//                    //                    for(RotatableDihedralVector::iterator rd2 = std::next(rd1); rd2 != rotatableDihedrals.end(); ++rd2)
-//                    //                    {
-//                    //                        for(int angle2EntryNumber = 0; angle2EntryNumber < rd2->GetNumberOfRotamers(); ++angle2EntryNumber)
-//                    //                        {
-//                    //                            rd2->SetSpecificAngleEntryUsingMetadata(false, angle2EntryNumber);
-//                    //                            std::cout << ".        .rd2it1 " << angle2EntryNumber << "\n";
-//                    //                        }
-//                    //                    }
-//                    for (ResidueLinkageVector::iterator it2 = std::next(it1); it2 != allSelectedLinkages.end(); ++it2)
-//                    {
-//                        std::cout << "    " << it2->GetFromThisResidue1()->GetId() << "-" << it2->GetToThisResidue2()->GetId() << "\n";
-//                        if(it2->CheckIfConformer())
-//                        {
-//                            for(int shapeNumber = 0; shapeNumber < it2->GetNumberOfShapes(); ++shapeNumber)
-//                            {
-//                                it2->SetSpecificShapeUsingMetadata(shapeNumber);
-//                                std::cout << ".      .it2 " << shapeNumber << "\n";
-//                                //CALCULATE OVERLAPS
-//                            }
-//                        }
-//                        else
-//                        {
-//                            RotatableDihedralVector rotatableDihedrals = it2->GetRotatableDihedralsWithMultipleRotamers();
-//                            for(RotatableDihedralVector::iterator rd1 = rotatableDihedrals.begin(); rd1 != rotatableDihedrals.end(); ++rd1)
-//                            {
-//                                for(int angleEntryNumber = 0; angleEntryNumber < rd1->GetNumberOfRotamers(); ++angleEntryNumber)
-//                                {
-//                                    rd1->SetSpecificAngleEntryUsingMetadata(false, angleEntryNumber);
-//                                    std::cout << ".      .rd1it2 " << angleEntryNumber << "\n";
-
-//                                    for(RotatableDihedralVector::iterator rd2 = std::next(rd1); rd2 != rotatableDihedrals.end(); ++rd2)
-//                                    {
-//                                        for(int angle2EntryNumber = 0; angle2EntryNumber < rd2->GetNumberOfRotamers(); ++angle2EntryNumber)
-//                                        {
-//                                            rd2->SetSpecificAngleEntryUsingMetadata(false, angle2EntryNumber);
-//                                            std::cout << ".            .rd2it2 " << angle2EntryNumber <<  "\n";
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-
-
-
-//            std::cout << "    " << it2->GetFromThisResidue1()->GetId() << "-" << it2->GetToThisResidue2()->GetId() << "\n";
-//            std::cout << "    Number of shapes: " << it2->GetNumberOfShapes() << "\n";
-
-    //}
 }
 
 

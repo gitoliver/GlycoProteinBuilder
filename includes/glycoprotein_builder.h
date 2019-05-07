@@ -43,6 +43,7 @@ GlycosylationSitePointerVector GetSitesWithOverlap(GlycosylationSiteVector &glyc
 //void DeleteSitesWithOverlapRecordsAboveTolerance(GlycosylationSiteVector &glycosites, double tolerance, std::string overlap_type = "total");
 void DeleteSitesIterativelyWithOverlapAboveTolerance(GlycosylationSiteVector &glycosites, double tolerance);
 void UpdateAtomsThatMoveInLinkages(GlycosylationSiteVector &glycosites);
+ResidueLinkageVector GetAllFirstAnd1_6Linkages(GlycosylationSiteVector &glycosites);
 
 //void Overlap_Weighted_Adjust_Torsions_For_X_Cycles(GlycosylationSitePointerVector &sites, GlycosylationSiteVector &glycosites, int max_cycles, double tolerance, std::string overlap_type);
 //void Overlap_Weighted_Adjust_Torsions(GlycosylationSitePointerVector &sites);
