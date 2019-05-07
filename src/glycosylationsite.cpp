@@ -74,11 +74,6 @@ Assembly* GlycosylationSite::GetAttachedGlycan()
     return &glycan_;
 }
 
-Assembly* GlycosylationSite::GetGlycoprotein()
-{
-    return this->GetResidue()->GetAssembly();
-}
-
 double GlycosylationSite::GetOverlap()
 {
     return (glycan_overlap_ + protein_overlap_);
@@ -152,7 +147,7 @@ ResidueLinkageVector GlycosylationSite::GetFirstAnd1_6Linkages()
 void GlycosylationSite::AttachGlycan(Assembly glycan, Assembly &glycoprotein)
 {
     this->SetGlycan(glycan);
-    this->SetGlycoprotein(glycoprotein);
+    this->SetGlycoprotein(&glycoprotein);
   //  std::cout << "Glycan set\n" << std::endl;
     this->Prepare_Glycans_For_Superimposition_To_Particular_Residue(residue_->GetName());
    // std::cout << "Superimpose prep done" << std::endl;

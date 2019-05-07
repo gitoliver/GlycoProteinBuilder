@@ -44,7 +44,6 @@ public:
     std::string GetResidueNumber();
     Residue* GetResidue();
     Assembly* GetAttachedGlycan();
-    Assembly* GetGlycoprotein();
     double GetOverlap();
     double GetWeightedOverlap(double glycan_weight, double protein_weight);
     double GetGlycanOverlap();
