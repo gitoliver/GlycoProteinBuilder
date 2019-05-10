@@ -12,9 +12,9 @@ typedef std::vector<Rotatable_dihedral> RotatableDihedralVector;
 
 Residue_linkage::Residue_linkage() {} // Do nothin
 
-Residue_linkage::Residue_linkage(Residue *residue1, Residue *residue2)
+Residue_linkage::Residue_linkage(Residue *residue1, Residue *residue2, GlycosylationSite *glycosite)
 {
-    this->InitializeClass(residue1, residue2);
+    this->InitializeClass(residue1, residue2, glycosite);
 }
 
 //////////////////////////////////////////////////////////
@@ -101,6 +101,12 @@ bool Residue_linkage::CheckIfConformer()
             return true;
     }
 }
+
+GlycosylationSite* Residue_linkage::GetAssociatedGlycosite()
+{
+    return associatedGlycosite_;
+}
+
 
 
 //////////////////////////////////////////////////////////
@@ -196,6 +202,11 @@ void Residue_linkage::DetermineAtomsThatMove()
     }
 }
 
+void Residue_linkage::SetAssociatedGlycosylationSite(GlycosylationSite *glycosite)
+{
+    associatedGlycosite_ = glycosite;
+}
+
 //////////////////////////////////////////////////////////
 //                       DISPLAY FUNCTION               //
 //////////////////////////////////////////////////////////
@@ -227,8 +238,9 @@ std::ostream& operator<<(std::ostream& os, const Residue_linkage& residue_linkag
 //                    PRIVATE FUNCTIONS                 //
 //////////////////////////////////////////////////////////
 
-void Residue_linkage::InitializeClass(Residue *from_this_residue1, Residue *to_this_residue2)
+void Residue_linkage::InitializeClass(Residue *from_this_residue1, Residue *to_this_residue2, GlycosylationSite *glycosite)
 {
+    this->SetAssociatedGlycosylationSite(glycosite);
     this->SetResidues(from_this_residue1, to_this_residue2);
     //std::cout << "Finding connection between " << from_this_residue1->GetId() << " :: " << to_this_residue2->GetId() << std::endl;
     this->SetConnectionAtoms(from_this_residue1_, to_this_residue2_);

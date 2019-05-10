@@ -223,8 +223,8 @@ double glycoprotein_builder::GetGlobalOverlap(GlycosylationSiteVector &glycosite
 void glycoprotein_builder::write_pdb_file(Assembly *glycoprotein, int cycle, std::string summary_filename, double overlap)
 {
     std::stringstream ss;
-   // ss << summary_filename << "_cycle_" << cycle << "overlap_" << overlap << ".pdb";
-    ss << cycle << "_cycle_" << ".pdb";
+    ss << summary_filename << "_cycle_" << cycle << "overlap_" << overlap << ".pdb";
+    //ss << cycle << "_cycle_" << ".pdb";
 
     PdbFileSpace::PdbFile *outputPdbFile = glycoprotein->BuildPdbFileStructureFromAssembly(-1,0);
     outputPdbFile->Write(ss.str());
@@ -312,10 +312,10 @@ GlycosylationSitePointerVector glycoprotein_builder::GetSitesWithOverlap(Glycosy
     return sites_to_return;
 }
 
-void glycoprotein_builder::DeleteSitesIterativelyWithOverlapAboveTolerance(GlycosylationSiteVector &glycosites, double tolerance)
+void glycoprotein_builder::DeleteSitesIterativelyWithAtomicOverlapAboveTolerance(GlycosylationSiteVector &glycosites, double tolerance)
 {
-    glycoprotein_builder::PrintDihedralAnglesAndOverlapOfGlycosites(glycosites);
-    std::cout << "Global overlap before deleting sites is " << glycoprotein_builder::GetGlobalOverlap(glycosites) << "\n";
+    //glycoprotein_builder::PrintDihedralAnglesAndOverlapOfGlycosites(glycosites);
+    std::cout << "Atomic overlap before deleting sites is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << "\n";
     bool continue_deleting = true;
     // While overlap for any site is > tolerance
     // Delete site with highest overlap.
@@ -325,7 +325,7 @@ void glycoprotein_builder::DeleteSitesIterativelyWithOverlapAboveTolerance(Glyco
         GlycosylationSite *worst_site = glycosites.data(); // Pointer to the first glycosite. Remember an erase/remove "advances"
         for (GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end(); ++current_glycosite)
         {
-            if  ( current_glycosite->GetOverlap() > worst_site->GetOverlap())
+            if  ( current_glycosite->CalculateAtomicOverlaps() > worst_site->CalculateAtomicOverlaps())
             {
                 worst_site = &(*current_glycosite); // The C is strong with this one.
             }
@@ -345,7 +345,7 @@ void glycoprotein_builder::DeleteSitesIterativelyWithOverlapAboveTolerance(Glyco
             }
             glycosites.erase(std::remove(glycosites.begin(), glycosites.end(), *worst_site), glycosites.end()); // Note need #include <algorithm>
             beads::Set_Other_Glycan_Beads(glycosites); // After "erasing", the actual atoms still exist and pointers to them are valid. Need to reset what beads are part of "other".
-            glycoprotein_builder::CalculateOverlaps(glycosites); // After deleting, other sites will have lower values
+            //glycoprotein_builder::CalculateOverlaps(glycosites); // After deleting, other sites will have lower values. No need anymore as calculating on the fly and not storing
         }
         else
         {
@@ -380,6 +380,24 @@ ResidueLinkageVector glycoprotein_builder::GetAllFirstAnd1_6Linkages(Glycosylati
     }
     return selectedLinkages;
 }
+
+void glycoprotein_builder::StashCoordinates(GlycosylationSiteVector &glycosites)
+{
+    for(auto &glycosite : glycosites)
+    {
+        glycosite.StashCoordinates();
+    }
+}
+
+
+void glycoprotein_builder::SetStashedCoordinatesWithLowestOverlap(GlycosylationSiteVector &glycosites)
+{
+    for(auto &glycosite : glycosites)
+    {
+        glycosite.SetStashedCoordinates();
+    }
+}
+
 //void glycoprotein_builder::Overlap_Weighted_Adjust_Torsions_For_X_Cycles(GlycosylationSitePointerVector &sites, GlycosylationSiteVector &glycosites, int max_cycles, double tolerance, std::string overlap_type)
 //{
 //    int cycle = 0;

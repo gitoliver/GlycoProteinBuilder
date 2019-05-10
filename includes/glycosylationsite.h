@@ -64,6 +64,8 @@ public:
     double Calculate_and_print_bead_overlaps();
     double CalculateAtomicOverlaps();
     void UpdateAtomsThatMoveInLinkages();
+    void StashCoordinates();
+    void SetStashedCoordinates();
     void Rename_Protein_Residue_From_GLYCAM_To_Standard();
     void Wiggle(int *output_pdb_id, double tolerance = 0.1, int interval = 5);
     void WiggleFirstLinkage(int *output_pdb_id, double tolerance = 0.1, int interval = 5);

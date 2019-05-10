@@ -159,7 +159,7 @@ void GlycosylationSite::AttachGlycan(Assembly glycan, Assembly &glycoprotein)
 
     //this->SetRotatableBonds(glycan_.GetResidues().at(0), residue_);
   // ResidueLinkageVector temp;
-    all_residue_linkages_.emplace_back(glycan_.GetResidues().at(0), residue_);
+    all_residue_linkages_.emplace_back(glycan_.GetResidues().at(0), residue_, this);
     this->FigureOutResidueLinkagesInGlycan(glycan_.GetResidues().at(0), glycan_.GetResidues().at(0), &all_residue_linkages_);
   //  all_residue_linkages_ = temp;
 }
@@ -658,6 +658,33 @@ void GlycosylationSite::UpdateAtomsThatMoveInLinkages()
     //residue_linkage_.DetermineAtomsThatMove();
 }
 
+void GlycosylationSite::StashCoordinates()
+{
+    std::cout << "Stashing coordinates" << std::endl;
+    AtomVector atoms = this->GetAttachedGlycan()->GetAllAtomsOfAssembly();
+    AtomVector sidechain_atoms = this->GetResidue()->GetAtoms();
+    atoms.insert(atoms.end(), sidechain_atoms.begin(), sidechain_atoms.end() );
+    for(auto &atom : atoms)
+    {
+        atom->AddCoordinate(new GeometryTopology::Coordinate(atom->GetCoordinate())); // push back the currect coordinates onto the end of the coordinates vector.
+    }
+}
+
+void GlycosylationSite::SetStashedCoordinates() // When a lower overlap is found, the coords are pushed back. Last one pushed back is the lowest overlap.
+{
+    std::cout << "Setting stashed coordinates\n";
+    AtomVector atoms = this->GetAttachedGlycan()->GetAllAtomsOfAssembly();
+    AtomVector sidechain_atoms = this->GetResidue()->GetAtoms();
+    atoms.insert(atoms.end(), sidechain_atoms.begin(), sidechain_atoms.end() );
+    for(auto &atom : atoms)
+    {
+        GeometryTopology::Coordinate *first_coords = atom->GetCoordinate();
+        GeometryTopology::Coordinate *last_coords = atom->GetCoordinates().back();
+        *first_coords = *last_coords;
+    }
+    //std::cout << "Finished Setting stashed coordinates" << std::endl;
+}
+
 
 //////////////////////////////////////////////////////////
 //                       DISPLAY FUNCTION               //
@@ -723,7 +750,7 @@ void GlycosylationSite::FigureOutResidueLinkagesInGlycan(Residue *from_this_resi
     {
         if( (neighbor->GetIndex() != from_this_residue1->GetIndex()) && (std::find(glycan_residues.begin(), glycan_residues.end(), neighbor) != glycan_residues.end())  )
         {
-            residue_linkages->emplace_back(neighbor, to_this_residue2);
+            residue_linkages->emplace_back(neighbor, to_this_residue2, this);
         }
     }
     for(auto &neighbor : neighbors)

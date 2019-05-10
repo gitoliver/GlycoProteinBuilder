@@ -15,7 +15,7 @@ static pcg_extras::seed_seq_from<std::random_device> seed_source;
 static pcg32 rng(seed_source);
 
 typedef std::vector<Rotatable_dihedral> RotatableDihedralVector;
-
+class GlycosylationSite;
 class Residue_linkage
 {
 public:
@@ -31,7 +31,7 @@ public:
     //////////////////////////////////////////////////////////
 
     Residue_linkage();
-    Residue_linkage(Residue *residue1, Residue *residue2);
+    Residue_linkage(Residue *residue1, Residue *residue2, GlycosylationSite *glycosite);
 
     //////////////////////////////////////////////////////////
     //                       ACCESSOR                       //
@@ -47,6 +47,7 @@ public:
     Atom* GetFromThisConnectionAtom1();
     Atom* GetToThisConnectionAtom2();
     bool CheckIfConformer();
+    GlycosylationSite* GetAssociatedGlycosite();
 
     //////////////////////////////////////////////////////////
     //                       MUTATOR                        //
@@ -64,6 +65,7 @@ public:
     void SetShapeToPrevious();
     void SetRandomDihedralAngles();
     void DetermineAtomsThatMove();
+    void SetAssociatedGlycosylationSite(GlycosylationSite *glycosite);
 
     //////////////////////////////////////////////////////////
     //                       DISPLAY FUNCTION               //
@@ -81,7 +83,7 @@ private:
     //                    PRIVATE FUNCTIONS                 //
     //////////////////////////////////////////////////////////
 
-    void InitializeClass(Residue *from_this_residue1, Residue *to_this_residue2);
+    void InitializeClass(Residue *from_this_residue1, Residue *to_this_residue2, GlycosylationSite *glycosite);
     RotatableDihedralVector FindRotatableDihedralsConnectingResidues(Atom *from_this_connection_atom1, Atom *to_this_connection_atom2);
     // Previous function generates a list of linearly connected atoms that define the rotatable bonds
     // This function splits that list into groups of 4 and creates rotatable_dihedral objects
@@ -92,11 +94,11 @@ private:
     void SetConnectionAtoms(Residue *residue1, Residue *residue2);
     void SetConformerUsingMetadata(bool useRanges = false, int conformerNumber = 0);
 
-
     //////////////////////////////////////////////////////////
     //                       ATTRIBUTES                     //
     //////////////////////////////////////////////////////////
 
+    GlycosylationSite* associatedGlycosite_;
     Residue* from_this_residue1_;
     Residue* to_this_residue2_;
     Atom* from_this_connection_atom1_;

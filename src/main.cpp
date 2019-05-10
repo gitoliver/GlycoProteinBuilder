@@ -90,10 +90,11 @@ int main(int argc, char* argv[])
 //        resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, max_cycles);
 //    }
 
+    resolve_overlaps::rotamer_permutator(glycosites);
+
     // Wiggle
     bool use_monte_carlo = true;
-    glycoprotein_builder::SetDefaultDihedralAnglesUsingMetadata(glycosites); // Reset to reasonable starting points 
-    resolve_overlaps::rotamer_permutator(glycosites);
+  //  glycoprotein_builder::SetDefaultDihedralAnglesUsingMetadata(glycosites); // Reset to reasonable starting points
 //    resolve_overlaps::wiggleFirstLinkages(glycosites, 100);
 //    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
 //    resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, 100, use_monte_carlo);
@@ -115,10 +116,12 @@ int main(int argc, char* argv[])
 //    resolve_overlaps::wiggle(glycosites, 100);
 //    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
 
+    beads::Remove_Beads(glycoprotein); //Remove beads and write a final PDB & PRMTOP
 
+    outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
     outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_All_Resolved.pdb");
     double loose_overlap_tolerance = 1.0;
-    glycoprotein_builder::DeleteSitesIterativelyWithOverlapAboveTolerance(glycosites, loose_overlap_tolerance);
+    glycoprotein_builder::DeleteSitesIterativelyWithAtomicOverlapAboveTolerance(glycosites, loose_overlap_tolerance);
 
 
 //    // Testing algorithms:
@@ -130,8 +133,8 @@ int main(int argc, char* argv[])
 ////        resolve_overlaps::weighted_protein_global_overlap_monte_carlo(glycosites, max_cycles);
 ////    }
 
+    std::cout << "Atomic overlap is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << "\n";
     std::cout << "Global overlap is " << glycoprotein_builder::GetGlobalOverlap(glycosites) << "\n";
-    beads::Remove_Beads(glycoprotein); //Remove beads and write a final PDB & PRMTOP
 
     glycoprotein_builder::PrintDihedralAnglesAndOverlapOfGlycosites(glycosites);
     outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
