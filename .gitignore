@@ -1,5 +1,6 @@
 tests/one_site/GlycoProtein_*
 tests/simple/GlycoProtein_*
+tests/*/GlycoProtein*
 test1_output
 build/*.o
 test1eer/
