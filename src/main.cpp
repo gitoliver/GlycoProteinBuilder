@@ -90,8 +90,6 @@ int main(int argc, char* argv[])
 //        resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, max_cycles);
 //    }
 
-
-    // Wiggle
     resolve_overlaps::rotamer_permutator(glycosites);
   //  glycoprotein_builder::SetDefaultDihedralAnglesUsingMetadata(glycosites); // Reset to reasonable starting points
     bool use_monte_carlo = true;

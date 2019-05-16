@@ -127,10 +127,6 @@ void resolve_overlaps::weighted_protein_global_overlap_random_descent(Glycosylat
             previous_glycan_overlap = current_glycosite->GetGlycanOverlap();
             previous_protein_overlap = current_glycosite->GetProteinOverlap();
             current_glycosite->SetRandomDihedralAnglesUsingMetadata();
-//            previous_chi1 = current_glycosite->GetChi1Value();
-//            current_glycosite->SetChi1Value(RandomAngle_360range());
-//            previous_chi2 = current_glycosite->GetChi2Value();
-//            current_glycosite->SetChi2Value(RandomAngle_360range());
             std::cout << "Site: " << current_glycosite->GetResidueNumber() << "\n";
             new_glycan_overlap = current_glycosite->Calculate_bead_overlaps("glycan", record_overlap);
             new_protein_overlap = current_glycosite->Calculate_bead_overlaps("protein", record_overlap);
