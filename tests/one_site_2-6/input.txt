@@ -1,0 +1,6 @@
+Protein:
+1eer_eop_Asn.pdb
+
+Protein Residue, Glycan Name:
+A_24,Hybrid-
+END

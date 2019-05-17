@@ -44,6 +44,7 @@ GlycosylationSitePointerVector GetSitesWithOverlap(GlycosylationSiteVector &glyc
 void DeleteSitesIterativelyWithAtomicOverlapAboveTolerance(GlycosylationSiteVector &glycosites, double tolerance);
 void UpdateAtomsThatMoveInLinkages(GlycosylationSiteVector &glycosites);
 ResidueLinkageVector GetAllFirstAnd1_6Linkages(GlycosylationSiteVector &glycosites);
+ResidueLinkageVector GetAllFirstAnd2_XLinkages(GlycosylationSiteVector &glycosites);
 void StashCoordinates(GlycosylationSiteVector &glycosites);
 void SetStashedCoordinatesWithLowestOverlap(GlycosylationSiteVector &glycosites);
 ResidueLinkageVector SplitLinkagesIntoPermutants(ResidueLinkageVector inputLinkages);

@@ -381,6 +381,20 @@ ResidueLinkageVector glycoprotein_builder::GetAllFirstAnd1_6Linkages(Glycosylati
     return selectedLinkages;
 }
 
+ResidueLinkageVector glycoprotein_builder::GetAllFirstAnd2_XLinkages(GlycosylationSiteVector &glycosites)
+{
+    ResidueLinkageVector selectedLinkages;
+    for(auto &glycosite : glycosites)
+    {
+        ResidueLinkageVector currentLinkages = glycosite.GetFirstAnd2_XLinkages();
+        selectedLinkages.insert( selectedLinkages.end(), currentLinkages.begin(), currentLinkages.end() );
+        std::cout << "Linkages found:\n";
+        for(auto &linkage : currentLinkages)
+            std::cout << linkage.GetFromThisResidue1()->GetId() << "-" << linkage.GetToThisResidue2()->GetId() << "\n";
+    }
+    return selectedLinkages;
+}
+
 void glycoprotein_builder::StashCoordinates(GlycosylationSiteVector &glycosites)
 {
     for(auto &glycosite : glycosites)

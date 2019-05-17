@@ -138,6 +138,25 @@ ResidueLinkageVector GlycosylationSite::GetFirstAnd1_6Linkages()
     }
     return returnedVector;
 }
+
+ResidueLinkageVector GlycosylationSite::GetFirstAnd2_XLinkages()
+{
+    ResidueLinkageVector returnedVector;
+    returnedVector.push_back(all_residue_linkages_.front()); // Gives you the Protein-Glycan linkage
+
+    for (auto &residue_linkage : all_residue_linkages_)
+    {
+//        std::string residue2Name = residue_linkage.GetToThisResidue2()->GetName();
+//        std::string residue2AtomName = residue_linkage.GetToThisConnectionAtom2()->GetName();
+        std::string residue1AtomName = residue_linkage.GetFromThisConnectionAtom1()->GetName();
+        if( (residue1AtomName.compare("C2")==0) )
+        {
+            std::cout << "Have found the 2-X linkage\n";
+            returnedVector.push_back(residue_linkage);
+        }
+    }
+    return returnedVector;
+}
 //////////////////////////////////////////////////////////
 //                       FUNCTIONS                      //
 //////////////////////////////////////////////////////////
