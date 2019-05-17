@@ -92,6 +92,7 @@ void resolve_overlaps::rotamer_permutator(GlycosylationSiteVector &glycosites)
     std::cout << "Initial overlap: " << lowest_global_overlap << "\n";
     // Go through each glycosite and select the first and inner 1-6 linkages
     ResidueLinkageVector allSelectedLinkages = glycoprotein_builder::GetAllFirstAnd1_6Linkages(glycosites);
+    ResidueLinkageVector linkagesOrderedForPermutation = glycoprotein_builder::SplitLinkagesIntoPermutants(allSelectedLinkages);
     resolve_overlaps::generateLinkagePermutationsRecursively(lowest_global_overlap, allSelectedLinkages.begin(), allSelectedLinkages.end(), glycosites);
     glycoprotein_builder::SetStashedCoordinatesWithLowestOverlap(glycosites);
     glycoprotein_builder::CalculateOverlaps(glycosites);

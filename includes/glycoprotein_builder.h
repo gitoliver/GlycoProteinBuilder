@@ -46,6 +46,7 @@ void UpdateAtomsThatMoveInLinkages(GlycosylationSiteVector &glycosites);
 ResidueLinkageVector GetAllFirstAnd1_6Linkages(GlycosylationSiteVector &glycosites);
 void StashCoordinates(GlycosylationSiteVector &glycosites);
 void SetStashedCoordinatesWithLowestOverlap(GlycosylationSiteVector &glycosites);
+ResidueLinkageVector SplitLinkagesIntoPermutants(ResidueLinkageVector inputLinkages);
 
 //void Overlap_Weighted_Adjust_Torsions_For_X_Cycles(GlycosylationSitePointerVector &sites, GlycosylationSiteVector &glycosites, int max_cycles, double tolerance, std::string overlap_type);
 //void Overlap_Weighted_Adjust_Torsions(GlycosylationSitePointerVector &sites);

@@ -398,6 +398,22 @@ void glycoprotein_builder::SetStashedCoordinatesWithLowestOverlap(GlycosylationS
     }
 }
 
+ResidueLinkageVector glycoprotein_builder::SplitLinkagesIntoPermutants(ResidueLinkageVector inputLinkages)
+{
+    ResidueLinkageVector sortedLinkages;
+    for(auto &linkage : inputLinkages)
+    {
+        if(linkage->CheckIfConformer())
+        {
+            sortedLinkages.push_back(linkage);
+        }
+        else // if not a conformer
+        {
+            RotatableDihedralVector rotatableDihedrals = linkage->GetRotatableDihedralsWithMultipleRotamers(); // only want the rotatabe dihedrals within a linkage that have multiple rotamers. Some bonds won't.
+        }
+    }
+}
+
 //void glycoprotein_builder::Overlap_Weighted_Adjust_Torsions_For_X_Cycles(GlycosylationSitePointerVector &sites, GlycosylationSiteVector &glycosites, int max_cycles, double tolerance, std::string overlap_type)
 //{
 //    int cycle = 0;
