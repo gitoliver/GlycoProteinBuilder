@@ -403,15 +403,24 @@ ResidueLinkageVector glycoprotein_builder::SplitLinkagesIntoPermutants(ResidueLi
     ResidueLinkageVector sortedLinkages;
     for(auto &linkage : inputLinkages)
     {
-        if(linkage->CheckIfConformer())
+        if(linkage.CheckIfConformer())
         {
             sortedLinkages.push_back(linkage);
         }
         else // if not a conformer
         {
-            RotatableDihedralVector rotatableDihedrals = linkage->GetRotatableDihedralsWithMultipleRotamers(); // only want the rotatabe dihedrals within a linkage that have multiple rotamers. Some bonds won't.
+            RotatableDihedralVector rotatableDihedrals = linkage.GetRotatableDihedralsWithMultipleRotamers(); // only want the rotatabe dihedrals within a linkage that have multiple rotamers. Some bonds won't.
+            for(auto &rotatableDihedral : rotatableDihedrals)
+            {
+                Residue_linkage splitLinkage = linkage; // Copy it to get correct info into class
+                RotatableDihedralVector temp = {rotatableDihedral};
+                splitLinkage.SetRotatableDihedrals(temp);
+                sortedLinkages.push_back(splitLinkage);
+                std::cout << "Split out " << splitLinkage.GetFromThisResidue1()->GetId() << "-" << splitLinkage.GetToThisResidue2()->GetId() << " rotamer with number of shapes: " << rotatableDihedral.GetNumberOfRotamers() << "\n";
+            }
         }
     }
+    return sortedLinkages;
 }
 
 //void glycoprotein_builder::Overlap_Weighted_Adjust_Torsions_For_X_Cycles(GlycosylationSitePointerVector &sites, GlycosylationSiteVector &glycosites, int max_cycles, double tolerance, std::string overlap_type)

@@ -673,7 +673,7 @@ void GlycosylationSite::StashCoordinates()
 
 void GlycosylationSite::SetStashedCoordinates() // When a lower overlap is found, the coords are pushed back. Last one pushed back is the lowest overlap.
 {
-    std::cout << "Setting stashed coordinates\n";
+    std::cout << "Setting stashed coordinates for site " << this->GetResidueNumber() << "\n";
     AtomVector atoms = this->GetAttachedGlycan()->GetAllAtomsOfAssembly();
     AtomVector sidechain_atoms = this->GetResidue()->GetAtoms();
     atoms.insert(atoms.end(), sidechain_atoms.begin(), sidechain_atoms.end() );

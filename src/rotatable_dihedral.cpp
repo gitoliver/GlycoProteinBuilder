@@ -291,7 +291,7 @@ void Rotatable_dihedral::SetSpecificAngleEntryUsingMetadata(bool useRanges, int 
     }
     else if (assigned_metadata_.size() <= angleEntryNumber)
     {
-         std::cout << "Error in Rotatable_dihedral::SetSpecificAngleUsingMetadata; angleEntryNumber selected is too large\n";
+         std::cout << "Error in Rotatable_dihedral::SetSpecificAngleUsingMetadata; angleEntryNumber of " << angleEntryNumber << " is too large as metadata.size() is " << assigned_metadata_.size() << ".\n";
     }
     else
     {

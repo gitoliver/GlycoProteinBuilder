@@ -67,7 +67,7 @@ int Residue_linkage::GetNumberOfShapes() // Can have conformers (sets of rotamer
     }
     else if (rotatable_dihedrals_.at(0).GetMetadata().at(0).rotamer_type_.compare("conformer")==0)
     {
-        numberOfShapes=rotatable_dihedrals_.size();
+        numberOfShapes = rotatable_dihedrals_.size();
     }
     return numberOfShapes;
 }
@@ -117,6 +117,12 @@ bool Residue_linkage::CheckIfConformer()
 //////////////////////////////////////////////////////////
 //                       MUTATOR                        //
 //////////////////////////////////////////////////////////
+
+
+void Residue_linkage::SetRotatableDihedrals(RotatableDihedralVector rotatableDihedrals)
+{
+    rotatable_dihedrals_ = rotatableDihedrals;
+}
 
 //////////////////////////////////////////////////////////
 //                       FUNCTIONS                      //
