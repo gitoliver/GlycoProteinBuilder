@@ -159,7 +159,8 @@ void GlycosylationSite::AttachGlycan(Assembly glycan, Assembly &glycoprotein)
 
     //this->SetRotatableBonds(glycan_.GetResidues().at(0), residue_);
   // ResidueLinkageVector temp;
-    all_residue_linkages_.emplace_back(glycan_.GetResidues().at(0), residue_, this);
+   // all_residue_linkages_.emplace_back(glycan_.GetResidues().at(0), residue_, this);
+    all_residue_linkages_.emplace_back(glycan_.GetResidues().at(0), residue_);
     this->FigureOutResidueLinkagesInGlycan(glycan_.GetResidues().at(0), glycan_.GetResidues().at(0), &all_residue_linkages_);
   //  all_residue_linkages_ = temp;
 }
@@ -750,7 +751,7 @@ void GlycosylationSite::FigureOutResidueLinkagesInGlycan(Residue *from_this_resi
     {
         if( (neighbor->GetIndex() != from_this_residue1->GetIndex()) && (std::find(glycan_residues.begin(), glycan_residues.end(), neighbor) != glycan_residues.end())  )
         {
-            residue_linkages->emplace_back(neighbor, to_this_residue2, this);
+            residue_linkages->emplace_back(neighbor, to_this_residue2);
         }
     }
     for(auto &neighbor : neighbors)
