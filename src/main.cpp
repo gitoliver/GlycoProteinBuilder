@@ -90,8 +90,8 @@ int main(int argc, char* argv[])
 //        resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, max_cycles);
 //    }
 
-    resolve_overlaps::rotamer_permutator(glycosites);
-  //  glycoprotein_builder::SetDefaultDihedralAnglesUsingMetadata(glycosites); // Reset to reasonable starting points
+ //   resolve_overlaps::rotamer_permutator(glycosites);
+    glycoprotein_builder::SetDefaultDihedralAnglesUsingMetadata(glycosites); // Reset to reasonable starting points
     bool use_monte_carlo = true;
     resolve_overlaps::wiggleFirstLinkages(glycosites, 100);
     std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
