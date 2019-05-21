@@ -116,8 +116,8 @@ void resolve_overlaps::rotamer_permutator(GlycosylationSiteVector &glycosites)
     double lowest_global_overlap = glycoprotein_builder::GetGlobalOverlap(glycosites);
     std::cout << "Initial overlap: " << lowest_global_overlap << "\n";
     // Go through each glycosite and select the first and inner 1-6 linkages
-   // ResidueLinkageVector allSelectedLinkages = glycoprotein_builder::GetAllFirstAnd1_6Linkages(glycosites);
-    ResidueLinkageVector allSelectedLinkages = glycoprotein_builder::GetAllFirstAnd2_XLinkages(glycosites);
+    ResidueLinkageVector allSelectedLinkages = glycoprotein_builder::GetAllFirstAnd1_6Linkages(glycosites);
+   // ResidueLinkageVector allSelectedLinkages = glycoprotein_builder::GetAllFirstAnd2_XLinkages(glycosites);
     ResidueLinkageVector linkagesOrderedForPermutation = glycoprotein_builder::SplitLinkagesIntoPermutants(allSelectedLinkages);
 //    resolve_overlaps::generateLinkagePermutationsRecursively(lowest_global_overlap, allSelectedLinkages.begin(), allSelectedLinkages.end(), glycosites);
     resolve_overlaps::generateLinkagePermutationsRecursively(lowest_global_overlap, linkagesOrderedForPermutation.begin(), linkagesOrderedForPermutation.end(), glycosites);
@@ -128,6 +128,7 @@ void resolve_overlaps::rotamer_permutator(GlycosylationSiteVector &glycosites)
 
 void resolve_overlaps::weighted_protein_global_overlap_random_descent(GlycosylationSiteVector &glycosites, int max_cycles, bool monte_carlo)
 {
+    OverlapType overlapType = BEAD;
     std::cout << "Weighted Protein, Global Overlap with Random Decent for " << max_cycles << " cycles and monte carlo set as " << std::boolalpha << monte_carlo << ".\n";
     int cycle = 1;
     bool stop = false;
@@ -140,7 +141,7 @@ void resolve_overlaps::weighted_protein_global_overlap_random_descent(Glycosylat
     double overlap_difference = 0.0;
     double strict_tolerance = 0.1, loose_tolerance = 1.0;
 
-    GlycosylationSitePointerVector sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance, "total");
+    GlycosylationSitePointerVector sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance, overlapType);
 
     std::cout << "Initial torsions and overlaps:\n";
     //glycoprotein_builder::PrintDihedralAnglesAndOverlapOfGlycosites(glycosites);
@@ -156,8 +157,8 @@ void resolve_overlaps::weighted_protein_global_overlap_random_descent(Glycosylat
             previous_protein_overlap = current_glycosite->GetProteinOverlap();
             current_glycosite->SetRandomDihedralAnglesUsingMetadata();
             std::cout << "Site: " << current_glycosite->GetResidueNumber() << "\n";
-            new_glycan_overlap = current_glycosite->Calculate_bead_overlaps("glycan", record_overlap);
-            new_protein_overlap = current_glycosite->Calculate_bead_overlaps("protein", record_overlap);
+            new_glycan_overlap = current_glycosite->CalculateOverlaps(overlapType, GLYCAN, record_overlap);
+            new_protein_overlap = current_glycosite->CalculateOverlaps(overlapType, PROTEIN, record_overlap);
             overlap_difference = (new_glycan_overlap + (new_protein_overlap*5)) - (previous_glycan_overlap + (previous_protein_overlap*5));
             if (overlap_difference >= 0.0) // if the change made it worse
             {
@@ -174,7 +175,7 @@ void resolve_overlaps::weighted_protein_global_overlap_random_descent(Glycosylat
         }
         //std::cout << "Updating list of sites with overlaps." << std::endl;
         new_global_overlap = glycoprotein_builder::GetGlobalOverlap(glycosites);
-        sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance); // Moved glycans may clash with other glycans. Need to check.
+        sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance, overlapType); // Moved glycans may clash with other glycans. Need to check.
         if (sites_with_overlaps.size() == 0)
         {
             std::cout << "Stopping with all overlaps resolved and global overlap is " << new_global_overlap <<  "\n";
@@ -195,10 +196,11 @@ void resolve_overlaps::weighted_protein_global_overlap_random_descent(Glycosylat
 
 void resolve_overlaps::wiggle(GlycosylationSiteVector &glycosites, int max_cycles)
 {
+    OverlapType overlapType = BEAD;
     std::cout << "Wiggling all linkages for " << max_cycles << " cycles.\n";
     int output_pdbfile_id = 0;
     double strict_tolerance = 0.1, loose_tolerance = 1.0;
-    GlycosylationSitePointerVector sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance, "total");
+    GlycosylationSitePointerVector sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance, overlapType);
     int cycle = 0;
     bool stop = false;
     while ( (cycle < max_cycles) && (stop == false) )
@@ -212,7 +214,7 @@ void resolve_overlaps::wiggle(GlycosylationSiteVector &glycosites, int max_cycle
             glycosite->Wiggle(&output_pdbfile_id, strict_tolerance);
         }
         // Check which sites still have overlaps, stop if none.
-        sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance); // Moved glycans may clash with other glycans. Need to check.
+        sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance, overlapType); // Moved glycans may clash with other glycans. Need to check.
         if (sites_with_overlaps.size() == 0)
         {
             std::cout << "Stopping with all overlaps resolved.\n";
@@ -225,10 +227,11 @@ void resolve_overlaps::wiggle(GlycosylationSiteVector &glycosites, int max_cycle
 
 void resolve_overlaps::wiggleFirstLinkages(GlycosylationSiteVector &glycosites, int max_cycles)
 {
+    OverlapType overlapType = BEAD;
     std::cout << "Wiggling first linkages for " << max_cycles << " cycles.\n";
     int output_pdbfile_id = 0;
     double strict_tolerance = 0.1, loose_tolerance = 1.0;
-    GlycosylationSitePointerVector sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance, "total");
+    GlycosylationSitePointerVector sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance, overlapType);
     int cycle = 0;
     bool stop = false;
     while ( (cycle < max_cycles) && (stop == false) )
@@ -240,7 +243,7 @@ void resolve_overlaps::wiggleFirstLinkages(GlycosylationSiteVector &glycosites, 
             glycosite->WiggleFirstLinkage(&output_pdbfile_id, strict_tolerance);
         }
         // Check which sites still have overlaps, stop if none.
-        sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance); // Moved glycans may clash with other glycans. Need to check.
+        sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance, overlapType); // Moved glycans may clash with other glycans. Need to check.
         if (sites_with_overlaps.size() == 0)
         {
             std::cout << "Stopping with all overlaps resolved.\n";
@@ -368,6 +371,7 @@ void resolve_overlaps::wiggleFirstLinkages(GlycosylationSiteVector &glycosites, 
 
 bool resolve_overlaps::dumb_random_walk(GlycosylationSiteVector &glycosites)
 {
+    OverlapType overlapType = BEAD;
     /* Algorithm:
      * Determine which sites have overlaps greater than tolerance. Stop if zero sites.
      * For each site with overlaps:
@@ -375,7 +379,7 @@ bool resolve_overlaps::dumb_random_walk(GlycosylationSiteVector &glycosites)
      */
     double tolerance = 0.1;
     int cycle = 0, max_cycles = 10;
-    GlycosylationSitePointerVector sites_with_overlaps = DetermineSitesWithOverlap(glycosites, tolerance);
+    GlycosylationSitePointerVector sites_with_overlaps = DetermineSitesWithOverlap(glycosites, tolerance, overlapType);
     bool resolved = false;
 
     while ( (cycle < max_cycles) && (resolved == false) )
@@ -388,7 +392,7 @@ bool resolve_overlaps::dumb_random_walk(GlycosylationSiteVector &glycosites)
             current_glycosite->SetRandomDihedralAnglesUsingMetadata();
         }
         //std::cout << "Updating list of sites with overlaps." << std::endl;
-        sites_with_overlaps = DetermineSitesWithOverlap(glycosites, tolerance); // Moved glycans may clash with other glycans. Need to check.
+        sites_with_overlaps = DetermineSitesWithOverlap(glycosites, tolerance, overlapType); // Moved glycans may clash with other glycans. Need to check.
         if (sites_with_overlaps.size() == 0)
         {
             std::cout << "Stopping with all overlaps resolved.\n";

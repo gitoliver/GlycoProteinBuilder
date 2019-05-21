@@ -12,6 +12,18 @@
 typedef std::vector<Residue_linkage> ResidueLinkageVector;
 typedef std::vector<Rotatable_dihedral> RotatableDihedralVector;
 
+enum OverlapType
+{
+    BEAD,
+    ATOMIC,
+};
+
+enum MoleculeType
+{
+    PROTEIN,
+    GLYCAN,
+    ALL
+};
 
 using namespace MolecularModeling;
 
@@ -62,9 +74,7 @@ public:
     //////////////////////////////////////////////////////////
 
     void AttachGlycan(Assembly glycan, Assembly &glycoprotein);
-    double Calculate_bead_overlaps(std::string overlap_type = "total", bool record = true);
-    double Calculate_and_print_bead_overlaps();
-    double CalculateAtomicOverlaps();
+    double CalculateOverlaps(OverlapType overlapType = BEAD, MoleculeType moleculeType = ALL, bool recordOverlap = true, bool printOverlap = false);
     void UpdateAtomsThatMoveInLinkages();
     void StashCoordinates();
     void SetStashedCoordinates();
@@ -85,6 +95,7 @@ public:
     void SetResidueNumber(std::string residue_number);
     void SetResidue(Residue* residue);
     void SetGlycan(Assembly glycan);
+    void SetOverlap(MoleculeType moleculeType, double overlap);
     void SetGlycanOverlap(double overlap);
     void SetProteinOverlap(double overlap);
     void SetSelfGlycanBeads(AtomVector *beads);
@@ -99,7 +110,7 @@ public:
     //                       DISPLAY FUNCTION               //
     //////////////////////////////////////////////////////////
 
-    void Print_bead_overlaps();
+    void PrintOverlaps();
     void Print(std::string type = "All");
 
     //////////////////////////////////////////////////////////
@@ -120,13 +131,16 @@ private:
     void Prepare_Glycans_For_Superimposition_To_Particular_Residue(std::string amino_acid_name);
     void Superimpose_Glycan_To_Glycosite(Residue *glycosite_residue);
     double CalculateTorsionAngle(AtomVector atoms);
-    double Calculate_bead_overlaps(AtomVector &atomsA, AtomVector &atomsB);
     //void SetRotatableBonds(Residue *residue1, Residue *residue2);
     void Rename_Protein_Residue_To_GLYCAM_Nomenclature();
     void FigureOutResidueLinkagesInGlycan(Residue *from_this_residue1, Residue *to_this_residue2, ResidueLinkageVector *residue_linkages);
     void RecursivelyGetAllNeighboringResidues(Atom* current_atom, ResidueVector* neighbors);
     Atom* GetConnectingProteinAtom(std::string residue_name);
     void WiggleOneLinkage(Residue_linkage &linkage, int *output_pdb_id, double tolerance = 0.1, int interval = 5);
+    double CalculateBeadOverlaps(MoleculeType moleculeType = ALL);
+    //double Calculate_and_print_bead_overlaps();
+    double CalculateAtomicOverlaps(MoleculeType moleculeType = ALL);
+    double CalculateBeadOverlaps(AtomVector &atomsA, AtomVector &atomsB);
 
     //////////////////////////////////////////////////////////
     //                       ATTRIBUTES                     //
