@@ -715,7 +715,7 @@ void GlycosylationSite::UpdateAtomsThatMoveInLinkages()
 
 void GlycosylationSite::StashCoordinates()
 {
-    std::cout << "Stashing coordinates" << std::endl;
+    std::cout << "Stashing coordinates for glycosite " << this->GetResidueNumber() << std::endl;
     AtomVector atoms = this->GetAttachedGlycan()->GetAllAtomsOfAssembly();
     AtomVector sidechain_atoms = this->GetResidue()->GetAtoms();
     atoms.insert(atoms.end(), sidechain_atoms.begin(), sidechain_atoms.end() );
