@@ -1,3 +1,5 @@
+tests/tough/*
+tests/morten
 tests/one_site/GlycoProtein_*
 tests/simple/GlycoProtein_*
 tests/*/GlycoProtein*

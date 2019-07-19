@@ -143,7 +143,7 @@ void resolve_overlaps::weighted_protein_global_overlap_random_descent(Glycosylat
     //glycoprotein_builder::PrintDihedralAnglesAndOverlapOfGlycosites(glycosites);
     while ( (cycle < max_cycles) && (stop == false) )
     {
-        std::cout << "Cycle " << cycle << " of " << max_cycles << std::endl;
+        std::cout << "Cycle " << cycle << "/" << max_cycles << "\n";
         ++cycle;
         std::random_shuffle (sites_with_overlaps.begin(), sites_with_overlaps.end());
         for(auto &current_glycosite : sites_with_overlaps)
@@ -200,7 +200,7 @@ void resolve_overlaps::wiggle(GlycosylationSiteVector &glycosites, OverlapType o
     while ( (cycle < max_cycles) && (stop == false) )
     {
         ++cycle;
-        std::cout << "Cycle " << cycle << " of " << max_cycles << "\n";
+        std::cout << "Cycle " << cycle << "/" << max_cycles << "\n";
         std::random_shuffle (sites_with_overlaps.begin(), sites_with_overlaps.end());
         for(auto &glycosite : sites_with_overlaps)
         {
@@ -229,6 +229,7 @@ void resolve_overlaps::wiggleFirstLinkages(GlycosylationSiteVector &glycosites, 
     bool stop = false;
     while ( (cycle < max_cycles) && (stop == false) )
     {
+        std::cout << "Cycle " << cycle << "/" << max_cycles << "\n";
         ++cycle;
         std::random_shuffle (sites_with_overlaps.begin(), sites_with_overlaps.end());
         for(auto &glycosite : sites_with_overlaps)

@@ -95,25 +95,25 @@ int main(int argc, char* argv[])
     bool use_monte_carlo = true;
     int cycles = 100;
     resolve_overlaps::wiggleFirstLinkages(glycosites, BEAD, cycles);
-    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
+    std::cout << "1. Post WiggleFirst Overlaps Bead: " << glycoprotein_builder::CalculateOverlaps(glycosites, BEAD) << ". Atomic: " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
     resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, BEAD, cycles, use_monte_carlo);
-    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
+    std::cout << "2. Post Monte Carlo Overlaps Bead: " << glycoprotein_builder::CalculateOverlaps(glycosites, BEAD) << ". Atomic: " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
     resolve_overlaps::wiggle(glycosites, BEAD, cycles);
-    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
+    std::cout << "3. Post Wiggle Overlaps Bead: " << glycoprotein_builder::CalculateOverlaps(glycosites, BEAD) << ". Atomic: " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
 
-    resolve_overlaps::wiggleFirstLinkages(glycosites, BEAD, cycles);
-    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
-    resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, BEAD, cycles, use_monte_carlo);
-    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
-    resolve_overlaps::wiggle(glycosites, BEAD, cycles);
-    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
+//    resolve_overlaps::wiggleFirstLinkages(glycosites, BEAD, cycles);
+//    std::cout << "4. Post WiggleFirst Overlaps Bead: " << glycoprotein_builder::CalculateOverlaps(glycosites, BEAD) << ". Atomic: " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
+//    resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, BEAD, cycles, use_monte_carlo);
+//    std::cout << "5. Post Monte Carlo Overlaps Bead: " << glycoprotein_builder::CalculateOverlaps(glycosites, BEAD) << ". Atomic: " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
+//    resolve_overlaps::wiggle(glycosites, BEAD, cycles);
+//    std::cout << "6. Post Wiggle Overlaps Bead: " << glycoprotein_builder::CalculateOverlaps(glycosites, BEAD) << ". Atomic: " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
 
     resolve_overlaps::wiggleFirstLinkages(glycosites, ATOMIC, cycles);
-    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
+    std::cout << "7. Post WiggleFirst Overlaps Bead: " << glycoprotein_builder::CalculateOverlaps(glycosites, BEAD) << ". Atomic: " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
     resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, ATOMIC, cycles, use_monte_carlo);
-    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
+    std::cout << "8. Post Monte Carlo Overlaps Bead: " << glycoprotein_builder::CalculateOverlaps(glycosites, BEAD) << ". Atomic: " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
     resolve_overlaps::wiggle(glycosites, ATOMIC, cycles);
-    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
+    std::cout << "9. Post Wiggle Overlaps Bead: " << glycoprotein_builder::CalculateOverlaps(glycosites, BEAD) << ". Atomic: " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
 
     beads::Remove_Beads(glycoprotein); //Remove beads and write a final PDB & PRMTOP
 
