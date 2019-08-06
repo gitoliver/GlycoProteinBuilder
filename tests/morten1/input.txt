@@ -1,0 +1,7 @@
+Protein:
+1d2v_noHET.pdb
+
+Protein Residue, Glycan Name:
+C_317,M3F1-
+D_317,M3F1-
+END

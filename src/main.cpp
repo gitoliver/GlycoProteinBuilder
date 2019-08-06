@@ -100,18 +100,18 @@ int main(int argc, char* argv[])
     resolve_overlaps::wiggle(glycosites, 100);
     std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
 
-    resolve_overlaps::wiggleFirstLinkages(glycosites, 100);
+    resolve_overlaps::wiggleFirstLinkages(glycosites, 500);
     std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
-    resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, 100, use_monte_carlo);
+    resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, 500, use_monte_carlo);
     std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
-    resolve_overlaps::wiggle(glycosites, 100);
+    resolve_overlaps::wiggle(glycosites, 500);
     std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
 
-    resolve_overlaps::wiggleFirstLinkages(glycosites, 100);
+    resolve_overlaps::wiggleFirstLinkages(glycosites, 1000);
     std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
-    resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, 100, use_monte_carlo);
+    resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, 1000, use_monte_carlo);
     std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
-    resolve_overlaps::wiggle(glycosites, 100);
+    resolve_overlaps::wiggle(glycosites, 1000);
     std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
 
 
