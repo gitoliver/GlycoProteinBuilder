@@ -81,6 +81,7 @@ public:
     void Rename_Protein_Residue_From_GLYCAM_To_Standard();
     void Wiggle(int *output_pdb_id, double tolerance = 0.1, int interval = 5);
     void WiggleFirstLinkage(int *output_pdb_id, double tolerance = 0.1, int interval = 5);
+    GlycosylationSiteVector GetXClosestSitesWithinOverlapDistanceY(GlycosylationSiteVector &glycosites, int maxNumberOfSitesToConsider);
 
     // Do not keep this here:
     void write_pdb_file(MolecularModeling::Assembly *glycoprotein, int cycle, std::string summary_filename, double overlap);

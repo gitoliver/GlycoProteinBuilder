@@ -1,5 +1,7 @@
 #include "../includes/selections.h"
 
+// Selections that are agnostic of Glycoprotein Builder classes. They will be transplantable into GMML.
+
 AtomVector selection::AtomsWithinDistanceOf(MolecularModeling::Atom *query_atom, double distance, AtomVector atoms)
 {
     AtomVector atoms_within_distance;
@@ -291,6 +293,25 @@ Atom* selection::FindCyclePointNeighbor(const AtomVector atom_path, Atom *cycle_
     }
    // std::cout << "Returning with neighbor: " << selected_neighbor->GetName() << "\n";
     return selected_neighbor;
+}
+
+// Ok not really a selection, but like, chill for a minute ok?
+double selection::GetMaxDistanceBetweenAtoms(AtomVector atoms)
+{
+    double max_distance = 0.0;
+    for(AtomVector::iterator it1 = atoms.begin(); it1 != atoms.end(); ++it1)
+    {
+        Atom *atom1 = (*it1);
+        for(AtomVector::iterator it2 = it1; it2 != atoms.end(); ++it2)
+        {
+            Atom *atom2 = (*it2);
+            if (atom1->GetDistanceToAtom(atom2) > max_distance)
+            {
+                max_distance = atom1->GetDistanceToAtom(atom2);
+            }
+        }
+    }
+    return max_distance;
 }
 
 //Atom* selection::FindAtomNeighborThatMatchesQuery(Atom *atom, std::string query)

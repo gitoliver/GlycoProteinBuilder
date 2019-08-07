@@ -90,8 +90,11 @@ int main(int argc, char* argv[])
 //        resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, max_cycles);
 //    }
 
-    resolve_overlaps::rotamer_permutator(glycosites);
-//    glycoprotein_builder::SetDefaultDihedralAnglesUsingMetadata(glycosites); // Reset to reasonable starting points
+   // resolve_overlaps::writePDB_rotamer_permutator(glycosites);
+    resolve_overlaps::rotamerPermutatorReasonableLimits(glycosites, 4);
+
+//    resolve_overlaps::rotamer_permutator(glycosites);
+////    glycoprotein_builder::SetDefaultDihedralAnglesUsingMetadata(glycosites); // Reset to reasonable starting points
     bool use_monte_carlo = true;
     int cycles = 100;
     resolve_overlaps::wiggleFirstLinkages(glycosites, BEAD, cycles);
@@ -115,6 +118,8 @@ int main(int argc, char* argv[])
     resolve_overlaps::wiggle(glycosites, ATOMIC, cycles);
     std::cout << "9. Post Wiggle Overlaps Bead: " << glycoprotein_builder::CalculateOverlaps(glycosites, BEAD) << ". Atomic: " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
 
+    glycoprotein_builder::CalculateOverlaps(glycosites);
+    std::cout << "Pre remove beads overlap: " << glycoprotein_builder::GetGlobalOverlap(glycosites) << "\n";
     beads::Remove_Beads(glycoprotein); //Remove beads and write a final PDB & PRMTOP
 
     outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);

@@ -740,6 +740,68 @@ void GlycosylationSite::SetStashedCoordinates() // When a lower overlap is found
     //std::cout << "Finished Setting stashed coordinates" << std::endl;
 }
 
+// Very interesting that I have to specify std::vector<GlycosylationSite>, but can use the typedef in the function.
+// A HUGE clue. MASSIVE.
+std::vector<GlycosylationSite> GlycosylationSite::GetXClosestSitesWithinOverlapDistanceY(GlycosylationSiteVector &glycosites, int maxNumberOfSitesToConsider)
+{
+    typedef std::pair<GlycosylationSite, double> siteDistancePair;
+    typedef std::vector<siteDistancePair> siteDistancePairVector;
+    siteDistancePairVector sitesWithinOverlapRange;
+    GlycosylationSiteVector sitesToReturn;
+    double maxLengthOfThisGlycan = (selection::GetMaxDistanceBetweenAtoms(this->GetAttachedGlycan()->GetAllAtomsOfAssembly()) + 5);
+    Atom *this_cb_atom = this->GetResidue()->GetAtom("CB");
+    for(auto &glycosite : glycosites)
+    {
+        std::cout << "    distance to " << glycosite.GetResidue()->GetId() << ": ";
+        if (this->GetResidue()->GetId().compare(glycosite.GetResidue()->GetId())==0) // if not this site. Oly you should overload the = operator?
+        {
+            std::cout << "Skipping\n";
+            continue; // I think this skips to next item in for loop.
+        }
+        double maxLengthOfThatGlycan = (selection::GetMaxDistanceBetweenAtoms(glycosite.GetAttachedGlycan()->GetAllAtomsOfAssembly()) + 5);
+        Atom *that_cb_atom = glycosite.GetResidue()->GetAtom("CB");
+        double distanceBetweenCBAtoms = this_cb_atom->GetDistanceToAtom(that_cb_atom);
+        std::cout << distanceBetweenCBAtoms;
+        if ( ( distanceBetweenCBAtoms ) <= (maxLengthOfThisGlycan + maxLengthOfThatGlycan) )
+        {
+            std::cout << " withing range! (" << (maxLengthOfThisGlycan + maxLengthOfThatGlycan) << ")" << std::endl;
+            // push back onto vector site and distance pairs
+            sitesWithinOverlapRange.emplace_back(glycosite, distanceBetweenCBAtoms);
+            // temporary until can sort the above
+            if (sitesToReturn.size() < maxNumberOfSitesToConsider)
+                sitesToReturn.push_back(glycosite);
+        }
+        else
+            std::cout << "\n";
+    }
+    // Sort list by distance. Remember that you might have more or less sites than the maxNumberOfSitesToConsider
+
+//    double previousMin = 0.0;
+//    double currentMin = 123456789.0;
+//    GlycosylationSite *currentBest;
+
+//    std::pair test(double, double);
+//    test.first
+
+//    for (int i = 0; i <= maxNumberOfSitesToConsider; ++i)
+//    {
+//        GlycosylationSite temp = sitesWithinOverlapRange.at(i).first;
+//        sitesToReturn.push_back(temp); // Just take the first i sites for testing now. Sort later.
+//        // Pffft. Figure out how to sort based on distance later.
+////        for(auto siteDistancePair : sitesWithinOverlapRange)
+////        {
+////            if (previousMin < siteDistancePair.second() < currentMin)
+////            {
+////                currentBest = siteDistancePair.first();
+////                current
+////            }
+////        }
+
+
+//    }
+    // Return up to maxNumberOfSitesToConsider
+    return sitesToReturn;
+}
 
 //////////////////////////////////////////////////////////
 //                       DISPLAY FUNCTION               //
@@ -913,5 +975,7 @@ void GlycosylationSite::WiggleOneLinkage(Residue_linkage &linkage, int *output_p
     }
     return; // Note possibility of earlier return above
 }
+
+
 
 

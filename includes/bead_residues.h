@@ -17,7 +17,5 @@ AtomVector Add_Beads_To_Glycan(MolecularModeling::Assembly *assembly);
 AtomVector Add_Beads_To_Protein(MolecularModeling::Assembly &assembly);
 }
 
-double GetMaxDistanceBetweenAtoms(AtomVector atoms);
-
 #endif // BEAD_RESIDUES_H
 
