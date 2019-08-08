@@ -34,8 +34,8 @@ void wiggleFirstLinkages(GlycosylationSiteVector &glycosites, OverlapType overla
 //void protein_first_random_walk_scaled_to_overlap(GlycosylationSiteVector &glycosites);
 bool dumb_random_walk(GlycosylationSiteVector &glycosites, OverlapType overlapType = BEAD);
 
-void writePDB_rotamer_permutator(GlycosylationSiteVector &glycosites);
-void generateLinkagePermutationsRecursivelyWritePDB(GlycosylationSite glycosite, ResidueLinkageVector::iterator linkage, ResidueLinkageVector::iterator end, int previousShapeNumber);
+//void writePDB_rotamer_permutator(GlycosylationSiteVector &glycosites);
+//void generateLinkagePermutationsRecursivelyWritePDB(GlycosylationSite glycosite, ResidueLinkageVector::iterator linkage, ResidueLinkageVector::iterator end, int previousShapeNumber);
 
 }
 

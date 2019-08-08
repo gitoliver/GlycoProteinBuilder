@@ -120,7 +120,23 @@ public:
 
     inline bool operator==(const GlycosylationSite &rhs) const
     {
-        return rhs.residue_number_ == residue_number_;
+        return rhs.residue_->GetId() == residue_->GetId();
+    }
+
+    inline bool operator!=(const GlycosylationSite &rhs) const
+    {
+        return residue_->GetId() == rhs.residue_->GetId();
+    }
+
+    inline bool operator<(const GlycosylationSite &rhs) const
+    {
+        return residue_->GetId() < rhs.residue_->GetId();
+    }
+
+
+    inline bool operator>(const GlycosylationSite &rhs) const
+    {
+        return residue_->GetId() > rhs.residue_->GetId();
     }
 
 private:
