@@ -23,6 +23,7 @@ namespace glycoprotein_builder
 /*******************************************/
 void Read_Input_File(GlycosylationSiteVector &glycosites, std::string &proteinPDB, std::string &glycanDirectory, const std::string working_Directory);
 void AttachGlycansToGlycosites(MolecularModeling::Assembly &glycoprotein, GlycosylationSiteVector &glycosites, const std::string glycanDirectory);
+void SetOtherGlycosites(GlycosylationSiteVector &glycosites);
 void PrintDihedralAnglesAndOverlapOfGlycosites(GlycosylationSiteVector &glycosites);
 void SetDefaultDihedralAnglesUsingMetadata(GlycosylationSiteVector &glycosites);
 void SetRandomDihedralAnglesUsingMetadata(GlycosylationSiteVector &glycosites);

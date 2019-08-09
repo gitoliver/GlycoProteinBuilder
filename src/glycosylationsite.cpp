@@ -332,49 +332,6 @@ void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_resid
 //    std::cout << std::endl;
 }
 
-// This is a dumb way to do it. Need dihedral class but in a rush. Fix later. // Update, I actually did something I said I would do.
-//void GlycosylationSite::SetChiAtoms(Residue* residue)
-//{
-//    AtomVector atoms = residue->GetAtoms();
-//    Atom *atom1, *atom2, *atom3, *atom4, *atom5;
-//    bool is_Chi2 = false;
-//    for(AtomVector::iterator it1 = atoms.begin(); it1 != atoms.end(); ++it1)
-//    {
-//        Atom *atom = *it1;
-//        if ( atom->GetName().compare("N"  )==0 ) { atom1 = atom; } // All residues
-//        if ( atom->GetName().compare("CA" )==0 ) { atom2 = atom; } // All residues
-//        if ( atom->GetName().compare("CB" )==0 ) { atom3 = atom; } // All residues
-//        if ( atom->GetName().compare("CG" )==0 ) { atom4 = atom; } // Asn + Tyr
-//        if ( atom->GetName().compare("OG1")==0 ) { atom4 = atom; } // Thr
-//        if ( atom->GetName().compare("OG" )==0 ) { atom4 = atom; } // Ser
-//        if ( atom->GetName().compare("ND2")==0 ) { atom5 = atom; is_Chi2 = true; } // Asn
-//        if ( atom->GetName().compare("CD1")==0 ) { atom5 = atom; is_Chi2 = true; } // Tyr
-//    }
-//    //chi1_ = {atom1, atom2, atom3, atom4};
-//    if (!is_Chi2)
-//    {
-//        Residue *reducing_Residue = this->GetAttachedGlycan()->GetResidues().at(1);
-//        AtomVector reducing_Atoms = reducing_Residue->GetAtoms();
-//        for(AtomVector::iterator it = reducing_Atoms.begin(); it != reducing_Atoms.end(); ++it)
-//        {
-//            Atom* atom = *it;
-//            if(atom->GetName().compare("C1")==0) // Need a way to get reducing atom from Residue. This is dumb as have residues such as 0SA were C1 is not the reducing atom.
-//            {
-//                atom5 = atom;
-//                is_Chi2 = true;
-//            }
-//        }
-//    }
-//    if (is_Chi2)
-//    {
-//       // chi2_ = {atom2, atom3, atom4, atom5};
-//    }
-//    else
-//    {
-//        std::cout << "Chi2 not set in GlycosylationSite::SetChiAtoms, program likely to crash" << std::endl;
-//    }
-//}
-
 void GlycosylationSite::Rename_Protein_Residue_To_GLYCAM_Nomenclature()
 {
     std::string amino_acid_name = this->GetResidue()->GetName();
@@ -424,24 +381,26 @@ double GlycosylationSite::CalculateOverlaps(OverlapType overlapType, MoleculeTyp
     return overlap;
 }
 
-//double GlycosylationSite::Calculate_and_print_bead_overlaps()
-//{
-//    double overlap = this->CalculateBeadOverlaps();
-//    this->PrintOverlaps();
-//    return overlap;
-//}
-
 double GlycosylationSite::CalculateAtomicOverlaps(MoleculeType moleculeType)
 {
     double overlap = 0.0;
-    AtomVector glycan_atoms = glycan_.GetAllAtomsOfAssembly();
-    for(auto &protein_bead : protein_beads_)
+    if(moleculeType == ALL)
     {
-        overlap += gmml::CalculateAtomicOverlaps(protein_bead->GetResidue()->GetAtoms(), glycan_atoms);
+        overlap = ( this->CalculateAtomicOverlaps(PROTEIN) + this->CalculateAtomicOverlaps(GLYCAN) );
     }
-    for(auto &other_glycan_bead : other_glycan_beads_)
+    if(moleculeType == PROTEIN)
     {
-        overlap += gmml::CalculateAtomicOverlaps(other_glycan_bead->GetResidue()->GetAtoms(), glycan_atoms);
+        // WARNING. protein_atoms and glycan_atoms contains the bead atoms, but this function in GMML ignores them:
+        overlap = gmml::CalculateAtomicOverlaps(glycoprotein_->GetAllAtomsOfAssemblyWithinProteinResidues(), glycan_.GetAllAtomsOfAssembly());
+        std::cout << residue_->GetId() << "-Protein: " << overlap << "\n";
+    }
+    if(moleculeType == GLYCAN)
+    {
+        for(auto &other_glycosite : other_glycosites_)
+        {
+            overlap += gmml::CalculateAtomicOverlaps(other_glycosite.GetAttachedGlycan()->GetAllAtomsOfAssembly(), glycan_.GetAllAtomsOfAssembly());
+            std::cout << residue_->GetId() << "-" << other_glycosite.GetResidue()->GetId() << ": " << overlap << "\n";
+        }
     }
     return overlap;
 }
@@ -783,6 +742,17 @@ std::vector<GlycosylationSite> GlycosylationSite::GetXClosestSitesWithinOverlapD
         }
     }
     return sitesToReturn;
+}
+
+void GlycosylationSite::SetOtherGlycosites(GlycosylationSiteVector &glycosites)
+{
+    for(auto &glycosite : glycosites)
+    {
+        if(this->GetResidue()->GetId().compare(glycosite.GetResidue()->GetId())==0)
+            continue;
+        other_glycosites_.push_back(glycosite);
+    }
+    return;
 }
 
 //////////////////////////////////////////////////////////

@@ -106,6 +106,7 @@ public:
     void SetRandomDihedralAnglesUsingMetadata();
     void SetRandomDihedralAnglesUsingMetadataForNthLinkage(int linkage_number);
     void ResetDihedralAngles();
+    void SetOtherGlycosites(GlycosylationSiteVector &glycosites);
 
     //////////////////////////////////////////////////////////
     //                       DISPLAY FUNCTION               //
@@ -176,6 +177,7 @@ private:
     AtomVector self_glycan_beads_;
     AtomVector other_glycan_beads_;
     AtomVector protein_beads_;
+    GlycosylationSiteVector other_glycosites_;
 };
 
 #endif // GLYCOSYLATIONSITE_H

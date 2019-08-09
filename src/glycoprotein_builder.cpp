@@ -31,24 +31,6 @@ void glycoprotein_builder::AttachGlycansToGlycosites(MolecularModeling::Assembly
             ++it2;
         }
     }
-    //    // Find protein residues in Glycoprotein that will get a glycan added. Set Residue in Glycosite.
-    //    ResidueVector protein_residues = glycoprotein.GetResidues();
-    //    for (ResidueVector::iterator it2 = protein_residues.begin(); it2 != protein_residues.end(); ++it2)
-    //    {
-    //        Residue *protein_residue = *it2;
-    //        std::string id = protein_residue->GetId();
-    //        for(GlycosylationSiteVector::iterator glycosite = glycosites.begin(); glycosite != glycosites.end(); ++glycosite)
-    //        {
-    //            std::string glycosite_number = glycosite->GetResidueNumber();
-    //            std::string formatted_glycosite_number = "_" + glycosite_number + "_";
-    //            if( id.compare(5, formatted_glycosite_number.size(), formatted_glycosite_number) == 0)
-    //            {
-    //                //std::cout << "glycosite: " << glycosite_number << std::endl;
-    //                std::cout << "glycosite id:" << id << std::endl;
-    //                glycosite->SetResidue(protein_residue);
-    //            }
-    //        }
-    //    }
     // Load glycan files from directory
     std::cout << "Glycan directory: " << glycanDirectory << std::endl;
     std::string filepath;
@@ -90,34 +72,14 @@ void glycoprotein_builder::AttachGlycansToGlycosites(MolecularModeling::Assembly
         }
     }
     closedir( dp );
-//    while ((dirp = readdir ( dp )))
-//    {
-//        filepath = glycanDirectory + "/" + dirp->d_name;
-//        // If the file is a directory (or is in some way invalid) we'll skip it. This can be ../ for example.
-//        if (stat( filepath.c_str(), &filestat )) continue; // Is it a valid file
-//        if (S_ISDIR( filestat.st_mode ))         continue; // Is it a directory?
-//        // If this is a valid file and directory:
-//            for (GlycosylationSiteVector::iterator glycosite = glycosites.begin(); glycosite != glycosites.end(); ++glycosite)
-//            {
-//               // std::cout << "Glycan is " << glycosite->GetGlycanName() << ". d_name is " << dirp->d_name << std::endl;
-//                if (glycosite->GetGlycanName().compare(0, glycosite->GetGlycanName().size(), dirp->d_name, 0, glycosite->GetGlycanName().size()) == 0 )
-//                {
-//                    found_glycosites_glycan = true;
-//                    MolecularModeling::Assembly input_glycan(filepath, gmml::InputFileType::PDB);
-//                    input_glycan.BuildStructureByDistance();
-//                    glycosite->AttachGlycan(input_glycan, glycoprotein);
-//                    std::cout << "Added " << glycosite->GetGlycanName() << " to " << glycosite->GetResidueNumber() << "\n";
-//                }
-//            }
-
-////        else // if not a valid file and directory:
-////        {
-////            std::cerr << "Directory or glycan name given in input file is not valid: \n";
-////            std::cerr << "Filepath is : " << filepath << "\nDo you even exist bro? \n";
-////            std::exit(1);
-////        }
-//    }
-//    closedir( dp );
+    glycoprotein_builder::SetOtherGlycosites(glycosites);
+    return;
+}
+void glycoprotein_builder::SetOtherGlycosites(GlycosylationSiteVector &glycosites)
+{
+    for (auto &glycosite : glycosites)
+        glycosite.SetOtherGlycosites(glycosites);
+    return;
 }
 
 void glycoprotein_builder::Read_Input_File(GlycosylationSiteVector &glycosites, std::string &proteinPDB, std::string &glycanDirectory, const std::string working_Directory)

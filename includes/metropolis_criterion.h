@@ -22,8 +22,8 @@ inline double get_random_acceptance_probability()
     pcg_extras::seed_seq_from<std::random_device> metropolis_seed_source;
     // Make a random number engine
     pcg32 rng_engine(metropolis_seed_source);
-    std::uniform_real_distribution<> angle_distribution(0, 1); // define the range
-    return angle_distribution(rng_engine);
+    std::uniform_real_distribution<> real_number_distribution(0, 1); // define the range
+    return real_number_distribution(rng_engine);
 }
 
 inline bool accept_via_metropolis_criterion(double change_in_overlap)
