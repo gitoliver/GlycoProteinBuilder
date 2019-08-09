@@ -402,15 +402,16 @@ double GlycosylationSite::CalculateAtomicOverlaps(MoleculeType moleculeType)
         AtomVector attachmentResidueAtoms = residue_->GetAtoms();
         AtomVector proteinAtomsNotInAttachmentResidue = selection::GetAtomsin_a_Notin_b_AtomVectors(allProteinAtoms, attachmentResidueAtoms);
         overlap = gmml::CalculateAtomicOverlaps(proteinAtomsNotInAttachmentResidue, glycan_.GetAllAtomsOfAssembly());
-        std::cout << residue_->GetId() << "-Protein: " << overlap << "\n";
+      //  std::cout << residue_->GetId() << "-Protein: " << overlap << "\n";
     }
     if(moleculeType == GLYCAN)
     {
         for(auto &other_glycosite : other_glycosites_)
         {
-            double current_overlap = gmml::CalculateAtomicOverlaps(other_glycosite->GetAttachedGlycan()->GetAllAtomsOfAssembly(), glycan_.GetAllAtomsOfAssembly());
-            overlap += current_overlap;
-            std::cout << residue_->GetId() << "-" << other_glycosite->GetResidue()->GetId() << ": " << current_overlap << "\n";
+        //    double current_overlap = gmml::CalculateAtomicOverlaps(other_glycosite->GetAttachedGlycan()->GetAllAtomsOfAssembly(), glycan_.GetAllAtomsOfAssembly());
+        //    overlap += current_overlap;
+        //    std::cout << residue_->GetId() << "-" << other_glycosite->GetResidue()->GetId() << ": " << current_overlap << "\n";
+        overlap += gmml::CalculateAtomicOverlaps(other_glycosite->GetAttachedGlycan()->GetAllAtomsOfAssembly(), glycan_.GetAllAtomsOfAssembly());
         }
     }
     return overlap;
