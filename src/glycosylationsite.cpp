@@ -155,6 +155,13 @@ ResidueLinkageVector GlycosylationSite::GetFirstAnd2_XLinkages()
     }
     return returnedVector;
 }
+
+std::vector<GlycosylationSite*> GlycosylationSite::GetOtherGlycosites()
+{
+    return other_glycosites_;
+}
+
+
 //////////////////////////////////////////////////////////
 //                       FUNCTIONS                      //
 //////////////////////////////////////////////////////////
@@ -391,15 +398,19 @@ double GlycosylationSite::CalculateAtomicOverlaps(MoleculeType moleculeType)
     if(moleculeType == PROTEIN)
     {
         // WARNING. protein_atoms and glycan_atoms contains the bead atoms, but this function in GMML ignores them:
-        overlap = gmml::CalculateAtomicOverlaps(glycoprotein_->GetAllAtomsOfAssemblyWithinProteinResidues(), glycan_.GetAllAtomsOfAssembly());
+        AtomVector allProteinAtoms = glycoprotein_->GetAllAtomsOfAssemblyWithinProteinResidues();
+        AtomVector attachmentResidueAtoms = residue_->GetAtoms();
+        AtomVector proteinAtomsNotInAttachmentResidue = selection::GetAtomsin_a_Notin_b_AtomVectors(allProteinAtoms, attachmentResidueAtoms);
+        overlap = gmml::CalculateAtomicOverlaps(proteinAtomsNotInAttachmentResidue, glycan_.GetAllAtomsOfAssembly());
         std::cout << residue_->GetId() << "-Protein: " << overlap << "\n";
     }
     if(moleculeType == GLYCAN)
     {
         for(auto &other_glycosite : other_glycosites_)
         {
-            overlap += gmml::CalculateAtomicOverlaps(other_glycosite.GetAttachedGlycan()->GetAllAtomsOfAssembly(), glycan_.GetAllAtomsOfAssembly());
-            std::cout << residue_->GetId() << "-" << other_glycosite.GetResidue()->GetId() << ": " << overlap << "\n";
+            double current_overlap = gmml::CalculateAtomicOverlaps(other_glycosite->GetAttachedGlycan()->GetAllAtomsOfAssembly(), glycan_.GetAllAtomsOfAssembly());
+            overlap += current_overlap;
+            std::cout << residue_->GetId() << "-" << other_glycosite->GetResidue()->GetId() << ": " << current_overlap << "\n";
         }
     }
     return overlap;
@@ -748,9 +759,8 @@ void GlycosylationSite::SetOtherGlycosites(GlycosylationSiteVector &glycosites)
 {
     for(auto &glycosite : glycosites)
     {
-        if(this->GetResidue()->GetId().compare(glycosite.GetResidue()->GetId())==0)
-            continue;
-        other_glycosites_.push_back(glycosite);
+        if(this->GetResidue()->GetId().compare(glycosite.GetResidue()->GetId())!=0)
+            other_glycosites_.push_back(&glycosite);
     }
     return;
 }

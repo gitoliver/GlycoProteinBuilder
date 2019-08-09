@@ -66,7 +66,7 @@ public:
     ResidueLinkageVector GetRotatableBonds();
     ResidueLinkageVector GetFirstAnd1_6Linkages();
     ResidueLinkageVector GetFirstAnd2_XLinkages();
-
+    std::vector<GlycosylationSite*> GetOtherGlycosites();
 
 
     //////////////////////////////////////////////////////////
@@ -177,7 +177,7 @@ private:
     AtomVector self_glycan_beads_;
     AtomVector other_glycan_beads_;
     AtomVector protein_beads_;
-    GlycosylationSiteVector other_glycosites_;
+    GlycosylationSitePointerVector other_glycosites_;
 };
 
 #endif // GLYCOSYLATIONSITE_H

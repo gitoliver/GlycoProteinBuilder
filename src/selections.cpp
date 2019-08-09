@@ -314,6 +314,48 @@ double selection::GetMaxDistanceBetweenAtoms(AtomVector atoms)
     return max_distance;
 }
 
+AtomVector selection::GetAtomsCommonToBothAtomVectors(AtomVector a, AtomVector b)
+{
+    AtomVector returned_selection;
+    for(AtomVector::iterator it = a.begin(); it != a.end(); ++it)
+    {
+        Atom *atom_a = *it;
+        for(AtomVector::iterator it1 = b.begin(); it1 != b.end(); ++it1)
+        {
+            Atom *atom_b = *it1;
+            if (atom_a->GetIndex() == atom_b->GetIndex())
+            {
+                returned_selection.push_back(atom_a);
+            }
+        }
+    }
+    return returned_selection;
+}
+
+AtomVector selection::GetAtomsin_a_Notin_b_AtomVectors(AtomVector a, AtomVector b)
+{
+    AtomVector returned_selection;
+    bool isCommon = false;
+    for(AtomVector::iterator it = a.begin(); it != a.end(); ++it)
+    {
+        isCommon = false;
+        Atom *atom_a = *it;
+        for(AtomVector::iterator it1 = b.begin(); it1 != b.end(); ++it1)
+        {
+            Atom *atom_b = *it1;
+            if (atom_a->GetIndex() == atom_b->GetIndex())
+            {
+                isCommon = true;
+            }
+        }
+        if (isCommon==false)
+        {
+            returned_selection.push_back(atom_a);
+        }
+    }
+    return returned_selection;
+}
+
 //Atom* selection::FindAtomNeighborThatMatchesQuery(Atom *atom, std::string query)
 //{
 //    Atom *selected_atom;

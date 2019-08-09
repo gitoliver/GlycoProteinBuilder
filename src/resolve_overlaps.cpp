@@ -208,8 +208,12 @@ void resolve_overlaps::weighted_protein_global_overlap_random_descent(Glycosylat
     double strict_tolerance = 0.1, loose_tolerance = 1.0;
 
     GlycosylationSitePointerVector sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance, overlapType);
-
-    std::cout << "Initial torsions and overlaps:\n";
+    if (sites_with_overlaps.size() == 0)
+    {
+        std::cout << "Stopping with all overlaps resolved.\n";
+        stop = true;
+    }
+    //std::cout << "Initial torsions and overlaps:\n";
     //glycoprotein_builder::PrintDihedralAnglesAndOverlapOfGlycosites(glycosites);
     while ( (cycle < max_cycles) && (stop == false) )
     {
@@ -267,6 +271,11 @@ void resolve_overlaps::wiggle(GlycosylationSiteVector &glycosites, OverlapType o
     GlycosylationSitePointerVector sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance, overlapType);
     int cycle = 0;
     bool stop = false;
+    if (sites_with_overlaps.size() == 0)
+    {
+        std::cout << "Stopping with all overlaps resolved.\n";
+        stop = true;
+    }
     while ( (cycle < max_cycles) && (stop == false) )
     {
         ++cycle;
@@ -297,6 +306,11 @@ void resolve_overlaps::wiggleFirstLinkages(GlycosylationSiteVector &glycosites, 
     GlycosylationSitePointerVector sites_with_overlaps = DetermineSitesWithOverlap(glycosites, strict_tolerance, overlapType);
     int cycle = 0;
     bool stop = false;
+    if (sites_with_overlaps.size() == 0)
+    {
+        std::cout << "Stopping with all overlaps resolved.\n";
+        stop = true;
+    }
     while ( (cycle < max_cycles) && (stop == false) )
     {
         std::cout << "Cycle " << cycle << "/" << max_cycles << "\n";
@@ -443,9 +457,13 @@ bool resolve_overlaps::dumb_random_walk(GlycosylationSiteVector &glycosites, Ove
     double tolerance = 0.1;
     int cycle = 0, max_cycles = 10;
     GlycosylationSitePointerVector sites_with_overlaps = DetermineSitesWithOverlap(glycosites, tolerance, overlapType);
-    bool resolved = false;
-
-    while ( (cycle < max_cycles) && (resolved == false) )
+    bool stop = false;
+    if (sites_with_overlaps.size() == 0)
+    {
+        std::cout << "Stopping with all overlaps resolved.\n";
+        stop = true;
+    }
+    while ( (cycle < max_cycles) && (stop == false) )
     {
         ++cycle;
         std::cout << "Cycle " << cycle << " of " << max_cycles << std::endl;
@@ -459,10 +477,10 @@ bool resolve_overlaps::dumb_random_walk(GlycosylationSiteVector &glycosites, Ove
         if (sites_with_overlaps.size() == 0)
         {
             std::cout << "Stopping with all overlaps resolved.\n";
-            resolved = true;
+            stop = true;
         }
     }
-    return resolved;
+    return stop;
 }
 
 

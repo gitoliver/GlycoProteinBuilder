@@ -22,7 +22,8 @@ bool FindRotationPointsForNonCycles(Atom *previous_atom, Atom *current_atom, Ato
 Atom* FindCyclePointNeighbor(const AtomVector atom_path, Atom *cycle_point);
 Atom* FindAtomNeighborThatMatchesQuery(Atom *atom, std::string query);
 double GetMaxDistanceBetweenAtoms(AtomVector atoms);
-
+AtomVector GetAtomsCommonToBothAtomVectors(AtomVector a, AtomVector b);
+AtomVector GetAtomsin_a_Notin_b_AtomVectors(AtomVector a, AtomVector b);
 }
 
 #endif // SELECTIONS_H
