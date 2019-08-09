@@ -1,4 +1,5 @@
 output*
+tests/*
 tests/tough/*
 tests/morten
 tests/one_site/GlycoProtein_*

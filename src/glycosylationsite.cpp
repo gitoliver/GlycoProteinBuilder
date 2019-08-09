@@ -753,8 +753,7 @@ std::vector<GlycosylationSite> GlycosylationSite::GetXClosestSitesWithinOverlapD
     for(auto &glycosite : glycosites)
     {
         std::cout << "    distance to " << glycosite.GetResidue()->GetId() << ": ";
-        if (glycosite == this)
-        //if (this->GetResidue()->GetId().compare(glycosite.GetResidue()->GetId())==0) // if not this site. Oly you should overload the = operator?
+        if (this->GetResidue()->GetId().compare(glycosite.GetResidue()->GetId())==0) // if not this site. Oly you should overload the = operator?
         {
             std::cout << "Skipping\n";
             continue; // I think this skips to next item in for loop.

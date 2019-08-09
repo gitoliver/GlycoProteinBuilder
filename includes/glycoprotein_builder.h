@@ -15,9 +15,9 @@
 typedef std::vector<GlycosylationSite> GlycosylationSiteVector;
 typedef std::vector<GlycosylationSite*> GlycosylationSitePointerVector;
 
+// This should become it's own class
 namespace glycoprotein_builder
 {
-
 /*******************************************/
 /* Function Declarations                   */
 /*******************************************/
