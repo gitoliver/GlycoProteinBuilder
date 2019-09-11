@@ -36,10 +36,7 @@ $(BIN)/gp_builder: \
 		$(BUILD)/io.o \
 		$(BUILD)/main.o \
 		$(BUILD)/overlap_record.o \
-		$(BUILD)/residue_linkage.o \
-		$(BUILD)/resolve_overlaps.o \
-		$(BUILD)/rotatable_dihedral.o \
-		$(BUILD)/selections.o
+		$(BUILD)/resolve_overlaps.o
 	$(CC) \
 		$(BUILD)/bead_residues.o \
 		$(BUILD)/glycoprotein_builder.o \
@@ -47,16 +44,12 @@ $(BIN)/gp_builder: \
 		$(BUILD)/io.o \
 		$(BUILD)/main.o \
 		$(BUILD)/overlap_record.o \
-		$(BUILD)/residue_linkage.o \
 		$(BUILD)/resolve_overlaps.o \
-		$(BUILD)/rotatable_dihedral.o \
-		$(BUILD)/selections.o \
 	$(LINK) $(RUNTIME) -o $(BIN)/gp_builder
 
 $(BUILD)/bead_residues.o: $(SRC)/bead_residues.cpp \
 		$(INC)/bead_residues.h \
-		$(INC)/glycosylationsite.h \
-		$(INC)/selections.h
+		$(INC)/glycosylationsite.h 
 	$(COMPILE) $(SRC)/bead_residues.cpp -o $(BUILD)/bead_residues.o
 
 $(BUILD)/glycoprotein_builder.o: $(SRC)/glycoprotein_builder.cpp \
@@ -67,9 +60,7 @@ $(BUILD)/glycoprotein_builder.o: $(SRC)/glycoprotein_builder.cpp \
 	$(COMPILE) $(SRC)/glycoprotein_builder.cpp -o $(BUILD)/glycoprotein_builder.o
 
 $(BUILD)/glycosylationsite.o: $(SRC)/glycosylationsite.cpp \
-		$(INC)/glycosylationsite.h \
-		$(INC)/residue_linkage.h \
-		$(INC)/rotatable_dihedral.h
+		$(INC)/glycosylationsite.h 
 	$(COMPILE) $(SRC)/glycosylationsite.cpp -o $(BUILD)/glycosylationsite.o
 
 $(BUILD)/io.o: $(SRC)/io.cpp \
@@ -87,12 +78,6 @@ $(BUILD)/overlap_record.o: $(SRC)/overlap_record.cpp \
 		$(INC)/overlap_record.h
 	$(COMPILE) $(SRC)/overlap_record.cpp -o $(BUILD)/overlap_record.o
 
-$(BUILD)/residue_linkage.o: $(SRC)/residue_linkage.cpp \
-		$(INC)/residue_linkage.h \
-		$(INC)/rotatable_dihedral.h \
-		$(INC)/selections.h
-	$(COMPILE) $(SRC)/residue_linkage.cpp -o $(BUILD)/residue_linkage.o
-
 $(BUILD)/resolve_overlaps.o: $(SRC)/resolve_overlaps.cpp \
 		$(INC)/resolve_overlaps.h \
 		$(INC)/bead_residues.h \
@@ -101,14 +86,6 @@ $(BUILD)/resolve_overlaps.o: $(SRC)/resolve_overlaps.cpp \
 		$(INC)/metropolis_criterion.h
 	$(COMPILE) $(SRC)/resolve_overlaps.cpp -o $(BUILD)/resolve_overlaps.o
 
-$(BUILD)/rotatable_dihedral.o: $(SRC)/rotatable_dihedral.cpp \
-		$(INC)/rotatable_dihedral.h \
-		$(INC)/pcg_random.hpp
-	$(COMPILE) $(SRC)/rotatable_dihedral.cpp -o $(BUILD)/rotatable_dihedral.o
-
-$(BUILD)/selections.o: $(SRC)/selections.cpp \
-		$(INC)/selections.h
-	$(COMPILE) $(SRC)/selections.cpp -o $(BUILD)/selections.o
 
 clean:
 	$(RM) $(BUILD)/*.o

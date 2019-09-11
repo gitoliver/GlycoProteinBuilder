@@ -6,8 +6,8 @@
 #include <algorithm> //  std::erase, std::remove
 
 #include "gmml.hpp"
-#include "residue_linkage.h"
-#include "rotatable_dihedral.h"
+//#include "residue_linkage.h"
+//#include "rotatable_dihedral.h"
 
 typedef std::vector<Residue_linkage> ResidueLinkageVector;
 typedef std::vector<Rotatable_dihedral> RotatableDihedralVector;
