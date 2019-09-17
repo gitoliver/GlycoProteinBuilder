@@ -137,7 +137,6 @@ void GlycosylationSite::AttachGlycan(Assembly glycan, Assembly &glycoprotein)
     this->Rename_Protein_Residue_To_GLYCAM_Nomenclature();
     glycoprotein.MergeAssembly(&glycan_); // Add glycan to glycoprotein assembly, allows SetDihedral later. May not be necessary anymore with new Rotatable Dihedral class.
   //  std::cout << "Merge done" << std::endl;
-
     //this->SetRotatableBonds(glycan_.GetResidues().at(0), residue_);
   // ResidueLinkageVector temp;
     all_residue_linkages_.emplace_back(glycan_.GetResidues().at(0), residue_);

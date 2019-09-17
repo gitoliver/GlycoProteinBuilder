@@ -9,9 +9,6 @@
 //#include "residue_linkage.h"
 //#include "rotatable_dihedral.h"
 
-typedef std::vector<Residue_linkage> ResidueLinkageVector;
-typedef std::vector<Rotatable_dihedral> RotatableDihedralVector;
-
 
 using namespace MolecularModeling;
 
@@ -24,6 +21,8 @@ public:
 
     typedef std::vector<GlycosylationSite> GlycosylationSiteVector;
     typedef std::vector<GlycosylationSite*> GlycosylationSitePointerVector;
+    typedef std::vector<Residue_linkage> ResidueLinkageVector;
+    typedef std::vector<Rotatable_dihedral> RotatableDihedralVector;
 
 
     //////////////////////////////////////////////////////////

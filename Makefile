@@ -24,10 +24,6 @@ all:$(BIN)/gp_builder \
 	$(BUILD)/io.o \
 	$(BUILD)/main.o \
 	$(BUILD)/overlap_record.o \
-	$(BUILD)/residue_linkage.o \
-	$(BUILD)/resolve_overlaps.o \
-	$(BUILD)/rotatable_dihedral.o \
-	$(BUILD)/selections.o
 
 $(BIN)/gp_builder: \
 		$(BUILD)/bead_residues.o \
