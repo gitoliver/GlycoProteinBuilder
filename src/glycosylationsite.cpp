@@ -755,6 +755,9 @@ Atom* GlycosylationSite::GetConnectingProteinAtom(std::string residue_name)
     }
 }
 
+
+// OG re-reading. I'm pretty sure this belongs in Residue_linkage. linkage.wiggle(output_pdb_id, tolerance, interval
+// OG re-re-reading. It's because you need to calculate overlaps you nonce.
 void GlycosylationSite::WiggleOneLinkage(Residue_linkage &linkage, int *output_pdb_id, double tolerance, int interval)
 {
     double current_overlap = this->Calculate_bead_overlaps();
