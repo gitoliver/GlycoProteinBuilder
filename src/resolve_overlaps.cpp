@@ -174,7 +174,6 @@ void resolve_overlaps::rotamer_permutator(GlycosylationSiteVector &glycosites)
 // Generate each rotamer combo for two sites and check if they overlap
 void resolve_overlaps::rotamerPermutatorReasonableLimits(GlycosylationSiteVector &glycosites, int maxNumberOfSitesToConsider)
 {
-
     for(auto &glycosite : glycosites)
     {
         glycoprotein_builder::CalculateOverlaps(glycosites);
@@ -192,7 +191,6 @@ void resolve_overlaps::rotamerPermutatorReasonableLimits(GlycosylationSiteVector
         glycoprotein_builder::CalculateOverlaps(glycosites);
         std::cout << "Post perm Current overlap: " << glycoprotein_builder::GetGlobalOverlap(glycosites) << "\n";
     }
-
 }
 
 void resolve_overlaps::weighted_protein_global_overlap_random_descent(GlycosylationSiteVector &glycosites, OverlapType overlapType, int max_cycles, bool monte_carlo)
