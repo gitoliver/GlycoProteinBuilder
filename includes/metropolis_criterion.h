@@ -4,7 +4,7 @@
 #include <cmath>
 #include <stdio.h>
 #include <random>
-#include "../includes/pcg_random.hpp"
+#include "../../../includes/External_Libraries/PCG/pcg_random.hpp"
 
 
 namespace monte_carlo
@@ -22,8 +22,8 @@ inline double get_random_acceptance_probability()
     pcg_extras::seed_seq_from<std::random_device> metropolis_seed_source;
     // Make a random number engine
     pcg32 rng_engine(metropolis_seed_source);
-    std::uniform_real_distribution<> angle_distribution(0, 1); // define the range
-    return angle_distribution(rng_engine);
+    std::uniform_real_distribution<> real_number_distribution(0, 1); // define the range
+    return real_number_distribution(rng_engine);
 }
 
 inline bool accept_via_metropolis_criterion(double change_in_overlap)
@@ -39,7 +39,7 @@ inline bool accept_via_metropolis_criterion(double change_in_overlap)
         double p = exp(-change_in_overlap / 10);
         if (p > r)
         {
-            std::cout << "ACCEPTED: " << change_in_overlap << " p: " << p << " r: " << r << "\n";
+           // std::cout << "ACCEPTED: " << change_in_overlap << " p: " << p << " r: " << r << "\n";
             return_value = true;
         }
         else

@@ -31,24 +31,6 @@ void glycoprotein_builder::AttachGlycansToGlycosites(MolecularModeling::Assembly
             ++it2;
         }
     }
-    //    // Find protein residues in Glycoprotein that will get a glycan added. Set Residue in Glycosite.
-    //    ResidueVector protein_residues = glycoprotein.GetResidues();
-    //    for (ResidueVector::iterator it2 = protein_residues.begin(); it2 != protein_residues.end(); ++it2)
-    //    {
-    //        Residue *protein_residue = *it2;
-    //        std::string id = protein_residue->GetId();
-    //        for(GlycosylationSiteVector::iterator glycosite = glycosites.begin(); glycosite != glycosites.end(); ++glycosite)
-    //        {
-    //            std::string glycosite_number = glycosite->GetResidueNumber();
-    //            std::string formatted_glycosite_number = "_" + glycosite_number + "_";
-    //            if( id.compare(5, formatted_glycosite_number.size(), formatted_glycosite_number) == 0)
-    //            {
-    //                //std::cout << "glycosite: " << glycosite_number << std::endl;
-    //                std::cout << "glycosite id:" << id << std::endl;
-    //                glycosite->SetResidue(protein_residue);
-    //            }
-    //        }
-    //    }
     // Load glycan files from directory
     std::cout << "Glycan directory: " << glycanDirectory << std::endl;
     std::string filepath;
@@ -90,34 +72,14 @@ void glycoprotein_builder::AttachGlycansToGlycosites(MolecularModeling::Assembly
         }
     }
     closedir( dp );
-//    while ((dirp = readdir ( dp )))
-//    {
-//        filepath = glycanDirectory + "/" + dirp->d_name;
-//        // If the file is a directory (or is in some way invalid) we'll skip it. This can be ../ for example.
-//        if (stat( filepath.c_str(), &filestat )) continue; // Is it a valid file
-//        if (S_ISDIR( filestat.st_mode ))         continue; // Is it a directory?
-//        // If this is a valid file and directory:
-//            for (GlycosylationSiteVector::iterator glycosite = glycosites.begin(); glycosite != glycosites.end(); ++glycosite)
-//            {
-//               // std::cout << "Glycan is " << glycosite->GetGlycanName() << ". d_name is " << dirp->d_name << std::endl;
-//                if (glycosite->GetGlycanName().compare(0, glycosite->GetGlycanName().size(), dirp->d_name, 0, glycosite->GetGlycanName().size()) == 0 )
-//                {
-//                    found_glycosites_glycan = true;
-//                    MolecularModeling::Assembly input_glycan(filepath, gmml::InputFileType::PDB);
-//                    input_glycan.BuildStructureByDistance();
-//                    glycosite->AttachGlycan(input_glycan, glycoprotein);
-//                    std::cout << "Added " << glycosite->GetGlycanName() << " to " << glycosite->GetResidueNumber() << "\n";
-//                }
-//            }
-
-////        else // if not a valid file and directory:
-////        {
-////            std::cerr << "Directory or glycan name given in input file is not valid: \n";
-////            std::cerr << "Filepath is : " << filepath << "\nDo you even exist bro? \n";
-////            std::exit(1);
-////        }
-//    }
-//    closedir( dp );
+    glycoprotein_builder::SetOtherGlycosites(glycosites);
+    return;
+}
+void glycoprotein_builder::SetOtherGlycosites(GlycosylationSiteVector &glycosites)
+{
+    for (auto &glycosite : glycosites)
+        glycosite.SetOtherGlycosites(glycosites);
+    return;
 }
 
 void glycoprotein_builder::Read_Input_File(GlycosylationSiteVector &glycosites, std::string &proteinPDB, std::string &glycanDirectory, const std::string working_Directory)
@@ -223,67 +185,69 @@ double glycoprotein_builder::GetGlobalOverlap(GlycosylationSiteVector &glycosite
 void glycoprotein_builder::write_pdb_file(Assembly *glycoprotein, int cycle, std::string summary_filename, double overlap)
 {
     std::stringstream ss;
-   // ss << summary_filename << "_cycle_" << cycle << "overlap_" << overlap << ".pdb";
-    ss << cycle << "_cycle_" << ".pdb";
+    ss << summary_filename << "_cycle_" << cycle << "overlap_" << overlap << ".pdb";
+    //ss << cycle << "_cycle_" << ".pdb";
 
     PdbFileSpace::PdbFile *outputPdbFile = glycoprotein->BuildPdbFileStructureFromAssembly(-1,0);
     outputPdbFile->Write(ss.str());
 
 }
 
-void glycoprotein_builder::PrintOverlaps(GlycosylationSiteVector &glycosites)
-{
-    std::cout << "      Site        |  Total | Protein | Glycan \n";
-    for (GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end(); ++current_glycosite)
-    {
-        current_glycosite->Print_bead_overlaps();
-    }
-}
+//void glycoprotein_builder::PrintOverlaps(GlycosylationSiteVector &glycosites)
+//{
+//    std::cout << "      Site        |  Total | Protein | Glycan \n";
+//    for (GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end(); ++current_glycosite)
+//    {
+//        current_glycosite->Print_bead_overlaps();
+//    }
+//}
 
-void glycoprotein_builder::PrintOverlaps(GlycosylationSitePointerVector &glycosites)
-{
-    std::cout << "      Site        |  Total | Protein | Glycan \n";
-    for (GlycosylationSitePointerVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end(); ++current_glycosite)
-    {
-        (*current_glycosite)->Print_bead_overlaps(); // Good old pointers to pointers.
-    }
-}
+//void glycoprotein_builder::PrintOverlaps(GlycosylationSitePointerVector &glycosites)
+//{
+//    std::cout << "      Site        |  Total | Protein | Glycan \n";
+//    for (GlycosylationSitePointerVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end(); ++current_glycosite)
+//    {
+//        (*current_glycosite)->Print_bead_overlaps(); // Good old pointers to pointers.
+//    }
+//}
 
-void glycoprotein_builder::CalculateAndPrintOverlaps(GlycosylationSiteVector &glycosites)
-{
-    std::cout << "      Site        |  Total | Protein | Glycan \n";
-    for (GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end(); ++current_glycosite)
-    {
-        current_glycosite->Calculate_and_print_bead_overlaps();
-    }
-}
+//void glycoprotein_builder::CalculateAndPrintOverlaps(GlycosylationSiteVector &glycosites)
+//{
+//    std::cout << "      Site        |  Total | Protein | Glycan \n";
+//    for (GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end(); ++current_glycosite)
+//    {
+//        current_glycosite->Calculate_and_print_bead_overlaps();
+//    }
+//}
 
-void glycoprotein_builder::CalculateOverlaps(GlycosylationSiteVector &glycosites)
-{
-    for (GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end(); ++current_glycosite)
-    {
-        current_glycosite->Calculate_bead_overlaps();
-    }
-}
-
-double glycoprotein_builder::CalculateAtomicOverlaps(GlycosylationSiteVector &glycosites)
+double glycoprotein_builder::CalculateOverlaps(GlycosylationSiteVector &glycosites, OverlapType overlapType, MoleculeType moleculeType, bool recordOverlap, bool printOverlap)
 {
     double overlap = 0.0;
     for(auto &glycosite : glycosites)
     {
-        overlap += glycosite.CalculateAtomicOverlaps();
+        overlap += glycosite.CalculateOverlaps(overlapType, moleculeType, recordOverlap, printOverlap);
     }
     return overlap;
 }
 
-GlycosylationSitePointerVector glycoprotein_builder::DetermineSitesWithOverlap(GlycosylationSiteVector &glycosites, double tolerance, std::string overlap_type)
+//double glycoprotein_builder::CalculateAtomicOverlaps(GlycosylationSiteVector &glycosites)
+//{
+//    double overlap = 0.0;
+//    for(auto &glycosite : glycosites)
+//    {
+//        overlap += glycosite.CalculateAtomicOverlaps();
+//    }
+//    return overlap;
+//}
+
+GlycosylationSitePointerVector glycoprotein_builder::DetermineSitesWithOverlap(GlycosylationSiteVector &glycosites, double tolerance, OverlapType overlapType)
 {
     GlycosylationSitePointerVector sites_to_return;
     double overlap = 0.0;
 //    std::cout << "      Site        |  Total | Protein | Glycan " << std::endl;
     for (GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end(); ++current_glycosite)
     {
-        overlap = current_glycosite->Calculate_bead_overlaps(overlap_type);
+        overlap = current_glycosite->CalculateOverlaps(overlapType);
         if ( overlap > tolerance)
         {
 //            std::cout << "Site " << current_glycosite->GetResidue()->GetId() << " is over tolerance with " << overlap << "\n";
@@ -305,17 +269,17 @@ GlycosylationSitePointerVector glycoprotein_builder::GetSitesWithOverlap(Glycosy
         if ( overlap > tolerance)
         {
 //            std::cout << "Site " << current_glycosite->GetResidue()->GetId() << " is over tolerance with " << overlap << "\n";
-            current_glycosite->Print_bead_overlaps();
+          //  current_glycosite->Print_bead_overlaps();
             sites_to_return.push_back(&(*current_glycosite));
         }
     }
     return sites_to_return;
 }
 
-void glycoprotein_builder::DeleteSitesIterativelyWithOverlapAboveTolerance(GlycosylationSiteVector &glycosites, double tolerance)
+void glycoprotein_builder::DeleteSitesIterativelyWithAtomicOverlapAboveTolerance(GlycosylationSiteVector &glycosites, double tolerance)
 {
-    glycoprotein_builder::PrintDihedralAnglesAndOverlapOfGlycosites(glycosites);
-    std::cout << "Global overlap before deleting sites is " << glycoprotein_builder::GetGlobalOverlap(glycosites) << "\n";
+    //glycoprotein_builder::PrintDihedralAnglesAndOverlapOfGlycosites(glycosites);
+    std::cout << "Atomic overlap before deleting sites is " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << "\n";
     bool continue_deleting = true;
     // While overlap for any site is > tolerance
     // Delete site with highest overlap.
@@ -325,13 +289,13 @@ void glycoprotein_builder::DeleteSitesIterativelyWithOverlapAboveTolerance(Glyco
         GlycosylationSite *worst_site = glycosites.data(); // Pointer to the first glycosite. Remember an erase/remove "advances"
         for (GlycosylationSiteVector::iterator current_glycosite = glycosites.begin(); current_glycosite != glycosites.end(); ++current_glycosite)
         {
-            if  ( current_glycosite->GetOverlap() > worst_site->GetOverlap())
+            if  ( current_glycosite->CalculateOverlaps(ATOMIC) > worst_site->CalculateOverlaps(ATOMIC))
             {
                 worst_site = &(*current_glycosite); // The C is strong with this one.
             }
         }
         //if (worst_site->GetOverlap() > tolerance)
-        double worst_site_overlap = worst_site->CalculateAtomicOverlaps();
+        double worst_site_overlap = worst_site->CalculateOverlaps(ATOMIC);
         std::cout << "worst_site_overlap: " << worst_site_overlap << "\n";
         if ( worst_site_overlap > tolerance)
         {
@@ -345,7 +309,7 @@ void glycoprotein_builder::DeleteSitesIterativelyWithOverlapAboveTolerance(Glyco
             }
             glycosites.erase(std::remove(glycosites.begin(), glycosites.end(), *worst_site), glycosites.end()); // Note need #include <algorithm>
             beads::Set_Other_Glycan_Beads(glycosites); // After "erasing", the actual atoms still exist and pointers to them are valid. Need to reset what beads are part of "other".
-            glycoprotein_builder::CalculateOverlaps(glycosites); // After deleting, other sites will have lower values
+            //glycoprotein_builder::CalculateOverlaps(glycosites); // After deleting, other sites will have lower values. No need anymore as calculating on the fly and not storing
         }
         else
         {
@@ -365,7 +329,76 @@ void glycoprotein_builder::UpdateAtomsThatMoveInLinkages(GlycosylationSiteVector
     {
         current_glycosite->UpdateAtomsThatMoveInLinkages();
     }
+}
 
+ResidueLinkageVector glycoprotein_builder::GetAllFirstAnd1_6Linkages(GlycosylationSiteVector &glycosites)
+{
+    ResidueLinkageVector selectedLinkages;
+    for(auto &glycosite : glycosites)
+    {
+        ResidueLinkageVector currentLinkages = glycosite.GetFirstAnd1_6Linkages();
+        selectedLinkages.insert( selectedLinkages.end(), currentLinkages.begin(), currentLinkages.end() );
+        std::cout << "Linkages found:\n";
+        for(auto &linkage : currentLinkages)
+            std::cout << linkage.GetFromThisResidue1()->GetId() << "-" << linkage.GetToThisResidue2()->GetId() << "\n";
+    }
+    return selectedLinkages;
+}
+
+ResidueLinkageVector glycoprotein_builder::GetAllFirstAnd2_XLinkages(GlycosylationSiteVector &glycosites)
+{
+    ResidueLinkageVector selectedLinkages;
+    for(auto &glycosite : glycosites)
+    {
+        ResidueLinkageVector currentLinkages = glycosite.GetFirstAnd2_XLinkages();
+        selectedLinkages.insert( selectedLinkages.end(), currentLinkages.begin(), currentLinkages.end() );
+        std::cout << "Linkages found:\n";
+        for(auto &linkage : currentLinkages)
+            std::cout << linkage.GetFromThisResidue1()->GetId() << "-" << linkage.GetToThisResidue2()->GetId() << "\n";
+    }
+    return selectedLinkages;
+}
+
+void glycoprotein_builder::StashCoordinates(GlycosylationSiteVector &glycosites)
+{
+    for(auto &glycosite : glycosites)
+    {
+        glycosite.StashCoordinates();
+    }
+}
+
+
+void glycoprotein_builder::SetStashedCoordinatesWithLowestOverlap(GlycosylationSiteVector &glycosites)
+{
+    for(auto &glycosite : glycosites)
+    {
+        glycosite.SetStashedCoordinates();
+    }
+}
+
+ResidueLinkageVector glycoprotein_builder::SplitLinkagesIntoPermutants(ResidueLinkageVector inputLinkages)
+{
+    ResidueLinkageVector sortedLinkages;
+    for(auto &linkage : inputLinkages)
+    {
+        if(linkage.CheckIfConformer())
+        {
+            sortedLinkages.push_back(linkage);
+        }
+        else // if not a conformer
+        {
+            RotatableDihedralVector rotatableDihedrals = linkage.GetRotatableDihedralsWithMultipleRotamers(); // only want the rotatabe dihedrals within a linkage that have multiple rotamers. Some bonds won't.
+            for(auto &rotatableDihedral : rotatableDihedrals)
+            {
+                Residue_linkage splitLinkage = linkage; // Copy it to get correct info into class
+                RotatableDihedralVector temp = {rotatableDihedral};
+                splitLinkage.SetRotatableDihedrals(temp);
+                sortedLinkages.push_back(splitLinkage);
+                std::cout << "Split out " << splitLinkage.GetFromThisResidue1()->GetId() << "-" << splitLinkage.GetToThisResidue2()->GetId() << " rotamer with number of shapes: " << rotatableDihedral.GetNumberOfRotamers() << "\n";
+            }
+        }
+    }
+    return sortedLinkages;
 }
 
 //void glycoprotein_builder::Overlap_Weighted_Adjust_Torsions_For_X_Cycles(GlycosylationSitePointerVector &sites, GlycosylationSiteVector &glycosites, int max_cycles, double tolerance, std::string overlap_type)

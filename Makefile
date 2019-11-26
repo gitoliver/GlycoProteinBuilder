@@ -23,7 +23,6 @@ all:$(BIN)/gp_builder \
 	$(BUILD)/glycosylationsite.o \
 	$(BUILD)/io.o \
 	$(BUILD)/main.o \
-	$(BUILD)/overlap_record.o \
 
 $(BIN)/gp_builder: \
 		$(BUILD)/bead_residues.o \
@@ -31,7 +30,6 @@ $(BIN)/gp_builder: \
 		$(BUILD)/glycosylationsite.o \
 		$(BUILD)/io.o \
 		$(BUILD)/main.o \
-		$(BUILD)/overlap_record.o \
 		$(BUILD)/resolve_overlaps.o
 	$(CC) \
 		$(BUILD)/bead_residues.o \
@@ -39,7 +37,6 @@ $(BIN)/gp_builder: \
 		$(BUILD)/glycosylationsite.o \
 		$(BUILD)/io.o \
 		$(BUILD)/main.o \
-		$(BUILD)/overlap_record.o \
 		$(BUILD)/resolve_overlaps.o \
 	$(LINK) $(RUNTIME) -o $(BIN)/gp_builder
 
@@ -69,10 +66,6 @@ $(BUILD)/main.o: $(SRC)/main.cpp \
 		$(INC)/bead_residues.h \
 		$(INC)/glycoprotein_builder.h
 	$(COMPILE) $(SRC)/main.cpp -o $(BUILD)/main.o
-
-$(BUILD)/overlap_record.o: $(SRC)/overlap_record.cpp \
-		$(INC)/overlap_record.h
-	$(COMPILE) $(SRC)/overlap_record.cpp -o $(BUILD)/overlap_record.o
 
 $(BUILD)/resolve_overlaps.o: $(SRC)/resolve_overlaps.cpp \
 		$(INC)/resolve_overlaps.h \

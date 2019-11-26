@@ -49,6 +49,11 @@ GlycosylationSite::~GlycosylationSite()
 //                       ACCESSOR                       //
 //////////////////////////////////////////////////////////
 
+Assembly* GlycosylationSite::GetGlycoprotein()
+{
+    return glycoprotein_;
+}
+
 std::string GlycosylationSite::GetGlycanName()
 {
     return glycan_name_;
@@ -67,11 +72,6 @@ Residue* GlycosylationSite::GetResidue()
 Assembly* GlycosylationSite::GetAttachedGlycan()
 {
     return &glycan_;
-}
-
-Assembly* GlycosylationSite::GetGlycoprotein()
-{
-    return this->GetResidue()->GetAssembly();
 }
 
 double GlycosylationSite::GetOverlap()
@@ -120,6 +120,48 @@ ResidueLinkageVector GlycosylationSite::GetRotatableBonds()
     return all_residue_linkages_;
 }
 
+ResidueLinkageVector GlycosylationSite::GetFirstAnd1_6Linkages()
+{
+    ResidueLinkageVector returnedVector;
+    returnedVector.push_back(all_residue_linkages_.front()); // Gives you the Protein-Glycan linkage
+
+    for (auto &residue_linkage : all_residue_linkages_)
+    {
+        std::string residue2Name = residue_linkage.GetToThisResidue2()->GetName();
+        std::string residue2AtomName = residue_linkage.GetToThisConnectionAtom2()->GetName();
+        std::string residue1AtomName = residue_linkage.GetFromThisConnectionAtom1()->GetName();
+        if( (residue2Name.compare(1,2,"MB")==0) && (residue2AtomName.compare("O6")==0) && (residue1AtomName.compare("C1")==0) )
+        {
+            std::cout << "Have found the inner core 1-6 linkage\n";
+            returnedVector.push_back(residue_linkage);
+        }
+    }
+    return returnedVector;
+}
+
+ResidueLinkageVector GlycosylationSite::GetFirstAnd2_XLinkages()
+{
+    ResidueLinkageVector returnedVector;
+    returnedVector.push_back(all_residue_linkages_.front()); // Gives you the Protein-Glycan linkage
+
+    for (auto &residue_linkage : all_residue_linkages_)
+    {
+        std::string residue1AtomName = residue_linkage.GetFromThisConnectionAtom1()->GetName();
+        if( (residue1AtomName.compare("C2")==0) )
+        {
+            std::cout << "Have found the 2-X linkage\n";
+            returnedVector.push_back(residue_linkage);
+        }
+    }
+    return returnedVector;
+}
+
+std::vector<GlycosylationSite*> GlycosylationSite::GetOtherGlycosites()
+{
+    return other_glycosites_;
+}
+
+
 //////////////////////////////////////////////////////////
 //                       FUNCTIONS                      //
 //////////////////////////////////////////////////////////
@@ -129,6 +171,7 @@ ResidueLinkageVector GlycosylationSite::GetRotatableBonds()
 void GlycosylationSite::AttachGlycan(Assembly glycan, Assembly &glycoprotein)
 {
     this->SetGlycan(glycan);
+    this->SetGlycoprotein(&glycoprotein);
   //  std::cout << "Glycan set\n" << std::endl;
     this->Prepare_Glycans_For_Superimposition_To_Particular_Residue(residue_->GetName());
    // std::cout << "Superimpose prep done" << std::endl;
@@ -139,6 +182,7 @@ void GlycosylationSite::AttachGlycan(Assembly glycan, Assembly &glycoprotein)
   //  std::cout << "Merge done" << std::endl;
     //this->SetRotatableBonds(glycan_.GetResidues().at(0), residue_);
   // ResidueLinkageVector temp;
+   // all_residue_linkages_.emplace_back(glycan_.GetResidues().at(0), residue_, this);
     all_residue_linkages_.emplace_back(glycan_.GetResidues().at(0), residue_);
     this->FigureOutResidueLinkagesInGlycan(glycan_.GetResidues().at(0), glycan_.GetResidues().at(0), &all_residue_linkages_);
   //  all_residue_linkages_ = temp;
@@ -294,49 +338,6 @@ void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_resid
 //    std::cout << std::endl;
 }
 
-// This is a dumb way to do it. Need dihedral class but in a rush. Fix later. // Update, I actually did something I said I would do.
-//void GlycosylationSite::SetChiAtoms(Residue* residue)
-//{
-//    AtomVector atoms = residue->GetAtoms();
-//    Atom *atom1, *atom2, *atom3, *atom4, *atom5;
-//    bool is_Chi2 = false;
-//    for(AtomVector::iterator it1 = atoms.begin(); it1 != atoms.end(); ++it1)
-//    {
-//        Atom *atom = *it1;
-//        if ( atom->GetName().compare("N"  )==0 ) { atom1 = atom; } // All residues
-//        if ( atom->GetName().compare("CA" )==0 ) { atom2 = atom; } // All residues
-//        if ( atom->GetName().compare("CB" )==0 ) { atom3 = atom; } // All residues
-//        if ( atom->GetName().compare("CG" )==0 ) { atom4 = atom; } // Asn + Tyr
-//        if ( atom->GetName().compare("OG1")==0 ) { atom4 = atom; } // Thr
-//        if ( atom->GetName().compare("OG" )==0 ) { atom4 = atom; } // Ser
-//        if ( atom->GetName().compare("ND2")==0 ) { atom5 = atom; is_Chi2 = true; } // Asn
-//        if ( atom->GetName().compare("CD1")==0 ) { atom5 = atom; is_Chi2 = true; } // Tyr
-//    }
-//    //chi1_ = {atom1, atom2, atom3, atom4};
-//    if (!is_Chi2)
-//    {
-//        Residue *reducing_Residue = this->GetAttachedGlycan()->GetResidues().at(1);
-//        AtomVector reducing_Atoms = reducing_Residue->GetAtoms();
-//        for(AtomVector::iterator it = reducing_Atoms.begin(); it != reducing_Atoms.end(); ++it)
-//        {
-//            Atom* atom = *it;
-//            if(atom->GetName().compare("C1")==0) // Need a way to get reducing atom from Residue. This is dumb as have residues such as 0SA were C1 is not the reducing atom.
-//            {
-//                atom5 = atom;
-//                is_Chi2 = true;
-//            }
-//        }
-//    }
-//    if (is_Chi2)
-//    {
-//       // chi2_ = {atom2, atom3, atom4, atom5};
-//    }
-//    else
-//    {
-//        std::cout << "Chi2 not set in GlycosylationSite::SetChiAtoms, program likely to crash" << std::endl;
-//    }
-//}
-
 void GlycosylationSite::Rename_Protein_Residue_To_GLYCAM_Nomenclature()
 {
     std::string amino_acid_name = this->GetResidue()->GetName();
@@ -355,68 +356,99 @@ void GlycosylationSite::Rename_Protein_Residue_From_GLYCAM_To_Standard()
     if (amino_acid_name.compare("OLY")==0) {this->GetResidue()->SetName("TYR");}
 }
 
-double GlycosylationSite::Calculate_and_print_bead_overlaps()
-{
-    double overlap = this->Calculate_bead_overlaps();
-    this->Print_bead_overlaps();
-    return overlap;
-}
-
-double GlycosylationSite::CalculateAtomicOverlaps()
+double GlycosylationSite::CalculateOverlaps(OverlapType overlapType, MoleculeType moleculeType, bool recordOverlap, bool printOverlap)
 {
     double overlap = 0.0;
-    AtomVector glycan_atoms = glycan_.GetAllAtomsOfAssembly();
-    for(auto &protein_bead : protein_beads_)
+    if (moleculeType == ALL) // glycan and protein overlap are calculated and stored sepatately. They get combined only when reporting total overlaps. Combined value is never stored.
     {
-        overlap += gmml::CalculateAtomicOverlaps(protein_bead->GetResidue()->GetAtoms(), glycan_atoms);
+        double proteinOverlap = this->CalculateOverlaps(overlapType, PROTEIN, recordOverlap, printOverlap);
+        double glycanOverlap = this->CalculateOverlaps(overlapType, GLYCAN, recordOverlap, printOverlap);
+        overlap = proteinOverlap + glycanOverlap;
     }
-    for(auto &other_glycan_bead : other_glycan_beads_)
+    else
     {
-        overlap += gmml::CalculateAtomicOverlaps(other_glycan_bead->GetResidue()->GetAtoms(), glycan_atoms);
+        if(overlapType == ATOMIC)
+        {
+            overlap = this->CalculateAtomicOverlaps(moleculeType);
+        }
+        else if (overlapType == BEAD)
+        {
+            overlap = this->CalculateBeadOverlaps(moleculeType);
+        }
+        if (recordOverlap)
+        {
+            this->SetOverlap(moleculeType, overlap);
+        }
+    }
+    if (printOverlap)
+    {
+        this->PrintOverlaps();
     }
     return overlap;
 }
 
-void GlycosylationSite::Print_bead_overlaps()
+double GlycosylationSite::CalculateAtomicOverlaps(MoleculeType moleculeType)
+{
+    double overlap = 0.0;
+    if(moleculeType == ALL)
+    {
+        overlap = ( this->CalculateAtomicOverlaps(PROTEIN) + this->CalculateAtomicOverlaps(GLYCAN) );
+    }
+    if(moleculeType == PROTEIN)
+    {
+        // WARNING. protein_atoms and glycan_atoms contains the bead atoms, but this function in GMML ignores them:
+        AtomVector allProteinAtoms = glycoprotein_->GetAllAtomsOfAssemblyWithinProteinResidues();
+        AtomVector attachmentResidueAtoms = residue_->GetAtoms();
+        AtomVector proteinAtomsNotInAttachmentResidue = selection::GetAtomsin_a_Notin_b_AtomVectors(allProteinAtoms, attachmentResidueAtoms);
+        overlap = gmml::CalculateAtomicOverlaps(proteinAtomsNotInAttachmentResidue, glycan_.GetAllAtomsOfAssembly());
+      //  std::cout << residue_->GetId() << "-Protein: " << overlap << "\n";
+    }
+    if(moleculeType == GLYCAN)
+    {
+        for(auto &other_glycosite : other_glycosites_)
+        {
+        //    double current_overlap = gmml::CalculateAtomicOverlaps(other_glycosite->GetAttachedGlycan()->GetAllAtomsOfAssembly(), glycan_.GetAllAtomsOfAssembly());
+        //    overlap += current_overlap;
+        //    std::cout << residue_->GetId() << "-" << other_glycosite->GetResidue()->GetId() << ": " << current_overlap << "\n";
+        overlap += gmml::CalculateAtomicOverlaps(other_glycosite->GetAttachedGlycan()->GetAllAtomsOfAssembly(), glycan_.GetAllAtomsOfAssembly());
+        }
+    }
+    return overlap;
+}
+
+void GlycosylationSite::PrintOverlaps()
 {
     std::cout << std::fixed; // Formating ouput
     std::cout << std::setprecision(2); // Formating ouput
-    std::cout 
-        << std::setw(17) << this->GetResidue()->GetId() << " | " 
+    std::cout
+        << std::setw(17) << this->GetResidue()->GetId() << " | "
         << std::setw(6)  << this->GetOverlap()     << " |  "
         << std::setw(6)  << this->GetProteinOverlap()   << " | "
         << std::setw(6)  << this->GetGlycanOverlap()    <<
     std::endl;
 }
 
-double GlycosylationSite::Calculate_bead_overlaps(std::string overlap_type, bool record)
+double GlycosylationSite::CalculateBeadOverlaps(MoleculeType moleculeType)
 {
     double overlap = 0.0;
-    if(overlap_type.compare("total")==0)
+    if(moleculeType == ALL)
     {
-        overlap = (this->Calculate_bead_overlaps("protein") + this->Calculate_bead_overlaps("glycan"));
+        overlap = ( this->CalculateBeadOverlaps(PROTEIN) + this->CalculateBeadOverlaps(GLYCAN) );
     }
-    if(overlap_type.compare("protein")==0)
+    if(moleculeType == PROTEIN)
     {
-        overlap = this->Calculate_bead_overlaps(self_glycan_beads_, protein_beads_);
-        if(record)
-        {
-            SetProteinOverlap(overlap);
-        }
+        overlap = this->CalculateBeadOverlaps(self_glycan_beads_, protein_beads_);
+
     }
-    if(overlap_type.compare("glycan")==0)
+    if(moleculeType == GLYCAN)
     {
-        overlap = this->Calculate_bead_overlaps(self_glycan_beads_, other_glycan_beads_);
-        if(record)
-        {
-            SetGlycanOverlap(overlap);
-        }
+        overlap = this->CalculateBeadOverlaps(self_glycan_beads_, other_glycan_beads_);
     }
     return overlap;
 }
 
 
-double GlycosylationSite::Calculate_bead_overlaps(AtomVector &atomsA, AtomVector &atomsB)
+double GlycosylationSite::CalculateBeadOverlaps(AtomVector &atomsA, AtomVector &atomsB)
 {
     double radius = 3.0; //Using same radius for all beads.
     double distance = 0.0, overlap = 0.0, current_overlap = 0.0;
@@ -433,7 +465,6 @@ double GlycosylationSite::Calculate_bead_overlaps(AtomVector &atomsA, AtomVector
                 distance = atomA->GetDistanceToAtom(atomB);
                 if ( ( distance < (radius + radius) ) && ( distance > 0.0 ) ) //Close enough to overlap, but not the same atom
                 {
-
                     current_overlap = gmml::CalculateAtomicOverlaps(atomA, atomB, radius, radius); // This calls the version with radius values
                     overlap += current_overlap;
                     //std::cout << atomA->GetResidue()->GetId() << " overlaping with " << atomB->GetResidue()->GetId() << ": " << current_overlap << "\n";
@@ -508,11 +539,14 @@ void GlycosylationSite::write_pdb_file(Assembly *glycoprotein, int cycle, std::s
 
 }
 
-
-
 //////////////////////////////////////////////////////////
 //                       MUTATOR                        //
 //////////////////////////////////////////////////////////
+
+void GlycosylationSite::SetGlycoprotein(Assembly* glycoprotein)
+{
+    glycoprotein_ = glycoprotein;
+}
 
 void GlycosylationSite::SetGlycanName(std::string glycan_name)
 {
@@ -532,6 +566,22 @@ void GlycosylationSite::SetResidue(Residue* residue)
 void GlycosylationSite::SetGlycan(Assembly glycan)
 {
     glycan_ = glycan;
+}
+
+void GlycosylationSite::SetOverlap(MoleculeType moleculeType, double overlap)
+{
+    switch (moleculeType)
+    {
+    case PROTEIN:
+        this->SetProteinOverlap(overlap);
+        break;
+    case GLYCAN:
+        this->SetGlycanOverlap(overlap);
+        break;
+    default:
+        std::cerr << "ERROR, No type specified in GlycosylationSite::SetOverlap. Required.\n";
+        break;
+    }
 }
 
 void GlycosylationSite::SetGlycanOverlap(double overlap)
@@ -593,7 +643,7 @@ void GlycosylationSite::SetDefaultDihedralAnglesUsingMetadata()
 {
     for(auto &linkage : all_residue_linkages_)
     {
-        linkage.SetDefaultDihedralAnglesUsingMetadata();
+        linkage.SetDefaultShapeUsingMetadata();
     }
     //residue_linkage_.SetDefaultDihedralAnglesUsingMetadata();
 }
@@ -602,7 +652,7 @@ void GlycosylationSite::SetRandomDihedralAnglesUsingMetadata()
 {
     for(auto &linkage : all_residue_linkages_)
     {
-        linkage.SetRandomDihedralAnglesUsingMetadata();
+        linkage.SetRandomShapeUsingMetadata();
     }
     //residue_linkage_.SetRandomDihedralAnglesUsingMetadata();
 }
@@ -611,7 +661,7 @@ void GlycosylationSite::SetRandomDihedralAnglesUsingMetadataForNthLinkage(int li
 {
     if(linkage_number < all_residue_linkages_.size())
     {
-        all_residue_linkages_.at(linkage_number).SetRandomDihedralAnglesUsingMetadata();
+        all_residue_linkages_.at(linkage_number).SetRandomShapeUsingMetadata();
     }
 }
 
@@ -619,7 +669,7 @@ void GlycosylationSite::ResetDihedralAngles()
 {
     for(auto &linkage : all_residue_linkages_)
     {
-        linkage.SetDihedralAnglesToPrevious();
+        linkage.SetShapeToPrevious();
     }
     //residue_linkage_.SetPreviousDihedralAngles();
 }
@@ -633,6 +683,87 @@ void GlycosylationSite::UpdateAtomsThatMoveInLinkages()
     //residue_linkage_.DetermineAtomsThatMove();
 }
 
+void GlycosylationSite::StashCoordinates()
+{
+    std::cout << "Stashing coordinates for glycosite " << this->GetResidueNumber() << std::endl;
+    AtomVector atoms = this->GetAttachedGlycan()->GetAllAtomsOfAssembly();
+    AtomVector sidechain_atoms = this->GetResidue()->GetAtoms();
+    atoms.insert(atoms.end(), sidechain_atoms.begin(), sidechain_atoms.end() );
+    for(auto &atom : atoms)
+    {
+        atom->AddCoordinate(new GeometryTopology::Coordinate(atom->GetCoordinate())); // push back the currect coordinates onto the end of the coordinates vector.
+    }
+}
+
+void GlycosylationSite::SetStashedCoordinates() // When a lower overlap is found, the coords are pushed back. Last one pushed back is the lowest overlap.
+{
+    std::cout << "Setting stashed coordinates for site " << this->GetResidueNumber() << "\n";
+    AtomVector atoms = this->GetAttachedGlycan()->GetAllAtomsOfAssembly();
+    AtomVector sidechain_atoms = this->GetResidue()->GetAtoms();
+    atoms.insert(atoms.end(), sidechain_atoms.begin(), sidechain_atoms.end() );
+    for(auto &atom : atoms)
+    {
+        GeometryTopology::Coordinate *first_coords = atom->GetCoordinate();
+        GeometryTopology::Coordinate *last_coords = atom->GetCoordinates().back();
+        *first_coords = *last_coords;
+    }
+    //std::cout << "Finished Setting stashed coordinates" << std::endl;
+}
+
+// Very interesting that I have to specify std::vector<GlycosylationSite>, but can use the typedef in the function.
+// A HUGE clue. MASSIVE.
+std::vector<GlycosylationSite> GlycosylationSite::GetXClosestSitesWithinOverlapDistanceY(GlycosylationSiteVector &glycosites, int maxNumberOfSitesToConsider)
+{
+    typedef std::pair<double, GlycosylationSite> siteDistancePair;
+    typedef std::vector<siteDistancePair> siteDistancePairVector;
+    siteDistancePairVector sitesWithinOverlapRange;
+    GlycosylationSiteVector sitesToReturn;
+    double maxLengthOfThisGlycan = (selection::GetMaxDistanceBetweenAtoms(this->GetAttachedGlycan()->GetAllAtomsOfAssembly()) + 5);
+    Atom *this_cb_atom = this->GetResidue()->GetAtom("CB");
+    for(auto &glycosite : glycosites)
+    {
+        std::cout << "    distance to " << glycosite.GetResidue()->GetId() << ": ";
+        if (this->GetResidue()->GetId().compare(glycosite.GetResidue()->GetId())==0) // if not this site. Oly you should overload the = operator?
+        {
+            std::cout << "Skipping\n";
+            continue; // I think this skips to next item in for loop.
+        }
+        double maxLengthOfThatGlycan = (selection::GetMaxDistanceBetweenAtoms(glycosite.GetAttachedGlycan()->GetAllAtomsOfAssembly()) + 5);
+        Atom *that_cb_atom = glycosite.GetResidue()->GetAtom("CB");
+        double distanceBetweenCBAtoms = this_cb_atom->GetDistanceToAtom(that_cb_atom);
+        std::cout << distanceBetweenCBAtoms;
+        if ( ( distanceBetweenCBAtoms ) <= (maxLengthOfThisGlycan + maxLengthOfThatGlycan) )
+        {
+            std::cout << " withing range! (" << (maxLengthOfThisGlycan + maxLengthOfThatGlycan) << ")" << std::endl;
+            // push back onto vector site and distance pairs
+            sitesWithinOverlapRange.emplace_back(distanceBetweenCBAtoms, glycosite);
+        }
+        else
+            std::cout << "\n";
+    }
+    // Sort list by distance. Remember that you might have more or less sites than the maxNumberOfSitesToConsider
+    std::sort(sitesWithinOverlapRange.begin(), sitesWithinOverlapRange.end());
+    // Return up to maxNumberOfSitesToConsider
+    for(auto &pairInstance : sitesWithinOverlapRange)
+    {
+        std::cout << "Sorted distance: " << pairInstance.first << "\n";
+        if (sitesToReturn.size() < maxNumberOfSitesToConsider)
+        {
+            sitesToReturn.push_back(pairInstance.second);
+        }
+    }
+    return sitesToReturn;
+}
+
+void GlycosylationSite::SetOtherGlycosites(GlycosylationSiteVector &glycosites)
+{
+    for(auto &glycosite : glycosites)
+    {
+        if(this->GetResidue()->GetId().compare(glycosite.GetResidue()->GetId())!=0)
+            other_glycosites_.push_back(&glycosite);
+    }
+    return;
+}
 
 //////////////////////////////////////////////////////////
 //                       DISPLAY FUNCTION               //
@@ -652,6 +783,7 @@ void GlycosylationSite::Print(std::string type)
         //std::cout << "\n";
     }
 }
+
 
 //////////////////////////////////////////////////////////
 //                   PRIVATE FUNCTIONS                 //
@@ -760,7 +892,7 @@ Atom* GlycosylationSite::GetConnectingProteinAtom(std::string residue_name)
 // OG re-re-reading. It's because you need to calculate overlaps you nonce.
 void GlycosylationSite::WiggleOneLinkage(Residue_linkage &linkage, int *output_pdb_id, double tolerance, int interval)
 {
-    double current_overlap = this->Calculate_bead_overlaps();
+    double current_overlap = this->CalculateBeadOverlaps();
     double lowest_overlap = current_overlap;
     // Reverse as convention is Glc1-4Gal and I want to wiggle in opposite direction i.e. from first rotatable bond in Asn outwards
     RotatableDihedralVector reversed_rotatable_bond_vector = linkage.GetRotatableDihedrals();
@@ -780,7 +912,7 @@ void GlycosylationSite::WiggleOneLinkage(Residue_linkage &linkage, int *output_p
                 rotatable_dihedral.SetDihedralAngle(current_dihedral);
                 //GlycosylationSite::write_pdb_file(this->GetGlycoprotein(), *output_pdb_id, "wiggle", lowest_overlap);
                 //++(*output_pdb_id);
-                current_overlap = this->Calculate_bead_overlaps();
+                current_overlap = this->CalculateBeadOverlaps();
               //  std::cout << this->GetResidueNumber() << ": current dihedral : overlap " << current_dihedral << " : " << current_overlap << ". Best dihedral : overlap: " << best_dihedral_angle << " : "<< lowest_overlap << "\n";
                 if (lowest_overlap >= (current_overlap + 0.01)) // 0.01 otherwise rounding errors
                 {
@@ -809,5 +941,7 @@ void GlycosylationSite::WiggleOneLinkage(Residue_linkage &linkage, int *output_p
     }
     return; // Note possibility of earlier return above
 }
+
+
 
 

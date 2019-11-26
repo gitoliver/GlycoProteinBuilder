@@ -89,35 +89,39 @@ int main(int argc, char* argv[])
 //        outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Initial1.pdb");
 //        resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, max_cycles);
 //    }
-
-    // Wiggle
+//    resolve_overlaps::rotamer_permutator(glycosites);
+////    glycoprotein_builder::SetDefaultDihedralAnglesUsingMetadata(glycosites); // Reset to reasonable starting points
     bool use_monte_carlo = true;
-    glycoprotein_builder::SetDefaultDihedralAnglesUsingMetadata(glycosites); // Reset to reasonable starting points 
-    resolve_overlaps::wiggleFirstLinkages(glycosites, 100);
-    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
-    resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, 100, use_monte_carlo);
-    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
-    resolve_overlaps::wiggle(glycosites, 100);
-    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
+    int cycles = 100;
+    resolve_overlaps::wiggleFirstLinkages(glycosites, BEAD, cycles);
+    std::cout << "1. Post WiggleFirst Overlaps Bead: " << glycoprotein_builder::CalculateOverlaps(glycosites, BEAD) << ". Atomic: " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
+    resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, BEAD, cycles, use_monte_carlo);
+    std::cout << "2. Post Monte Carlo Overlaps Bead: " << glycoprotein_builder::CalculateOverlaps(glycosites, BEAD) << ". Atomic: " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
+    resolve_overlaps::wiggle(glycosites, BEAD, cycles);
+    std::cout << "3. Post Wiggle Overlaps Bead: " << glycoprotein_builder::CalculateOverlaps(glycosites, BEAD) << ". Atomic: " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
 
-    resolve_overlaps::wiggleFirstLinkages(glycosites, 500);
-    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
-    resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, 500, use_monte_carlo);
-    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
-    resolve_overlaps::wiggle(glycosites, 500);
-    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
+    resolve_overlaps::wiggleFirstLinkages(glycosites, BEAD, cycles);
+    std::cout << "4. Post WiggleFirst Overlaps Bead: " << glycoprotein_builder::CalculateOverlaps(glycosites, BEAD) << ". Atomic: " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
+    resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, BEAD, cycles, use_monte_carlo);
+    std::cout << "5. Post Monte Carlo Overlaps Bead: " << glycoprotein_builder::CalculateOverlaps(glycosites, BEAD) << ". Atomic: " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
+    resolve_overlaps::wiggle(glycosites, BEAD, cycles);
+    std::cout << "6. Post Wiggle Overlaps Bead: " << glycoprotein_builder::CalculateOverlaps(glycosites, BEAD) << ". Atomic: " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
 
-    resolve_overlaps::wiggleFirstLinkages(glycosites, 1000);
-    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
-    resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, 1000, use_monte_carlo);
-    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
-    resolve_overlaps::wiggle(glycosites, 1000);
-    std::cout << "Real atomic overlaps is " << glycoprotein_builder::CalculateAtomicOverlaps(glycosites) << std::endl;
+    resolve_overlaps::wiggleFirstLinkages(glycosites, ATOMIC, cycles);
+    std::cout << "7. Post WiggleFirst Overlaps Bead: " << glycoprotein_builder::CalculateOverlaps(glycosites, BEAD) << ". Atomic: " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
+    resolve_overlaps::weighted_protein_global_overlap_random_descent(glycosites, ATOMIC, cycles, use_monte_carlo);
+    std::cout << "8. Post Monte Carlo Overlaps Bead: " << glycoprotein_builder::CalculateOverlaps(glycosites, BEAD) << ". Atomic: " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
+    resolve_overlaps::wiggle(glycosites, ATOMIC, cycles);
+    std::cout << "9. Post Wiggle Overlaps Bead: " << glycoprotein_builder::CalculateOverlaps(glycosites, BEAD) << ". Atomic: " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << std::endl;
 
+    glycoprotein_builder::CalculateOverlaps(glycosites);
+    std::cout << "Pre remove beads overlap: " << glycoprotein_builder::GetGlobalOverlap(glycosites) << "\n";
+    beads::Remove_Beads(glycoprotein); //Remove beads and write a final PDB & PRMTOP
 
+    outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
     outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_All_Resolved.pdb");
     double loose_overlap_tolerance = 1.0;
-    glycoprotein_builder::DeleteSitesIterativelyWithOverlapAboveTolerance(glycosites, loose_overlap_tolerance);
+    glycoprotein_builder::DeleteSitesIterativelyWithAtomicOverlapAboveTolerance(glycosites, loose_overlap_tolerance);
 
 
 //    // Testing algorithms:
@@ -129,8 +133,8 @@ int main(int argc, char* argv[])
 ////        resolve_overlaps::weighted_protein_global_overlap_monte_carlo(glycosites, max_cycles);
 ////    }
 
+    std::cout << "Atomic overlap is " << glycoprotein_builder::CalculateOverlaps(glycosites, ATOMIC) << "\n";
     std::cout << "Global overlap is " << glycoprotein_builder::GetGlobalOverlap(glycosites) << "\n";
-    beads::Remove_Beads(glycoprotein); //Remove beads and write a final PDB & PRMTOP
 
     glycoprotein_builder::PrintDihedralAnglesAndOverlapOfGlycosites(glycosites);
     outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);

@@ -1,0 +1,9 @@
+Protein:
+protein.pdb
+
+Protein Residue, Glycan Name:
+?_1496,Man9
+?_1529,Man9
+?_1565,Man9
+?_1680,Man9
+END

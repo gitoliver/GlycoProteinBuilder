@@ -17,7 +17,7 @@ void beads::Add_Beads(MolecularModeling::Assembly &glycoprotein, GlycosylationSi
     	GlycosylationSite *glycosite = &(*it1);
         Atom *cb_atom = glycosite->GetResidue()->GetAtom("CB");
         // This needs to be updated/scrapped if we start adjusting the glycosidic angles after this step, as that can change max distance
-        double distance = ( GetMaxDistanceBetweenAtoms(glycosite->GetAttachedGlycan()->GetAllAtomsOfAssembly()) + 5); // added 5 to account for CB-C1(glycan) distance
+        double distance = ( selection::GetMaxDistanceBetweenAtoms(glycosite->GetAttachedGlycan()->GetAllAtomsOfAssembly()) + 5); // added 5 to account for CB-C1(glycan) distance
         AtomVector close_protein_beads = selection::AtomsWithinDistanceOf(cb_atom, distance, protein_beads);
         glycosite->SetProteinBeads(&close_protein_beads);
         AtomVector self_glycan_beads = Add_Beads_To_Glycan(glycosite->GetAttachedGlycan());
@@ -173,23 +173,7 @@ void beads::Remove_Beads(MolecularModeling::Assembly &glycoprotein)
     }
 }
 
-double GetMaxDistanceBetweenAtoms(AtomVector atoms)
-{
-    double max_distance = 0.0;
-    for(AtomVector::iterator it1 = atoms.begin(); it1 != atoms.end(); ++it1)
-    {
-        Atom *atom1 = (*it1);
-        for(AtomVector::iterator it2 = it1; it2 != atoms.end(); ++it2)
-        {
-            Atom *atom2 = (*it2);
-            if (atom1->GetDistanceToAtom(atom2) > max_distance)
-            {
-                max_distance = atom1->GetDistanceToAtom(atom2);
-            }
-        }
-    }
-    return max_distance;
-}
+
 
 
 

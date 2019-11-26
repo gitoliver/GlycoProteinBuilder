@@ -1,9 +1,6 @@
 Protein:
 0.5.3.3_glycosylated_TER_deglycosylated_emin.pdb
 
-Glycans:
-glycans/
-
 Protein Residue, Glycan Name:
 ?_58,Man9
 ?_105,Man9
