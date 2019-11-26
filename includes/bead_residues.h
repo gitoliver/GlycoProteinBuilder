@@ -3,7 +3,6 @@
 
 #include "gmml.hpp"
 #include "glycosylationsite.h"
-#include "selections.h"
 
 typedef std::vector<GlycosylationSite> GlycosylationSiteVector;
 typedef std::vector<GlycosylationSite*> GlycosylationSitePointerVector;
