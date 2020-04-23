@@ -172,14 +172,14 @@ void GlycosylationSite::AttachGlycan(Assembly glycan, Assembly &glycoprotein)
 {
     this->SetGlycan(glycan);
     this->SetGlycoprotein(&glycoprotein);
-  //  std::cout << "Glycan set\n" << std::endl;
+  //  std::cout << "\nGlycan set" << std::endl;
     this->Prepare_Glycans_For_Superimposition_To_Particular_Residue(residue_->GetName());
-   // std::cout << "Superimpose prep done" << std::endl;
+ //   std::cout << "Superimpose prep done" << std::endl;
     this->Superimpose_Glycan_To_Glycosite(residue_);
   //  std::cout << "Suerpimposed" << std::endl;
     this->Rename_Protein_Residue_To_GLYCAM_Nomenclature();
     glycoprotein.MergeAssembly(&glycan_); // Add glycan to glycoprotein assembly, allows SetDihedral later. May not be necessary anymore with new Rotatable Dihedral class.
-  //  std::cout << "Merge done" << std::endl;
+ //   std::cout << "Merge done" << std::endl;
     //this->SetRotatableBonds(glycan_.GetResidues().at(0), residue_);
   // ResidueLinkageVector temp;
    // all_residue_linkages_.emplace_back(glycan_.GetResidues().at(0), residue_, this);
@@ -240,10 +240,13 @@ void GlycosylationSite::Prepare_Glycans_For_Superimposition_To_Particular_Residu
         superimposition_residue->AddAtom(atomCB);
         superimposition_residue->AddAtom(atomOG1);
         superimposition_atoms_ = superimposition_residue->GetAtoms();
+        std::cout << "Ding: " << amino_acid_name <<  std::endl;
         if ( (amino_acid_name.compare("THR")==0) || (amino_acid_name.compare("OLT")==0) )
         {
             atomOG1->SetName("OG1"); // It's OG in Ser.
+            std::cout << "Ding" << std::endl;
         }
+        atomOG1->GetCoordinate()->Print();
     }
     else if ( (amino_acid_name.compare("TYR")==0) || (amino_acid_name.compare("OLY")==0) )
     {
@@ -281,7 +284,7 @@ void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_resid
             if (protein_atom->GetName() == superimposition_atom->GetName())
             {
                 target_atoms.push_back(protein_atom);
-               // std::cout << "Superimposition target acquired is " << protein_atom->GetName() << std::endl;
+             //   std::cout << "Superimposition target acquired is " << protein_atom->GetName() << std::endl;
             }
         }
     }
@@ -307,7 +310,7 @@ void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_resid
     gmml::Superimpose(superimposition_atoms_, target_atoms, glycan_atoms);
 
     Residue* reducing_Residue = glycan_.GetResidues().at(1); // I assume I assumed something stupid here.
-   // std::cout << "Reducing residue is " << reducing_Residue->GetName() << std::endl;
+  //  std::cout << "Reducing residue is " << reducing_Residue->GetName() << std::endl;
     AtomVector reducing_Atoms = reducing_Residue->GetAtoms();
     Atom* atomC1;
     for(AtomVector::iterator it = reducing_Atoms.begin(); it != reducing_Atoms.end(); it++)
@@ -320,7 +323,6 @@ void GlycosylationSite::Superimpose_Glycan_To_Glycosite(Residue *glycosite_resid
     }
     //Connect the glycan and protein atoms to each other.
     Atom *protein_connection_atom = this->GetConnectingProteinAtom(glycosite_residue->GetName());
-   // std::cout << protein_connection_atom->GetId() << std::endl;
 
     protein_connection_atom->GetNode()->AddNodeNeighbor(atomC1);
 
@@ -864,19 +866,19 @@ void GlycosylationSite::RecursivelyGetAllNeighboringResidues(Atom* current_atom,
 
 Atom* GlycosylationSite::GetConnectingProteinAtom(std::string residue_name)
 {
-    if(residue_name.compare("NLN") || residue_name.compare("ASN"))
+    if(residue_name == "NLN" || residue_name == "ASN")
     {
         return residue_->GetAtom("ND2");
     }
-    else if(residue_name.compare("OLT") || residue_name.compare("THR"))
+    else if(residue_name == "OLT" || residue_name == "THR")
     {
         return residue_->GetAtom("OG1");
     }
-    else if(residue_name.compare("OLS") || residue_name.compare("SER"))
+    else if(residue_name == "OLS" || residue_name == "SER")
     {
         return residue_->GetAtom("OG");
     }
-    else if(residue_name.compare("OLY") || residue_name.compare("TYR"))
+    else if(residue_name == "OLY" || residue_name == "TYR")
     {
         return residue_->GetAtom("OH");
     }
