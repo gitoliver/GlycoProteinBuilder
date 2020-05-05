@@ -4,5 +4,5 @@ Protein:
 Protein Residue, Glycan Name:
 A_24,Man9
 A_38,Man9
-A_83,Man9
+A_83,S1A3_S1G3GN3M3GN2-
 END
