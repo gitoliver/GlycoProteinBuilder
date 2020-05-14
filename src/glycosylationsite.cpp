@@ -884,7 +884,7 @@ Atom* GlycosylationSite::GetConnectingProteinAtom(std::string residue_name)
     }
     else
     {
-        std::cout << "In GlycosylationSite::GetConectinProteinAtom you passed in a residue that isn't ON THE LIST. Exiting early: " << std::endl;
+        std::cout << "In GlycosylationSite::GetConectinProteinAtom you passed in a residue (" << residue_name << ") that isn't ON THE LIST. Exiting early: " << std::endl;
         exit(1);
     }
 }

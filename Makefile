@@ -5,7 +5,7 @@
 CC = g++
 CFLAGS = -std=c++0x -I ${GEMSHOME}/gmml/includes/ -I includes/
 RFLAGS = -Wl,-rpath,${GEMSHOME}/gmml/lib/
-LFLAGS = -I ${GEMSHOME}/gmml/includes/ -L ${GEMSHOME}/gmml/lib/ -lgmml
+LFLAGS = -pthread -I ${GEMSHOME}/gmml/includes/ -L ${GEMSHOME}/gmml/lib/ -lgmml
 COMPILE = $(CC) $(CFLAGS) -c
 LINK = $(LFLAGS)
 RUNTIME = $(RFLAGS)
