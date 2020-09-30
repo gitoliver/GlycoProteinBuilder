@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
 
     std::cout << "AttachGlycansToGlycosites"  << std::endl;
     glycoprotein_builder::AttachGlycansToGlycosites(glycoprotein, glycosites, glycanDirectory);
-    PdbFileSpace::PdbFile *outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
+    PdbFileSpace::PdbFile *outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0,-1,false);
     outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Initial.pdb");
     //glycoprotein_builder::SetResonableChi1Chi2DihedralAngles(glycosites);
 
@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
     //************************************************//
 
     std::cout << "BuildGlycoproteinStructure"  << std::endl;
-   // PdbFileSpace::PdbFile *outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
+   // PdbFileSpace::PdbFile *outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0,-1,false);
     outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Initial.pdb");
     // Add beads. They make the overlap calculation faster.
     std::cout << "Add_Beads"  << std::endl;
@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
     std::cout << "Pre remove beads overlap: " << glycoprotein_builder::GetGlobalOverlap(glycosites) << "\n";
     beads::Remove_Beads(glycoprotein); //Remove beads and write a final PDB & PRMTOP
 
-    outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
+    outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0,-1,false);
     outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_All_Resolved.pdb");
     double loose_overlap_tolerance = 1.0;
     glycoprotein_builder::DeleteSitesIterativelyWithAtomicOverlapAboveTolerance(glycosites, loose_overlap_tolerance);
@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
     std::cout << "Global overlap is " << glycoprotein_builder::GetGlobalOverlap(glycosites) << "\n";
 
     glycoprotein_builder::PrintDihedralAnglesAndOverlapOfGlycosites(glycosites);
-    outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0);
+    outputPdbFileGlycoProteinAll = glycoprotein.BuildPdbFileStructureFromAssembly(-1,0,-1,false);
     outputPdbFileGlycoProteinAll->Write(working_Directory + "/GlycoProtein_Resolved.pdb");
 
     std::cout << "Program got to end ok" << std::endl;
